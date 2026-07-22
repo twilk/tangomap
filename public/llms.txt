@@ -1,0 +1,13 @@
+# Tango Map
+
+> An interactive skill map for Argentine tango — 62 techniques across 10 levels, from the
+> walk and the cross to ochos, giros, boleos, sacadas and volcadas. Track what you've
+> mastered, see what's ready next, and share an optional public profile.
+
+## Pages
+- [Map](https://partykamap.vercel.app/): the full 62-skill map (ready / mastered / locked states).
+- [Public profile](https://partykamap.vercel.app/u/): a dancer's shareable profile at /u/{handle} (only when made public).
+
+## Notes
+- Progress persists per account (Google sign-in); profiles are private by default.
+- Levels: 1–2 Beginners (first steps → figures), 3–6 Intermediate, 7–10 Advanced (dynamics, styles).
