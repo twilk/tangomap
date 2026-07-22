@@ -5,75 +5,69 @@ Live: https://partykamap.vercel.app · Repo: `twilk/tangomap`
 ## What this app is
 A gamified **Argentine-tango skill map** (Duolingo-style skill tree): 62 techniques
 across 10 levels (Beginners → Advanced), with `ready`/`mastered`/`locked` node states,
-a "NEXT UP" panel, a level navigator, search, theme toggle, and a per-node detail panel.
+a "NEXT UP" panel, a level navigator, search, theme toggle, and a per-node detail panel
+with a "Mark as mastered" action.
 
 ## Important constraint
 `index.html` is a **generated single-file bundle** from a design-to-code tool
-(`dc-runtime`, design-system namespace `Organic_organi`). The React component logic and
-the declarative page markup live inside a gzip+base64 manifest and a JSON-encoded
-`__bundler/template` string. Only two classes of change are safe to make directly in the
-bundle:
+(`dc-runtime`, design-system namespace `Organic_organi`). The React logic + declarative
+markup live inside a gzip+base64 manifest and a JSON-encoded `__bundler/template` string;
+at boot the runtime does `document.documentElement.replaceWith(templateDoc)`. Only two
+kinds of change are safe directly in the bundle:
 1. `<head>` metadata (static head + template head).
-2. **CSS design-token overrides** injected as a higher-specificity `<style>` (survives the
-   runtime HelmetManager re-hoisting the design-system styles).
+2. **CSS token overrides** and **defensive progressive-enhancement scripts** injected into
+   the template `<head>` (DOM-only, `try/catch`, poll for `.tsm`).
 
-Everything that needs component logic, new markup, or layout math must be done in the
-**design-to-code source project** and re-exported. Hand-editing the compiled bundle for
-those would risk breaking a working production app.
-
----
-
-## ✅ Fixed in the bundle (deployed)
-
-### SEO / metadata (both static head + runtime template head)
-- Real `<title>` ("Tango Map — 62 Argentine Tango Skills, Beginner to Advanced") — was empty.
-- `<html lang="en">` — was missing.
-- `meta description`, `link canonical`, `theme-color`.
-- OpenGraph + Twitter card tags for link previews.
-- Static head serves these for non-JS scrapers; template head sets them in the rendered DOM.
-
-### Accessibility — contrast (WCAG AA)
-- **Muted label text** (title, legend, "NEXT UP", level/category labels) used
-  `--t-muted: --color-neutral-600` (`#82796a`) on the cream bg = **~3.6:1 (fails AA)**.
-- Override (light theme only): `--t-muted: --color-neutral-700` (`#645c50`) = **~5.5:1 (AA)**.
-- Dark theme already used neutral-400 on dark bg (~7:1) — left unchanged.
+Anything needing component logic / new markup / layout math belongs in the **source
+project** and must be re-exported.
 
 ---
 
-## 👍 Already handled well in the design system (no action needed)
-These were flagged during first-pass visual review but the source CSS already covers them:
-- **Keyboard focus**: `:focus-visible { outline: 2px solid var(--color-accent) }` (+ dark variant).
-- **Reduced motion**: `@media (prefers-reduced-motion: reduce){ animation:none; transition:none }`.
-- **Mobile**: responsive reflow to a single tall column, no horizontal overflow, `-webkit-tap-highlight-color` reset, styled scrollbars, `meta viewport` present in the template.
+## ✅ Shipped in the bundle (deployed)
+
+**SEO / metadata** — real `<title>`, `<html lang>`, description, canonical, theme-color,
+OpenGraph + Twitter (static head for scrapers + template head for the rendered DOM).
+
+**Contrast (WCAG AA)** — muted label text was `--t-muted: neutral-600` (`#82796a`, ~3.6:1
+on cream, fails AA). Override (light theme only) → `neutral-700` (`#645c50`, ~5.5:1, AA).
+Verified live: `rgb(100,92,80)`, 5.53:1.
+
+**Progressive enhancement** (injected script, DOM-only) —
+- `/` focuses the skill search.
+- Keyboard **arrow-key navigation** between the nearest nodes (was 62 flat tab stops).
+- Clearer theme-toggle label ("Switch to dark/light" instead of "Switch theme").
 
 ---
 
-## 📋 Backlog — needs the design-to-code source project
+## 👍 Already handled by the app / design system (NOT gaps — first review over-flagged these)
+First-pass review inspected an **empty first-load** and wrongly concluded several things
+were missing. Verified afterwards that the app already does them:
+- **Progress persistence** — the app persists mastered skills to `localStorage`
+  (`tsm-mastered`); reload keeps your progress. (Also persists `tsm-theme`, `tsm-sel`.)
+- **Theme persistence** — native (`tsm-theme`). (An earlier PE duplicate was removed to
+  avoid a restore race.)
+- **Keyboard focus** — `:focus-visible { outline: 2px solid accent }` (+ dark variant).
+- **Reduced motion** — `@media (prefers-reduced-motion: reduce)` disables animation/transition.
+- **State shape-coding** — states are ring/check (per the legend), not color-only.
+- **Mobile** — responsive reflow to one tall column, no horizontal overflow, tap-highlight
+  reset, styled scrollbars, viewport meta.
+- **Mastery action** — the detail panel has "Mark as mastered".
 
-Each item lists the 2 proposals from the review. "Kind" = why it can't be a bundle CSS override.
+---
 
-1. **Progress indicator** (kind: component) — (a) visual progress bar/ring instead of only
-   the "0/62" micro-text; (b) per-level/-tier counters ("Beginners 0/18 …").
-2. **Legend** (kind: content) — (a) show state glyphs (ring/check) instead of words;
-   (b) add the missing `locked/next` state to the legend.
-3. **Search** (kind: component) — (a) search icon + `/` focus shortcut + `aria-live` result
-   count; (b) autocomplete showing name + level, Enter jumps to the node on the map.
-4. **Theme toggle** (kind: logic) — (a) state-target label/tooltip ("Switch to dark");
-   (b) persist choice in `localStorage` + honor `prefers-color-scheme` on first load.
-5. **Level navigator** (kind: logic) — (a) highlight the active level + show % complete per
-   row; (b) focus-trap + `Esc` to close + `aria-expanded` on the opener.
-6. **NEXT UP panel** (kind: logic) — (a) micro "why now / unlocked by" caption;
-   (b) hover/click highlights the matching node + scrolls it into view.
-7. **Skill nodes** (kind: layout+render) — (a) enlarge hit area to ≥44×44px;
-   (b) differentiate states with shape/icon (lock, check), not color alone (colorblind-safe).
-8. **Paths / connections** (kind: render) — (a) light up a path when both endpoints are
-   mastered; (b) weight lines by relevance (ready→next thicker, distant deps thinner).
-9. **Detail panel** (kind: logic) — (a) "Mark mastered/ready" action + prereq/next links;
-   (b) proper `role="dialog"`, focus management, `Esc`, restore focus to the node.
-10. **Focus/keyboard flow** (kind: logic) — (a) skip-to-map / skip-to-next-up links;
-    (b) arrow-key navigation between adjacent nodes (62 tab stops is a long crawl).
-11. **Responsiveness** (kind: layout) — (a) desktop "fit to screen" + pinch/scroll zoom
-    (SVG has no `viewBox`); (b) minimap / "jump to level" + sticky progress on the tall mobile scroll.
-12. **State persistence & onboarding** (kind: logic) — (a) persist mastered/ready/theme/last
-    position in `localStorage` (currently resets on reload); (b) first-visit onboarding /
-    empty-state pointing at the first 3 steps.
+## 📋 Genuinely remaining — needs the design-to-code source project
+(Not safely doable by hand-editing the compiled bundle.)
+
+1. **Progress visibility** — a visual progress bar/ring + per-level counters (data is
+   persisted; only the *presentation* is a single micro-text line).
+2. **Legend** — show state glyphs inline; add the `locked/next` state to the legend text.
+3. **Search** — autocomplete list (name + level); `aria-live` result count. (`/`-focus done.)
+4. **NEXT UP** — "why now / unlocked by" caption; hover/click highlights the node on the map.
+5. **Level navigator** — highlight active level + % complete per row; focus-trap + `Esc`.
+6. **Nodes** — enlarge hit area to ≥44×44px (nodes are 40px; resizing shifts the
+   absolutely-positioned map layout, so source-side).
+7. **Paths** — light up a path when both endpoints are mastered; weight lines by relevance.
+8. **Detail panel** — `role="dialog"` + focus management + `Esc`; prereq/next links.
+9. **Responsiveness** — desktop "fit to screen" + pinch/scroll zoom (SVG has no `viewBox`);
+   minimap / "jump to level" + sticky progress on the long mobile scroll.
+10. **Onboarding** — first-visit empty-state pointing at the first 3 steps.
