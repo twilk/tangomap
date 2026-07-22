@@ -1,11 +1,10 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 
 // public/sync.js is a defensive IIFE. We load its source and execute it in the
 // jsdom global scope via indirect eval, so it binds to globalThis.fetch /
 // localStorage / document / window / timers just like it would in the browser.
-const SRC = readFileSync(fileURLToPath(new URL('../public/sync.js', import.meta.url)), 'utf8');
+const SRC = readFileSync('public/sync.js', 'utf8');
 function runSync(): void {
   (0, eval)(SRC);
 }

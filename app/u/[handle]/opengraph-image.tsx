@@ -1,3 +1,4 @@
+import React from 'react';
 import { ImageResponse } from 'next/og';
 import { getPublicProfile } from '@/src/lib/publicProfile';
 import { masteredCount } from '@/src/lib/progress';
