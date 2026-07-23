@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getPublicProfile } from '@/src/lib/publicProfile';
 import { masteredCount, perLevel, milestones } from '@/src/lib/progress';
+import { TangoDNA } from '@/src/components/TangoDNA';
 
 // Public, read-only profile page. Renders ONLY allow-listed fields.
 // Never renders dates or `sel` — those never leave getPublicProfile.
@@ -61,6 +62,10 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
         ))}
       </section>
 
+      <div style={{ margin: '0 0 1.5rem' }}>
+        <TangoDNA mastered={data.mastered} />
+      </div>
+
       {badges.length > 0 && (
         <section aria-label="Milestones">
           <h2 style={{ fontSize: '1rem', margin: '0 0 0.5rem' }}>Milestones</h2>
@@ -82,6 +87,14 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
           </ul>
         </section>
       )}
+
+      <footer style={{ marginTop: '2rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+        <a href={`/compare?a=${encodeURIComponent(data.handle)}`} style={{ color: ACCENT }}>
+          Compare with another dancer →
+        </a>
+      </footer>
     </main>
   );
 }
+
+const ACCENT = '#c67139';
