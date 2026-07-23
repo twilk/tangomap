@@ -2,35 +2,37 @@ import { SKILLS } from '@/src/data/skills';
 import { sanitizeMastered } from '@/src/lib/progress';
 
 // The 13 skill categories (bundle node `tag`s) with human labels + a monochrome
-// line icon (inner SVG markup, 24×24, currentColor), in display order. The icon
-// replaces the axis number on the radar and prefixes the label in every row.
+// line icon (inner SVG markup, 24×24, currentColor), in display order. Icons are
+// Lucide glyphs (lucide.dev, ISC-licensed) inlined as path data — no runtime dep;
+// they match iconSvg()'s wrapper exactly (2px stroke, round caps, currentColor).
+// The icon replaces the axis number on the radar and prefixes the label in rows.
 export const CATEGORIES: { tag: string; label: string; icon: string }[] = [
-  // Connection — two dancers linked (interlocking rings)
-  { tag: 'PARTNER', label: 'Connection', icon: '<circle cx="9" cy="12" r="4.5"/><circle cx="15" cy="12" r="4.5"/>' },
-  // Body & Posture — the standing axis (head, spine, base)
-  { tag: 'BODY', label: 'Body & Posture', icon: '<circle cx="12" cy="5.5" r="2.5"/><path d="M12 8v11"/><path d="M8 19h8"/>' },
-  // Footwork — ascending steps
-  { tag: 'STEP', label: 'Footwork', icon: '<path d="M4 20h5v-5h5v-5h5V5"/>' },
-  // Musicality — rhythm bars (a little equaliser)
-  { tag: 'RHYTHM', label: 'Musicality', icon: '<path d="M6 15V9"/><path d="M10 17V7"/><path d="M14 16V8"/><path d="M18 14v-4"/>' },
-  // Turns — the ocho / figure-eight
-  { tag: 'ROTATION', label: 'Turns', icon: '<path d="M12 12C6 10 6 4 12 4c6 0 6 6 0 8-6 2-6 8 0 8 6 0 6-6 0-8Z"/>' },
-  // Navigation — compass (needle in a circle)
-  { tag: 'SPACE', label: 'Navigation', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5 13.8 12 12 16.5 10.2 12Z"/>' },
-  // Contact — the gancho hook
-  { tag: 'CONTACT', label: 'Contact', icon: '<path d="M14 4v9a4 4 0 1 1-8 0"/>' },
-  // Free Leg — a sweeping adorno to the free foot
-  { tag: 'FREE LEG', label: 'Free Leg', icon: '<path d="M6 20Q6 8 16 6"/><circle cx="16.5" cy="6" r="1.8" fill="currentColor" stroke="none"/>' },
-  // Off-Axis — leaning off the (dashed) axis
-  { tag: 'OFF AXIS', label: 'Off-Axis', icon: '<path d="M12 4v16" stroke-dasharray="2 2" opacity="0.5"/><path d="M8 20 16 6"/><circle cx="16.3" cy="5.7" r="1.6" fill="currentColor" stroke="none"/>' },
-  // Dynamics — energy (lightning bolt)
-  { tag: 'DYNAMICS', label: 'Dynamics', icon: '<path d="M13 2 4 14h7l-1 8 10-13h-8Z" fill="currentColor" stroke="none"/>' },
-  // Genres — beamed notes
-  { tag: 'GENRE', label: 'Genres', icon: '<circle cx="7" cy="18" r="2.2" fill="currentColor" stroke="none"/><circle cx="17" cy="16" r="2.2" fill="currentColor" stroke="none"/><path d="M9 18V6l10-2v12"/>' },
-  // Styles — a dancer
-  { tag: 'STYLE', label: 'Styles', icon: '<circle cx="12" cy="5" r="2.2"/><path d="M12 7.2v6m0 0-4 7m4-7 4 6M8.5 10.5 15.5 8.5"/>' },
-  // Mastery — a four-point sparkle
-  { tag: 'MASTERY', label: 'Mastery', icon: '<path d="M12 3 13.8 10.2 21 12 13.8 13.8 12 21 10.2 13.8 3 12 10.2 10.2Z"/>' },
+  // Connection — lucide "users" (two dancers)
+  { tag: 'PARTNER', label: 'Connection', icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+  // Body & Posture — lucide "person-standing"
+  { tag: 'BODY', label: 'Body & Posture', icon: '<circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/>' },
+  // Footwork — lucide "footprints"
+  { tag: 'STEP', label: 'Footwork', icon: '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>' },
+  // Musicality — lucide "audio-lines"
+  { tag: 'RHYTHM', label: 'Musicality', icon: '<path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>' },
+  // Turns — lucide "rotate-cw"
+  { tag: 'ROTATION', label: 'Turns', icon: '<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>' },
+  // Navigation — lucide "compass"
+  { tag: 'SPACE', label: 'Navigation', icon: '<path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/>' },
+  // Contact — lucide "link"
+  { tag: 'CONTACT', label: 'Contact', icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>' },
+  // Free Leg — lucide "wind" (a sweeping motion)
+  { tag: 'FREE LEG', label: 'Free Leg', icon: '<path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>' },
+  // Off-Axis — a post leaning off vertical (Lucide-styled custom; no standard glyph fits)
+  { tag: 'OFF AXIS', label: 'Off-Axis', icon: '<path d="M8 21 15 3"/><path d="M5 21h6"/><path d="M12 3h6"/>' },
+  // Dynamics — lucide "zap" (lightning bolt)
+  { tag: 'DYNAMICS', label: 'Dynamics', icon: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>' },
+  // Genres — lucide "disc-3" (a record)
+  { tag: 'GENRE', label: 'Genres', icon: '<path d="M6 12c0-1.7.7-3.2 1.8-4.2"/><circle cx="12" cy="12" r="10"/><path d="M18 12c0 1.7-.7 3.2-1.8 4.2"/><circle cx="12" cy="12" r="2"/>' },
+  // Styles — lucide "palette" (a variety of styles)
+  { tag: 'STYLE', label: 'Styles', icon: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2Z"/>' },
+  // Mastery — lucide "award" (a medal)
+  { tag: 'MASTERY', label: 'Mastery', icon: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>' },
 ];
 
 /** Wrap a category's inner icon markup in a themeable 24×24 line-icon <svg>. */
