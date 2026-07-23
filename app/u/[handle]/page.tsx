@@ -3,6 +3,10 @@ import { getPublicProfile } from '@/src/lib/publicProfile';
 import { masteredCount, perLevel, milestones } from '@/src/lib/progress';
 import { TangoDNA } from '@/src/components/TangoDNA';
 
+// Live DB read: never statically cache, or a profile flipped to private would
+// stay visible from the cache (a privacy leak) and progress would go stale.
+export const dynamic = 'force-dynamic';
+
 // Public, read-only profile page. Renders ONLY allow-listed fields.
 // Never renders dates or `sel` — those never leave getPublicProfile.
 export default async function Page({ params }: { params: Promise<{ handle: string }> }) {

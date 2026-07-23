@@ -3,6 +3,9 @@ import { masteredCount } from '@/src/lib/progress';
 import { TangoDNA } from '@/src/components/TangoDNA';
 import type { PublicProfile } from '@/src/lib/types';
 
+// Live DB read (privacy flag + progress): must not be statically cached.
+export const dynamic = 'force-dynamic';
+
 const ACCENT = '#c67139';
 
 function Column({ handle, profile }: { handle: string; profile: PublicProfile | null }) {
