@@ -7,6 +7,9 @@ import { masteredCount } from '@/src/lib/progress';
 import { perCategoryDetailed, dnaSignature } from '@/src/lib/dna';
 import { DnaRadar } from '@/src/components/DnaRadar';
 import { DnaCompareRadar } from '@/src/components/DnaCompareRadar';
+import { DnaGenome } from '@/src/components/DnaGenome';
+import { DnaBars } from '@/src/components/DnaBars';
+import { ViewSwitcher } from '@/src/components/ViewSwitcher';
 import { CopyButton } from '@/src/components/CopyButton';
 import { TopNav } from '@/src/components/TopNav';
 import type { PublicProfile } from '@/src/lib/types';
@@ -96,15 +99,22 @@ export default async function Compare({
           </p>
         )}
 
-        {pa && pb && (
-          <>
-            {verdict}
-            <DnaCompareRadar
-              a={{ name: nameOf(pa), cats: perCategoryDetailed(pa.mastered) }}
-              b={{ name: nameOf(pb), cats: perCategoryDetailed(pb.mastered) }}
-            />
-          </>
-        )}
+        {pa && pb && (() => {
+          const A = { name: nameOf(pa), cats: perCategoryDetailed(pa.mastered) };
+          const B = { name: nameOf(pb), cats: perCategoryDetailed(pb.mastered) };
+          return (
+            <>
+              {verdict}
+              <ViewSwitcher
+                views={[
+                  { id: 'radar', label: 'Radar', node: <DnaCompareRadar a={A} b={B} /> },
+                  { id: 'genome', label: 'Genome', node: <DnaGenome series={[A, B]} /> },
+                  { id: 'bars', label: 'Strengths', node: <DnaBars series={[A, B]} /> },
+                ]}
+              />
+            </>
+          );
+        })()}
 
         {((pa && !pb) || (!pa && pb)) && (() => {
           const p = (pa ?? pb) as PublicProfile;
@@ -114,7 +124,13 @@ export default async function Compare({
               <h2 className="tm-sh">
                 {nameOf(p)} · {cnt}/62 · {dnaSignature(p.mastered)}
               </h2>
-              <DnaRadar categories={perCategoryDetailed(p.mastered)} />
+              <ViewSwitcher
+                views={[
+                  { id: 'radar', label: 'Radar', node: <DnaRadar categories={perCategoryDetailed(p.mastered)} /> },
+                  { id: 'genome', label: 'Genome', node: <DnaGenome series={[{ cats: perCategoryDetailed(p.mastered) }]} /> },
+                  { id: 'bars', label: 'Strengths', node: <DnaBars series={[{ cats: perCategoryDetailed(p.mastered) }]} /> },
+                ]}
+              />
               <div className="tm-invite">
                 <span>Add a second handle above, or send a friend an invite — they just add their handle:</span>
                 <CopyButton className="tm-cta ghost" text={`${SITE}/compare?a=${encodeURIComponent(p.handle)}&b=`} label="Copy invite link" />

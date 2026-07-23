@@ -359,4 +359,65 @@ body { margin: 0; }
   .tm-detail.cmp{padding-left:24px}
 }
 
+/* ---- view switcher (Radar · Genome · Strengths) ---- */
+.tm-viewsel{display:inline-flex; gap:2px; padding:3px; border:1px solid var(--tm-line); border-radius:999px; background:var(--tm-chip); margin-bottom:20px; max-width:100%; overflow-x:auto}
+.tm-vbtn{display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--tm-muted); background:transparent; border:0; border-radius:999px; padding:8px 15px; cursor:pointer; white-space:nowrap; transition:color .15s, background .15s}
+.tm-vbtn:hover{color:var(--tm-ink)}
+.tm-vbtn.on{background:var(--tm-panel); color:var(--tm-ink); box-shadow:0 1px 2px rgba(32,30,29,.12)}
+.tm-vbtn .tm-vico{display:inline-flex; line-height:0; color:var(--tm-muted)}
+.tm-vbtn.on .tm-vico{color:var(--tm-ember)}
+.tm-vbtn:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
+
+/* ---- genome ---- */
+.tm-genome{display:flex; flex-direction:column; gap:12px}
+.tm-genome .tm-gseq{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 13px; padding:4px 0}
+.tm-gcol{display:flex; flex-direction:column; align-items:center; gap:8px; flex:none}
+.tm-gbars{display:flex; align-items:flex-end; gap:2px; height:70px}
+.tm-genome.cmp .tm-gbars{height:46px}
+.tm-gbar{width:6px; min-height:5px; border-radius:2px 2px 0 0; background:var(--tm-chip)}
+.tm-gbar.on.s0{background:var(--tm-ember)}
+.tm-gbar.on.s1{background:var(--tm-verd)}
+.tm-gaxc{color:var(--tm-muted); line-height:0}
+.tm-ghead,.tm-glegend{display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center; margin:0}
+.tm-gk{display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11px; color:var(--tm-muted)}
+.tm-gk i{width:11px; height:11px; border-radius:3px; background:var(--tm-chip)}
+.tm-gk.s0 i{background:var(--tm-ember)}
+.tm-gk.s1 i{background:var(--tm-verd)}
+.tm-ghint{font-family:var(--mono); font-size:10.5px; color:var(--tm-faint); margin-left:auto; letter-spacing:.04em}
+
+/* ---- ranked bars ---- */
+.tm-bars{display:flex; flex-direction:column; gap:9px}
+.tm-brow{display:grid; grid-template-columns:22px minmax(84px,150px) 1fr 52px; align-items:center; gap:11px}
+.tm-bico{color:var(--tm-muted); line-height:0}
+.tm-blab{font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tm-btrack{height:9px; border-radius:999px; background:var(--tm-chip); overflow:hidden}
+.tm-btrack i{display:block; height:100%; border-radius:999px; background:var(--tm-ember)}
+.tm-bval{font-family:var(--mono); font-size:12px; color:var(--tm-muted); text-align:right; font-variant-numeric:tabular-nums}
+.tm-bval b{color:var(--tm-ink)}
+
+/* ---- diverging bars (compare) ---- */
+.tm-dbars{display:flex; flex-direction:column; gap:8px}
+.tm-dhead{display:grid; grid-template-columns:1fr 150px 1fr; gap:8px; margin-bottom:2px; font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em}
+.tm-dhead .s0{text-align:right; color:var(--tm-ember)}
+.tm-dhead .s1{text-align:left; color:var(--tm-verd)}
+.tm-drow{display:grid; grid-template-columns:46px 1fr 150px 1fr 46px; align-items:center; gap:9px}
+.tm-dval{font-family:var(--mono); font-size:12px; font-variant-numeric:tabular-nums}
+.tm-dval b{color:var(--tm-ink)}
+.tm-dval.s0{text-align:right; color:var(--tm-muted)}
+.tm-dval.s1{text-align:left; color:var(--tm-muted)}
+.tm-dbar{height:10px; border-radius:999px; background:var(--tm-chip); overflow:hidden; display:flex}
+.tm-dbar.l{justify-content:flex-end}
+.tm-dbar i{display:block; height:100%}
+.tm-dbar.l i{border-radius:999px 0 0 999px; background:var(--tm-ember)}
+.tm-dbar.r i{border-radius:0 999px 999px 0; background:var(--tm-verd)}
+.tm-dlab{display:flex; align-items:center; gap:6px; justify-content:center; font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tm-dlab .tm-bico{color:var(--tm-muted); flex:none}
+@media(max-width:560px){
+  .tm-dhead{grid-template-columns:1fr 92px 1fr}
+  .tm-drow{grid-template-columns:28px 1fr 92px 1fr 28px; gap:6px}
+  .tm-dlab{font-size:11px; gap:4px}
+  .tm-dlab .tm-bico{display:none}
+  .tm-dval{font-size:10.5px}
+}
+
 @media (prefers-reduced-motion:reduce){.tm-profile *{animation:none!important; transition:none!important}}

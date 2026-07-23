@@ -44,7 +44,7 @@ export function iconSvg(inner: string, size = 16): string {
 }
 
 export type CategoryStat = { tag: string; label: string; icon: string; done: number; total: number; pct: number };
-export type CategorySkill = { name: string; slug: string; on: boolean };
+export type CategorySkill = { name: string; slug: string; on: boolean; level: number };
 export type CategoryDetail = CategoryStat & { skills: CategorySkill[] };
 
 // Precompute tag -> skill slugs once (module load) so perCategory does not re-scan all 62.
@@ -65,7 +65,7 @@ const SKILLS_BY_TAG: Map<string, typeof SKILLS> = (() => {
 export function perCategoryDetailed(mastered: string[]): CategoryDetail[] {
   const set = new Set(sanitizeMastered(mastered));
   return CATEGORIES.map(({ tag, label, icon }) => {
-    const skills = (SKILLS_BY_TAG.get(tag) ?? []).map((s) => ({ name: s.name, slug: s.slug, on: set.has(s.slug) }));
+    const skills = (SKILLS_BY_TAG.get(tag) ?? []).map((s) => ({ name: s.name, slug: s.slug, on: set.has(s.slug), level: s.level }));
     const done = skills.reduce((n, s) => n + (s.on ? 1 : 0), 0);
     const total = skills.length;
     return { tag, label, icon, done, total, pct: total ? Math.round((done / total) * 100) : 0, skills };

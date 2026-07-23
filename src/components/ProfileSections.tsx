@@ -3,6 +3,9 @@ import { perCategoryDetailed, topStrengths } from '@/src/lib/dna';
 import { LEVELS, TIER_NAME, TIER_SHORT, furthestTier } from '@/src/lib/levels';
 import { SKILLS } from '@/src/data/skills';
 import { DnaRadar } from '@/src/components/DnaRadar';
+import { DnaGenome } from '@/src/components/DnaGenome';
+import { DnaBars } from '@/src/components/DnaBars';
+import { ViewSwitcher } from '@/src/components/ViewSwitcher';
 
 const MILESTONES = [5, 10, 25, 50];
 
@@ -55,7 +58,13 @@ export function ProfileSections({ mastered: raw }: { mastered: string[] }) {
 
       <section className="tm-sec">
         <h2 className="tm-sh">Tango DNA</h2>
-        <DnaRadar categories={cats} />
+        <ViewSwitcher
+          views={[
+            { id: 'radar', label: 'Radar', node: <DnaRadar categories={cats} /> },
+            { id: 'genome', label: 'Genome', node: <DnaGenome series={[{ cats }]} /> },
+            { id: 'bars', label: 'Strengths', node: <DnaBars series={[{ cats }]} /> },
+          ]}
+        />
       </section>
 
       <section className="tm-sec">
