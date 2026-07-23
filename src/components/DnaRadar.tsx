@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CategoryDetail } from '@/src/lib/dna';
+import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
 
 /**
  * Tango DNA radar: an animated canvas fingerprint (13 axes) paired with an
@@ -14,6 +14,8 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
   const progRef = useRef(0);
   const hiRef = useRef(-1);
   const hoverRef = useRef(-1);
+  const iconsRef = useRef<{ color: string; imgs: HTMLImageElement[] }>({ color: '', imgs: [] });
+  const redrawRef = useRef<() => void>(() => {});
   const [open, setOpen] = useState(-1);
   const count = categories.reduce((n, c) => n + c.done, 0);
   const total = categories.reduce((n, c) => n + c.total, 0);
@@ -42,6 +44,17 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
     const faint = gv('--tm-faint');
     const ember = gv('--tm-ember');
     const carm = gv('--tm-carmine');
+    const muted = gv('--tm-muted');
+    // Build (once per theme colour) the 13 category icons as themed SVG images.
+    if (iconsRef.current.color !== muted) {
+      iconsRef.current.color = muted;
+      iconsRef.current.imgs = categories.map((c) => {
+        const img = new Image();
+        img.onload = () => redrawRef.current();
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(c.icon, 24).replace(/currentColor/g, muted));
+        return img;
+      });
+    }
     const hexA = (hex: string, a: number) => {
       let h = hex.replace('#', '');
       if (h.length === 3) h = h.split('').map((x) => x + x).join('');
@@ -84,10 +97,9 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
         ctx.fill();
         ctx.restore();
       }
-      ctx.font = `${Math.max(13, size * (on ? 0.052 : 0.046))}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(categories[i].icon, ex, ey);
+      const img = iconsRef.current.imgs[i];
+      const is = Math.max(15, size * (on ? 0.062 : 0.052));
+      if (img && img.complete && img.naturalWidth) ctx.drawImage(img, ex - is / 2, ey - is / 2, is, is);
     }
     ctx.beginPath();
     for (let i = 0; i <= N; i++) {
@@ -132,6 +144,10 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
       }
     }
   }, [categories]);
+
+  useEffect(() => {
+    redrawRef.current = draw;
+  }, [draw]);
 
   useEffect(() => {
     const cv = canvasRef.current;
@@ -216,7 +232,7 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
               onClick={() => setOpen(open === i ? -1 : i)}
             >
               <span className="tm-ix">{String(i + 1).padStart(2, '0')}</span>
-              <span className="tm-lab"><span className="tm-cicon" aria-hidden="true">{c.icon}</span>{c.label}</span>
+              <span className="tm-lab"><span className="tm-cicon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(c.icon, 15) }} />{c.label}</span>
               <span className="tm-track">
                 <span className="tm-fill" style={{ width: `${c.pct}%` }} />
               </span>

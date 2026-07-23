@@ -8,20 +8,21 @@
 (function () {
   try {
     var CATS = [
-      { label: 'Connection', icon: '🤝', names: ['Mirada & Cabeceo', 'The Embrace', 'Leader & Follower', 'Close Embrace', 'Connection', 'Cross System', 'Embrace Transitions', 'Change of Role', 'Embrace & Communication'] },
-      { label: 'Body & Posture', icon: '🧍', names: ['Posture', 'Dissociation', 'Energy from the Ground', 'Posture & Walking Refined'] },
-      { label: 'Footwork', icon: '👣', names: ['Walking', 'The Square', 'Change of Weight', 'Walking Outside', 'The Cross', 'Exits from the Cross', 'Americana'] },
-      { label: 'Musicality', icon: '🎵', names: ['Music & Timing', 'Double Timing', 'Traspié', 'Musicality', 'The Orchestras', 'Switching the Instrument'] },
-      { label: 'Turns', icon: '🌀', names: ['Ocho Adelante', 'Ocho Atrás', 'Ocho Cortado', 'Molinete', 'Giro to the Left', 'Giro to the Right', 'Calesita', 'Linear Giro', 'Asymmetric Giro', 'Media Luna via Crosses'] },
-      { label: 'Navigation', icon: '🧭', names: ['The Ronda', 'Sacada', 'Giro with Sacadas', 'Follower’s Sacada', 'Cadenas', 'Sacada Against Sacada'] },
-      { label: 'Contact', icon: '🔗', names: ['Parada', 'Mordida', 'Barrida & Arrastre', 'Gancho', 'Pasada'] },
-      { label: 'Free Leg', icon: '🦵', names: ['Adornos & Lustrada', 'Boleo', 'Planeo'] },
-      { label: 'Off-Axis', icon: '🤸', names: ['Volcada', 'Colgada'] },
-      { label: 'Dynamics', icon: '⚡', names: ['Bounce & Rebound', 'Soltadas'] },
-      { label: 'Genres', icon: '🎻', names: ['Vals', 'Milonga', 'Chacarera'] },
-      { label: 'Styles', icon: '💃', names: ['Tango Salón', 'Estilo Milonguero', 'Tango Nuevo'] },
-      { label: 'Mastery', icon: '🏆', names: ['Improvisation', 'Stops & Endings'] }
+      { label: 'Connection', icon: '<circle cx="9" cy="12" r="4.5"/><circle cx="15" cy="12" r="4.5"/>', names: ['Mirada & Cabeceo', 'The Embrace', 'Leader & Follower', 'Close Embrace', 'Connection', 'Cross System', 'Embrace Transitions', 'Change of Role', 'Embrace & Communication'] },
+      { label: 'Body & Posture', icon: '<circle cx="12" cy="5.5" r="2.5"/><path d="M12 8v11"/><path d="M8 19h8"/>', names: ['Posture', 'Dissociation', 'Energy from the Ground', 'Posture & Walking Refined'] },
+      { label: 'Footwork', icon: '<path d="M4 20h5v-5h5v-5h5V5"/>', names: ['Walking', 'The Square', 'Change of Weight', 'Walking Outside', 'The Cross', 'Exits from the Cross', 'Americana'] },
+      { label: 'Musicality', icon: '<path d="M6 15V9"/><path d="M10 17V7"/><path d="M14 16V8"/><path d="M18 14v-4"/>', names: ['Music & Timing', 'Double Timing', 'Traspié', 'Musicality', 'The Orchestras', 'Switching the Instrument'] },
+      { label: 'Turns', icon: '<path d="M12 12C6 10 6 4 12 4c6 0 6 6 0 8-6 2-6 8 0 8 6 0 6-6 0-8Z"/>', names: ['Ocho Adelante', 'Ocho Atrás', 'Ocho Cortado', 'Molinete', 'Giro to the Left', 'Giro to the Right', 'Calesita', 'Linear Giro', 'Asymmetric Giro', 'Media Luna via Crosses'] },
+      { label: 'Navigation', icon: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5 13.8 12 12 16.5 10.2 12Z"/>', names: ['The Ronda', 'Sacada', 'Giro with Sacadas', 'Follower’s Sacada', 'Cadenas', 'Sacada Against Sacada'] },
+      { label: 'Contact', icon: '<path d="M14 4v9a4 4 0 1 1-8 0"/>', names: ['Parada', 'Mordida', 'Barrida & Arrastre', 'Gancho', 'Pasada'] },
+      { label: 'Free Leg', icon: '<path d="M6 20Q6 8 16 6"/><circle cx="16.5" cy="6" r="1.8" fill="currentColor" stroke="none"/>', names: ['Adornos & Lustrada', 'Boleo', 'Planeo'] },
+      { label: 'Off-Axis', icon: '<path d="M12 4v16" stroke-dasharray="2 2" opacity="0.5"/><path d="M8 20 16 6"/><circle cx="16.3" cy="5.7" r="1.6" fill="currentColor" stroke="none"/>', names: ['Volcada', 'Colgada'] },
+      { label: 'Dynamics', icon: '<path d="M13 2 4 14h7l-1 8 10-13h-8Z" fill="currentColor" stroke="none"/>', names: ['Bounce & Rebound', 'Soltadas'] },
+      { label: 'Genres', icon: '<circle cx="7" cy="18" r="2.2" fill="currentColor" stroke="none"/><circle cx="17" cy="16" r="2.2" fill="currentColor" stroke="none"/><path d="M9 18V6l10-2v12"/>', names: ['Vals', 'Milonga', 'Chacarera'] },
+      { label: 'Styles', icon: '<circle cx="12" cy="5" r="2.2"/><path d="M12 7.2v6m0 0-4 7m4-7 4 6M8.5 10.5 15.5 8.5"/>', names: ['Tango Salón', 'Estilo Milonguero', 'Tango Nuevo'] },
+      { label: 'Mastery', icon: '<path d="M12 3 13.8 10.2 21 12 13.8 13.8 12 21 10.2 13.8 3 12 10.2 10.2Z"/>', names: ['Improvisation', 'Stops & Endings'] }
     ];
+    function iconSvg(inner) { return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>'; }
     var norm = function (s) { try { return String(s).normalize('NFC'); } catch (e) { return String(s); } };
     var nameToCat = {};
     CATS.forEach(function (c, i) { c.names.forEach(function (n) { nameToCat[norm(n)] = i; }); });
@@ -109,7 +110,7 @@
         return '<button class="tm-cat-row" data-i="' + i + '" style="display:flex;align-items:center;gap:10px;width:calc(100% - 12px);margin:1px 6px;padding:7px 10px;border:0;border-radius:9px;cursor:pointer;text-align:left;font:600 14.5px Figtree,system-ui,sans-serif;' +
           (active ? 'background:' + hexa(accent, 0.14) + ';color:' + accent : 'background:transparent;color:' + ink) + '">' +
           '<span style="font:600 10px ui-monospace,Menlo,monospace;color:' + (active ? accent : muted) + ';width:16px;flex:none">' + (i + 1 < 10 ? '0' : '') + (i + 1) + '</span>' +
-          '<span style="font-size:14px;flex:none">' + cat.icon + '</span>' +
+          '<span style="display:inline-flex;align-items:center;flex:none;color:' + (active ? accent : muted) + '">' + iconSvg(cat.icon) + '</span>' +
           '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + cat.label + '</span>' +
           '<span style="font:600 12px ui-monospace,Menlo,monospace;color:' + muted + ';flex:none">' + n + '</span>' +
           '</button>';

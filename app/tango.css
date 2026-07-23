@@ -123,7 +123,9 @@ body { margin: 0; }
 .tm-lrow.zero .tm-val b{color:var(--tm-faint)}
 .tm-chev{grid-row:1/3; grid-column:4; justify-self:end; font-size:9px; color:var(--tm-faint)}
 .tm-lrow.open .tm-chev{color:var(--tm-ember)}
-.tm-cicon{margin-right:8px; font-size:13px; line-height:1; display:inline-block; vertical-align:-1px}
+.tm-cicon{display:inline-flex; align-items:center; margin-right:8px; color:var(--tm-muted); vertical-align:-3px}
+.tm-cicon svg{display:block}
+.tm-lrow:hover .tm-cicon,.tm-lrow.open .tm-cicon,.tm-tr:hover .tm-cicon,.tm-tr.open .tm-cicon{color:var(--tm-ember)}
 /* accordion detail (shared by legend + compare tape) */
 .tm-detail{list-style:none; margin:0 -8px 4px; padding:4px 8px 8px 34px; display:flex; flex-direction:column; gap:3px;
   border-bottom:1px solid var(--tm-line2); animation:tm-reveal .18s ease}

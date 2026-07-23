@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CategoryDetail } from '@/src/lib/dna';
+import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
 
 type Side = { name: string; cats: CategoryDetail[] };
 
@@ -16,6 +16,8 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
   const progRef = useRef(0);
   const hiRef = useRef(-1);
   const hoverRef = useRef(-1);
+  const iconsRef = useRef<{ color: string; imgs: HTMLImageElement[] }>({ color: '', imgs: [] });
+  const redrawRef = useRef<() => void>(() => {});
   const [open, setOpen] = useState(-1);
   const cats = a.cats;
   const aCount = a.cats.reduce((n, c) => n + c.done, 0);
@@ -45,6 +47,16 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
     const faint = gv('--tm-faint');
     const ember = gv('--tm-ember');
     const verd = gv('--tm-verd');
+    const muted = gv('--tm-muted');
+    if (iconsRef.current.color !== muted) {
+      iconsRef.current.color = muted;
+      iconsRef.current.imgs = cats.map((c) => {
+        const img = new Image();
+        img.onload = () => redrawRef.current();
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(c.icon, 24).replace(/currentColor/g, muted));
+        return img;
+      });
+    }
     const hexA = (hex: string, al: number) => {
       let h = hex.replace('#', '');
       if (h.length === 3) h = h.split('').map((x) => x + x).join('');
@@ -87,10 +99,9 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
         ctx.fill();
         ctx.restore();
       }
-      ctx.font = `${Math.max(13, size * (on ? 0.052 : 0.046))}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(cats[i].icon, ex, ey);
+      const img = iconsRef.current.imgs[i];
+      const is = Math.max(15, size * (on ? 0.062 : 0.052));
+      if (img && img.complete && img.naturalWidth) ctx.drawImage(img, ex - is / 2, ey - is / 2, is, is);
     }
 
     const series: [CategoryDetail[], string][] = [
@@ -133,6 +144,10 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
       }
     }
   }, [a.cats, b.cats, cats.length]);
+
+  useEffect(() => {
+    redrawRef.current = draw;
+  }, [draw]);
 
   useEffect(() => {
     const cv = canvasRef.current;
@@ -233,7 +248,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
               >
                 <span className="ix">{String(i + 1).padStart(2, '0')}</span>
                 <span className="lab">
-                  <span className="tm-cicon" aria-hidden="true">{c.icon}</span>{c.label}
+                  <span className="tm-cicon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(c.icon, 15) }} />{c.label}
                   <span className="tm-chev" aria-hidden="true">{open === i ? ' ▾' : ' ▸'}</span>
                 </span>
                 <span className={`a${aw ? ' win' : ''}`}>
