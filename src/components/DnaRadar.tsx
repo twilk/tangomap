@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
 
 const LIST = { hidden: {}, show: { transition: { staggerChildren: 0.028 } } };
@@ -248,27 +248,22 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
               </span>
               <span className="tm-chev" aria-hidden="true">{open === i ? '▾' : '▸'}</span>
             </motion.button>
-            <AnimatePresence initial={false}>
-              {open === i && (
-                <motion.ul
-                  key="detail"
-                  className="tm-detail"
-                  initial={reduce ? false : { height: 0, opacity: 0 }}
-                  animate={reduce ? {} : { height: 'auto', opacity: 1 }}
-                  exit={reduce ? {} : { height: 0, opacity: 0 }}
-                  transition={DETAIL_T}
-                  style={{ overflow: 'hidden' }}
-                >
-                  {c.skills.map((s) => (
-                    <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
-                      <span className="tm-dot" aria-hidden="true" />
-                      <span>{s.name}</span>
-                      {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
-                    </li>
-                  ))}
-                </motion.ul>
-              )}
-            </AnimatePresence>
+            <motion.ul
+              className="tm-detail"
+              initial={false}
+              animate={{ height: open === i ? 'auto' : 0, opacity: open === i ? 1 : 0 }}
+              transition={reduce ? { duration: 0 } : DETAIL_T}
+              style={{ overflow: 'hidden' }}
+              aria-hidden={open !== i}
+            >
+              {c.skills.map((s) => (
+                <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
+                  <span className="tm-dot" aria-hidden="true" />
+                  <span>{s.name}</span>
+                  {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
+                </li>
+              ))}
+            </motion.ul>
           </motion.li>
         ))}
       </motion.ul>
