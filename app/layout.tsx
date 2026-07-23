@@ -11,8 +11,11 @@ export const metadata = {
 // Also re-applies on `storage` (another tab flipped the theme — live multi-tab
 // sync) and on `pageshow[persisted]` (returning from the bfcache with a stale
 // DOM), so the setting stays consistent no matter how you arrived at the page.
+// A meta[theme-color] is kept in step with the ground colour so the mobile
+// browser chrome bar tracks the theme too (a MutationObserver covers the toggle,
+// which sets data-theme directly rather than going through a()).
 const THEME_SCRIPT =
-  "(function(){function a(){try{document.documentElement.setAttribute('data-theme',localStorage.getItem('tsm-theme')==='dark'?'dark':'light')}catch(e){document.documentElement.setAttribute('data-theme','light')}}a();try{addEventListener('storage',function(e){if(!e.key||e.key==='tsm-theme')a()});addEventListener('pageshow',function(e){if(e.persisted)a()})}catch(e){}})()";
+  "(function(){function tc(d){var m=document.querySelector('meta[name=\\\"theme-color\\\"]');if(!m){m=document.createElement('meta');m.setAttribute('name','theme-color');document.head.appendChild(m)}m.setAttribute('content',d==='dark'?'#110D09':'#f5ead8')}function a(){var d;try{d=localStorage.getItem('tsm-theme')==='dark'?'dark':'light'}catch(e){d='light'}document.documentElement.setAttribute('data-theme',d);tc(d)}a();try{addEventListener('storage',function(e){if(!e.key||e.key==='tsm-theme')a()});addEventListener('pageshow',function(e){if(e.persisted)a()});new MutationObserver(function(){tc(document.documentElement.getAttribute('data-theme'))}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']})}catch(e){}})()";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

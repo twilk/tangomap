@@ -35,9 +35,12 @@ export const CATEGORIES: { tag: string; label: string; icon: string }[] = [
   { tag: 'MASTERY', label: 'Mastery', icon: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>' },
 ];
 
-/** Wrap a category's inner icon markup in a themeable 24×24 line-icon <svg>. */
+/** Wrap a category's inner icon markup in a themeable 24×24 line-icon <svg>.
+ * The xmlns is required: this same string is also loaded as a data: URL <img>
+ * onto the radar canvas, and a standalone SVG without the namespace fails to
+ * load (inline in the DOM the browser infers it, as a data URL it does not). */
 export function iconSvg(inner: string, size = 16): string {
-  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
 }
 
 export type CategoryStat = { tag: string; label: string; icon: string; done: number; total: number; pct: number };
