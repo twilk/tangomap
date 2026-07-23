@@ -15,5 +15,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   }),
   providers: [Google],
   session: { strategy: 'database' },
-  pages: { signIn: '/signin' },
+  pages: { signIn: '/signin', signOut: '/signout' },
 });

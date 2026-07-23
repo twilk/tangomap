@@ -49,7 +49,7 @@ export default async function SettingsPage() {
             {initial.isPublic && initial.handle && (
               <a className="tm-link" href={`/u/${initial.handle}`}>View public</a>
             )}
-            <a className="tm-link" href="/api/auth/signout">Sign out</a>
+            <a className="tm-link" href="/signout">Sign out</a>
           </span>
         </nav>
 
