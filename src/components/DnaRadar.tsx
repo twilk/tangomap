@@ -247,8 +247,11 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
               </span>
               <span className="tm-chev" aria-hidden="true">{open === i ? '▾' : '▸'}</span>
             </motion.button>
-            <div className={`tm-acc${open === i ? ' open' : ''}`} aria-hidden={open !== i}>
-              <div className="tm-accwrap">
+            <div
+              className={`tm-acc${open === i ? ' open' : ''}`}
+              style={{ height: open === i ? c.skills.length * 22 + 16 : 0 }}
+              aria-hidden={open !== i}
+            >
               <ul className="tm-detail">
                 {c.skills.map((s) => (
                   <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
@@ -258,7 +261,6 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
                   </li>
                 ))}
               </ul>
-              </div>
             </div>
           </motion.li>
         ))}

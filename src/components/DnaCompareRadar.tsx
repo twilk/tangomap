@@ -271,8 +271,11 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
                   <b>{bc.done}</b>/{bc.total}
                 </span>
               </motion.button>
-              <div className={`tm-acc${open === i ? ' open' : ''}`} aria-hidden={open !== i}>
-                <div className="tm-accwrap">
+              <div
+                className={`tm-acc${open === i ? ' open' : ''}`}
+                style={{ height: open === i ? c.skills.length * 22 + 16 : 0 }}
+                aria-hidden={open !== i}
+              >
                 <div className="tm-detail cmp">
                   {c.skills.map((s, k) => {
                     const bOn = bc.skills[k]?.on ?? false;
@@ -284,7 +287,6 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
                       </div>
                     );
                   })}
-                </div>
                 </div>
               </div>
             </motion.div>
