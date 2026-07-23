@@ -20,7 +20,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
   const progRef = useRef(0);
   const hiRef = useRef(-1);
   const hoverRef = useRef(-1);
-  const iconsRef = useRef<{ color: string; imgs: HTMLImageElement[] }>({ color: '', imgs: [] });
+  const iconsRef = useRef<{ key: string; imgs: HTMLImageElement[]; imgsHi: HTMLImageElement[] }>({ key: '', imgs: [], imgsHi: [] });
   const redrawRef = useRef<() => void>(() => {});
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(-1);
@@ -53,14 +53,21 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
     const ember = gv('--tm-ember');
     const verd = gv('--tm-verd');
     const muted = gv('--tm-muted');
-    if (iconsRef.current.color !== muted) {
-      iconsRef.current.color = muted;
-      iconsRef.current.imgs = cats.map((c) => {
-        const img = new Image();
-        img.onload = () => redrawRef.current();
-        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(c.icon, 24).replace(/currentColor/g, muted));
-        return img;
-      });
+    const focus = gv('--tm-focus');
+    // Two icon sets: muted for idle axes, focus-coloured for the hovered/pinned
+    // axis so its icon pops in the highlight colour (distinct from both series).
+    const iconKey = muted + '|' + focus;
+    if (iconsRef.current.key !== iconKey) {
+      iconsRef.current.key = iconKey;
+      const build = (col: string) =>
+        cats.map((c) => {
+          const img = new Image();
+          img.onload = () => redrawRef.current();
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(c.icon, 24).replace(/currentColor/g, col));
+          return img;
+        });
+      iconsRef.current.imgs = build(muted);
+      iconsRef.current.imgsHi = build(focus);
     }
     const hexA = (hex: string, al: number) => {
       let h = hex.replace('#', '');
@@ -86,25 +93,28 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
     for (let i = 0; i < N; i++) {
       const an = ang(i);
       const on = i === hiI;
-      ctx.strokeStyle = on ? ember : line;
+      ctx.strokeStyle = on ? focus : line;
       ctx.lineWidth = on ? 2 : 1;
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + Math.cos(an) * rad, cy + Math.sin(an) * rad);
       ctx.stroke();
-      // category icon (replaces the axis number); highlight = ember disc behind it
+      // category icon (replaces the axis number); highlight = focus disc + ring behind it
       const lr = rad + Math.max(15, size * 0.055);
       const ex = cx + Math.cos(an) * lr;
       const ey = cy + Math.sin(an) * lr;
       if (on) {
         ctx.save();
-        ctx.fillStyle = hexA(ember, 0.18);
         ctx.beginPath();
         ctx.arc(ex, ey, Math.max(12, size * 0.043), 0, 7);
+        ctx.fillStyle = hexA(focus, 0.2);
         ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = focus;
+        ctx.stroke();
         ctx.restore();
       }
-      const img = iconsRef.current.imgs[i];
+      const img = on ? iconsRef.current.imgsHi[i] : iconsRef.current.imgs[i];
       const is = Math.max(15, size * (on ? 0.062 : 0.052));
       if (img && img.complete && img.naturalWidth) ctx.drawImage(img, ex - is / 2, ey - is / 2, is, is);
     }

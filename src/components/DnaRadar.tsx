@@ -18,7 +18,7 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
   const progRef = useRef(0);
   const hiRef = useRef(-1);
   const hoverRef = useRef(-1);
-  const iconsRef = useRef<{ color: string; imgs: HTMLImageElement[] }>({ color: '', imgs: [] });
+  const iconsRef = useRef<{ key: string; imgs: HTMLImageElement[]; imgsHi: HTMLImageElement[] }>({ key: '', imgs: [], imgsHi: [] });
   const redrawRef = useRef<() => void>(() => {});
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(-1);
@@ -50,15 +50,21 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
     const ember = gv('--tm-ember');
     const carm = gv('--tm-carmine');
     const muted = gv('--tm-muted');
-    // Build (once per theme colour) the 13 category icons as themed SVG images.
-    if (iconsRef.current.color !== muted) {
-      iconsRef.current.color = muted;
-      iconsRef.current.imgs = categories.map((c) => {
-        const img = new Image();
-        img.onload = () => redrawRef.current();
-        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(c.icon, 24).replace(/currentColor/g, muted));
-        return img;
-      });
+    const focus = gv('--tm-focus');
+    // Build (once per theme) two icon sets: muted for idle axes, focus-coloured
+    // for the hovered/pinned axis so its icon pops in the highlight colour.
+    const iconKey = muted + '|' + focus;
+    if (iconsRef.current.key !== iconKey) {
+      iconsRef.current.key = iconKey;
+      const build = (col: string) =>
+        categories.map((c) => {
+          const img = new Image();
+          img.onload = () => redrawRef.current();
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(c.icon, 24).replace(/currentColor/g, col));
+          return img;
+        });
+      iconsRef.current.imgs = build(muted);
+      iconsRef.current.imgsHi = build(focus);
     }
     const hexA = (hex: string, a: number) => {
       let h = hex.replace('#', '');
@@ -84,25 +90,28 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
     for (let i = 0; i < N; i++) {
       const a = ang(i);
       const on = i === hiI;
-      ctx.strokeStyle = on ? ember : line;
+      ctx.strokeStyle = on ? focus : line;
       ctx.lineWidth = on ? 2 : 1;
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + Math.cos(a) * rad, cy + Math.sin(a) * rad);
       ctx.stroke();
-      // category icon (replaces the axis number); highlight = ember disc behind it
+      // category icon (replaces the axis number); highlight = focus disc + ring behind it
       const lr = rad + Math.max(15, size * 0.055);
       const ex = cx + Math.cos(a) * lr;
       const ey = cy + Math.sin(a) * lr;
       if (on) {
         ctx.save();
-        ctx.fillStyle = hexA(ember, 0.18);
         ctx.beginPath();
         ctx.arc(ex, ey, Math.max(12, size * 0.043), 0, 7);
+        ctx.fillStyle = hexA(focus, 0.2);
         ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = focus;
+        ctx.stroke();
         ctx.restore();
       }
-      const img = iconsRef.current.imgs[i];
+      const img = on ? iconsRef.current.imgsHi[i] : iconsRef.current.imgs[i];
       const is = Math.max(15, size * (on ? 0.062 : 0.052));
       if (img && img.complete && img.naturalWidth) ctx.drawImage(img, ex - is / 2, ey - is / 2, is, is);
     }

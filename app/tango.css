@@ -19,6 +19,9 @@ body { margin: 0; }
   --tm-ember:#c67139; --tm-ember-s:rgba(198,113,57,.15);
   --tm-verd:#2C7869; --tm-verd-s:rgba(44,120,105,.15);
   --tm-carmine:#A6172E; --tm-chip:rgba(32,30,29,.05);
+  /* hover/focus highlight on the radar — a cool "moonlight" accent, complementary
+     to the warm ember and distinct from the teal, so it never blends with data. */
+  --tm-focus:#3F5BB0;
   --tm-elev:0 1px 0 var(--tm-hi),0 2px 6px -2px rgba(32,30,29,.1),0 26px 52px -32px rgba(32,30,29,.45);
   color-scheme:light;
   background:var(--tm-ground); color:var(--tm-ink); font-family:var(--sans); line-height:1.5; min-height:100vh;
@@ -33,6 +36,7 @@ body { margin: 0; }
   --tm-ember:#E58C44; --tm-ember-s:rgba(229,140,68,.14);
   --tm-verd:#61AB95; --tm-verd-s:rgba(97,171,149,.15);
   --tm-carmine:#E6415C; --tm-chip:rgba(241,233,220,.05);
+  --tm-focus:#8EA6FF;
   --tm-elev:0 0 0 1px rgba(241,233,220,.04),0 34px 66px -34px rgba(0,0,0,.9);
   color-scheme:dark;
 }
