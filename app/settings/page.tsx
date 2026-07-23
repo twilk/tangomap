@@ -2,11 +2,8 @@ import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/db';
-import { profile, progress } from '@/db/schema';
+import { profile } from '@/db/schema';
 import type { ProfileDTO, Style } from '@/src/lib/types';
-import { masteredCount, milestones, sanitizeMastered } from '@/src/lib/progress';
-import { perCategory, topStrengths } from '@/src/lib/dna';
-import { DnaRadar } from '@/src/components/DnaRadar';
 import SettingsForm from './SettingsForm';
 
 export const dynamic = 'force-dynamic';
@@ -22,10 +19,7 @@ export default async function SettingsPage() {
   }
   const uid = session.user.id;
 
-  const [prof, prog] = await Promise.all([
-    db.query.profile.findFirst({ where: eq(profile.userId, uid) }),
-    db.query.progress.findFirst({ where: eq(progress.userId, uid) }),
-  ]);
+  const prof = await db.query.profile.findFirst({ where: eq(profile.userId, uid) });
 
   const initial: ProfileDTO = {
     handle: prof?.handle ?? null,
@@ -33,11 +27,6 @@ export default async function SettingsPage() {
     displayName: prof?.displayName ?? null,
     style: (prof?.style as Style | null) ?? null,
   };
-  const mastered = sanitizeMastered(prog?.mastered ?? []);
-  const count = masteredCount(mastered);
-  const cats = perCategory(mastered);
-  const strong = topStrengths(mastered, 1)[0];
-  const badges = milestones(count).length;
 
   return (
     <div className="tm-profile">
@@ -46,50 +35,24 @@ export default async function SettingsPage() {
           <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
           <span className="tm-nav">
             <a className="tm-link" href="/">← The map</a>
-            {initial.isPublic && initial.handle && (
-              <a className="tm-link" href={`/u/${initial.handle}`}>View public</a>
-            )}
+            <a className="tm-link" href="/me">Profile</a>
             <a className="tm-link" href="/signout">Sign out</a>
           </span>
         </nav>
 
-        <h1 className="tm-h1">Your cockpit</h1>
-        <p className="tm-lead">Read your own Tango DNA, then decide who else gets to. Publishing is off until you switch it on.</p>
+        <h1 className="tm-h1">Settings</h1>
+        <p className="tm-lead">Your handle, display name and style — and whether your profile is public. Publishing is off until you switch it on.</p>
 
-        <div className="tm-strip" style={{ marginTop: '22px' }}>
-          <div className="tm-s">
-            <div className="tm-k">Mastered</div>
-            <div className="tm-v">
-              {count}
-              <small>/62</small>
-            </div>
-          </div>
-          <div className="tm-s">
-            <div className="tm-k">Strongest</div>
-            <div className="tm-v tm-sm">{strong ? strong.label : '—'}</div>
-          </div>
-          <div className="tm-s">
-            <div className="tm-k">Milestones</div>
-            <div className="tm-v">
-              {badges}
-              <small>/4</small>
-            </div>
-          </div>
-          <div className="tm-s">
-            <div className="tm-k">Visibility</div>
-            <div className="tm-v tm-sm">{initial.isPublic ? 'Public' : 'Private'}</div>
-          </div>
-        </div>
-
-        <section className="tm-sec">
-          <h2 className="tm-sh">Your Tango DNA</h2>
-          <DnaRadar categories={cats} />
-        </section>
-
-        <section className="tm-sec">
+        <section className="tm-sec" style={{ marginTop: '26px' }}>
           <h2 className="tm-sh">Profile &amp; privacy</h2>
           <SettingsForm initial={initial} />
         </section>
+
+        <div className="tm-cta-row">
+          <a className="tm-cta" href="/me">
+            View your profile <span className="tm-ar" aria-hidden="true">→</span>
+          </a>
+        </div>
       </main>
     </div>
   );

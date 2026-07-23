@@ -62,6 +62,11 @@ body { margin: 0; }
 .tm-meta b{color:var(--tm-ink); text-transform:capitalize}
 .tm-sig{font-family:var(--serif); font-style:italic; font-size:clamp(15px,2.2vw,18px); color:var(--tm-muted); margin:8px 0 0}
 .tm-sig b{color:var(--tm-ink); font-style:normal}
+.tm-tag{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:999px; border:1px solid var(--tm-line); color:var(--tm-faint)}
+.tm-tag.on{color:var(--tm-verd); border-color:transparent; background:var(--tm-verd-s)}
+.tm-callout{margin:22px 0 4px; padding:14px 16px; border:1px solid var(--tm-line); border-radius:12px; background:var(--tm-panel2); font-size:13.5px; color:var(--tm-muted); line-height:1.5}
+.tm-link-inline{color:var(--tm-ember); text-decoration:none; font-weight:600; white-space:nowrap}
+.tm-link-inline:hover{text-decoration:underline}
 
 /* stats strip */
 .tm-strip{display:flex; margin:26px 0 8px; border:1px solid var(--tm-line); border-radius:14px; overflow:hidden;

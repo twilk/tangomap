@@ -32,7 +32,7 @@ export default function SignIn() {
           <form
             action={async () => {
               'use server';
-              await signIn('google', { redirectTo: '/settings' });
+              await signIn('google', { redirectTo: '/me' });
             }}
           >
             <button className="tm-cta" type="submit">

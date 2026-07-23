@@ -1,9 +1,9 @@
-/* Tango Map — "By category" navigator.
-   Injected enhancement (like auth-ui.js / sync.js): adds a category filter that
-   complements the level-based Skill Navigator. Each of the 13 skill categories
-   (the Tango DNA tags) maps to its skill nodes by name; hovering previews and
-   clicking pins a category, highlighting its nodes on the map and dimming the
-   rest. Fully self-contained; degrades to a no-op if the map never renders. */
+/* Tango Map — category navigation inside the Skill Navigator.
+   The level list in the left sidebar duplicates the main map (which is already
+   laid out by level), so this injected enhancement replaces it with the 13 skill
+   categories (the Tango DNA tags) — a genuinely new axis. Hovering a category
+   previews it on the map; clicking pins it (its nodes light up, the rest dim).
+   Self-contained; degrades to a no-op if the map never renders. */
 (function () {
   try {
     var CATS = [
@@ -28,7 +28,6 @@
     var pinned = -1;
     var built = false;
     var catNodes = [];
-    var reapplyTimer = null;
 
     function nodes() {
       return Array.prototype.slice.call(document.querySelectorAll('button')).filter(function (b) {
@@ -49,8 +48,7 @@
         if (b.__co === undefined) b.__co = b.style.opacity || '1';
         if (b.__cs === undefined) b.__cs = b.style.boxShadow || '';
       });
-      var probe = ns[0];
-      var a = getComputedStyle(probe).getPropertyValue('--t-accent').trim();
+      var a = getComputedStyle(ns[0]).getPropertyValue('--t-accent').trim();
       if (a) ACCENT = a;
       built = true;
       return true;
@@ -80,66 +78,95 @@
       });
     }
 
-    function setPinned(idx) {
-      pinned = idx;
-      apply(pinned);
-      if (reapplyTimer) { clearInterval(reapplyTimer); reapplyTimer = null; }
-      // keep the highlight sticky through the map's own re-renders (pan/zoom)
-      if (pinned >= 0) reapplyTimer = setInterval(function () { apply(pinned); }, 400);
+    function gv(n, f) {
+      var els = [document.querySelector('[style*="var(--t-"]'), document.querySelector('.tsm'), document.querySelector('.sc-host'), document.body].filter(Boolean);
+      for (var i = 0; i < els.length; i++) { var v = getComputedStyle(els[i]).getPropertyValue(n).trim(); if (v) return v; }
+      return f;
+    }
+    function hexa(hex, a) {
+      hex = String(hex).replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(function (x) { return x + x; }).join('');
+      var n = parseInt(hex, 16);
+      if (isNaN(n)) return 'rgba(198,113,57,' + a + ')';
+      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
     }
 
-    var panel;
-    var collapsed = (window.innerWidth < 640);
-
-    function chip(inner, attrs) {
-      return '<button class="tmc-chip" ' + attrs + ' style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--tmc-bd);background:var(--tmc-bg2);color:inherit;border-radius:999px;padding:5px 9px;margin:3px;cursor:pointer;font:inherit;font-size:11px;white-space:nowrap;transition:border-color .15s,background .15s">' + inner + '</button>';
+    function findList() {
+      var nav = document.querySelector('nav');
+      if (!nav) return null;
+      var row = Array.prototype.slice.call(nav.querySelectorAll('*')).find(function (e) {
+        return /Beginners.*First Steps/i.test((e.textContent || '').replace(/\s+/g, ' ')) && e.querySelectorAll('*').length < 12;
+      });
+      if (!row || !row.parentElement) return null;
+      return { nav: nav, list: row.parentElement };
     }
 
-    function render() {
-      if (!panel) { panel = document.createElement('div'); panel.id = 'tm-cats'; document.body.appendChild(panel); }
-      panel.style.cssText =
-        'position:fixed;left:14px;bottom:14px;z-index:2147483000;max-width:min(320px,calc(100vw - 28px));' +
-        'font:600 12px system-ui,-apple-system,Segoe UI,sans-serif;color:#f2eadc;' +
-        'background:rgba(17,13,9,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);' +
-        'border:1px solid rgba(241,233,220,.16);border-radius:14px;box-shadow:0 22px 44px -26px rgba(0,0,0,.7);overflow:hidden;' +
-        '--tmc-bd:rgba(241,233,220,.18);--tmc-bg2:transparent';
-      var activeLabel = pinned >= 0 ? CATS[pinned].label : '';
-      var hdr = '<button id="tmc-h" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;color:inherit;cursor:pointer;padding:11px 13px;font:inherit;font-size:10px;letter-spacing:.14em;text-transform:uppercase">' +
-        '<span style="width:8px;height:8px;border-radius:50%;background:' + ACCENT + ';box-shadow:0 0 0 3px rgba(198,113,57,.25)"></span>' +
-        'By category' +
-        (activeLabel ? '<span style="letter-spacing:0;text-transform:none;color:' + ACCENT + '">· ' + activeLabel + '</span>' : '') +
-        '<span style="flex:1"></span><span style="opacity:.55;font-size:12px">' + (collapsed ? '▸' : '▾') + '</span></button>';
+    function setPinned(idx) { pinned = idx; apply(pinned); }
 
-      var chips = CATS.map(function (c, i) {
-        var n = catNodes[i] ? catNodes[i].length : c.names.length;
-        var active = (pinned === i);
-        var st = active ? ' style="display:inline-flex;align-items:center;gap:6px;border:1px solid ' + ACCENT + ';background:rgba(198,113,57,.18);color:#fff;border-radius:999px;padding:5px 9px;margin:3px;cursor:pointer;font:inherit;font-size:11px;white-space:nowrap;font-weight:600"' : '';
-        var inner = c.label + ' <b style="opacity:.55;font-weight:600">' + n + '</b>';
-        if (active) return '<button class="tmc-chip" data-i="' + i + '"' + st + '>' + inner + '</button>';
-        return chip(inner, 'data-i="' + i + '"');
-      }).join('');
-      var clear = pinned >= 0 ? chip('Clear ✕', 'data-i="-1"') : '';
+    function render(cont) {
+      var ink = gv('--t-ink', '#201e1d'), accent = gv('--t-accent', '#c67139'), muted = gv('--t-muted', '#645c50');
+      ACCENT = accent;
+      function rowHtml(i) {
+        var cat = CATS[i];
+        var n = catNodes[i] ? catNodes[i].length : cat.names.length;
+        var active = pinned === i;
+        return '<button class="tm-cat-row" data-i="' + i + '" style="display:flex;align-items:center;gap:10px;width:calc(100% - 12px);margin:1px 6px;padding:7px 10px;border:0;border-radius:9px;cursor:pointer;text-align:left;font:600 14.5px Figtree,system-ui,sans-serif;' +
+          (active ? 'background:' + hexa(accent, 0.14) + ';color:' + accent : 'background:transparent;color:' + ink) + '">' +
+          '<span style="font:600 10px ui-monospace,Menlo,monospace;color:' + (active ? accent : muted) + ';width:16px;flex:none">' + (i + 1 < 10 ? '0' : '') + (i + 1) + '</span>' +
+          '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + cat.label + '</span>' +
+          '<span style="font:600 12px ui-monospace,Menlo,monospace;color:' + muted + ';flex:none">' + n + '</span>' +
+          '</button>';
+      }
+      var rows = CATS.map(function (_, i) { return rowHtml(i); }).join('');
+      var clear = pinned >= 0
+        ? '<button class="tm-cat-row" data-i="-1" style="display:flex;align-items:center;gap:8px;width:calc(100% - 12px);margin:6px 6px 2px;padding:6px 10px;border:0;border-radius:9px;cursor:pointer;text-align:left;font:600 12px Figtree,system-ui,sans-serif;color:' + muted + ';background:transparent">✕ Clear filter</button>'
+        : '';
+      cont.innerHTML =
+        '<div style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:' + muted + ';padding:8px 16px 8px">Browse by category</div>' +
+        rows + clear;
 
-      panel.innerHTML = hdr +
-        '<div id="tmc-b" style="display:' + (collapsed ? 'none' : 'flex') + ';flex-wrap:wrap;padding:2px 8px 10px;max-height:42vh;overflow:auto">' + chips + clear + '</div>';
-
-      document.getElementById('tmc-h').onclick = function () { collapsed = !collapsed; render(); };
-      Array.prototype.forEach.call(panel.querySelectorAll('.tmc-chip'), function (el) {
+      Array.prototype.forEach.call(cont.querySelectorAll('.tm-cat-row'), function (el) {
         var i = parseInt(el.getAttribute('data-i'), 10);
-        el.onmouseenter = function () { if (pinned < 0 && i >= 0) apply(i); };
-        el.onmouseleave = function () { if (pinned < 0) apply(-1); };
-        el.onclick = function () {
-          setPinned((i < 0 || i === pinned) ? -1 : i);
-          render();
+        el.onmouseenter = function () {
+          if (i >= 0 && pinned < 0) apply(i);
+          if (i !== pinned) el.style.background = hexa(accent, i < 0 ? 0 : 0.08);
         };
+        el.onmouseleave = function () {
+          if (pinned < 0) apply(-1);
+          if (i !== pinned) el.style.background = 'transparent';
+        };
+        el.onclick = function () { setPinned((i < 0 || i === pinned) ? -1 : i); render(cont); };
       });
     }
 
-    var tries = 0;
-    var iv = setInterval(function () {
-      tries++;
-      if (build()) { clearInterval(iv); render(); }
-      else if (tries > 60) { clearInterval(iv); }
-    }, 250);
+    function mount() {
+      var f = findList();
+      if (!f || !built) return false;
+      // hide the redundant level list, relabel the sub-count, inject categories
+      f.list.style.display = 'none';
+      try {
+        var st = Array.prototype.slice.call(f.nav.querySelectorAll('*')).find(function (e) {
+          return e.children.length === 0 && /\d+\s*levels/i.test(e.textContent || '');
+        });
+        if (st) st.textContent = st.textContent.replace(/\d+\s*levels/i, '13 categories');
+      } catch (e) {}
+      var cont = document.getElementById('tm-catnav');
+      if (!cont) {
+        cont = document.createElement('div');
+        cont.id = 'tm-catnav';
+        f.list.parentNode.insertBefore(cont, f.list.nextSibling);
+      }
+      render(cont);
+      return true;
+    }
+
+    // Boot + keep stable against the map's own re-renders (cheap DOM checks).
+    setInterval(function () {
+      if (!built) build();
+      if (!built) return;
+      var f = findList();
+      if (f && (f.list.style.display !== 'none' || !document.getElementById('tm-catnav'))) mount();
+      if (pinned >= 0) apply(pinned);
+    }, 400);
   } catch (e) {}
 })();
