@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { profile } from '@/db/schema';
 import type { ProfileDTO, Style } from '@/src/lib/types';
 import SettingsForm from './SettingsForm';
+import { DeleteAccount } from '@/src/components/DeleteAccount';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,11 @@ export default async function SettingsPage() {
             View your profile <span className="tm-ar" aria-hidden="true">→</span>
           </a>
         </div>
+
+        <section className="tm-sec">
+          <h2 className="tm-sh danger">Danger zone</h2>
+          <DeleteAccount />
+        </section>
       </main>
     </div>
   );

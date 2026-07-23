@@ -6,6 +6,7 @@ import { profile, progress } from '@/db/schema';
 import { sanitizeMastered } from '@/src/lib/progress';
 import { dnaSignature } from '@/src/lib/dna';
 import { ProfileSections } from '@/src/components/ProfileSections';
+import { CopyButton } from '@/src/components/CopyButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,24 +62,32 @@ export default async function MePage() {
           </div>
         </header>
 
-        <div className="tm-callout">
-          {mastered.length === 0 ? (
-            <>
-              You haven’t marked any skills yet — your Tango DNA fills in as you go.{' '}
-              <a className="tm-link-inline" href="/">Open the map and start your climb →</a>
-            </>
-          ) : isPublic && handle ? (
-            <>
-              Your profile is live at <a className="tm-publink" href={`/u/${handle}`}>partykamap.vercel.app/u/{handle}</a>.
-              {' '}
-              <a className="tm-link-inline" href="/settings">Manage visibility →</a>
-            </>
-          ) : (
-            <>
-              This is your private view — only you can see it. <a className="tm-link-inline" href="/settings">Publish it in Settings →</a>
-            </>
-          )}
-        </div>
+        {mastered.length === 0 ? (
+          <div className="tm-callout">
+            You haven’t marked any skills yet — your Tango DNA fills in as you go.{' '}
+            <a className="tm-link-inline" href="/">Open the map and start your climb →</a>
+          </div>
+        ) : isPublic && handle ? (
+          <section className="tm-share" aria-label="Share your profile">
+            <a className="tm-ogthumb" href={`/u/${handle}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- dynamic OG route, not a static asset */}
+              <img src={`/u/${handle}/opengraph-image`} alt={`Share card for @${handle}`} loading="lazy" width={1200} height={630} />
+            </a>
+            <div className="tm-share-body">
+              <div className="tm-share-label">Your profile is live — share your DNA</div>
+              <div className="tm-share-url num">partykamap.vercel.app/u/{handle}</div>
+              <div className="tm-share-actions">
+                <CopyButton text={`https://partykamap.vercel.app/u/${handle}`} label="Copy link" />
+                <a className="tm-cta ghost" href={`/u/${handle}`}>Open <span className="tm-ar" aria-hidden="true">→</span></a>
+                <a className="tm-link-inline" href="/settings">Manage visibility →</a>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <div className="tm-callout">
+            This is your private view — only you can see it. <a className="tm-link-inline" href="/settings">Publish it in Settings →</a>
+          </div>
+        )}
 
         <ProfileSections mastered={mastered} />
 

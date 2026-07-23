@@ -1,4 +1,8 @@
 import { notFound } from 'next/navigation';
+import { eq } from 'drizzle-orm';
+import { auth } from '@/auth';
+import { db } from '@/db';
+import { profile } from '@/db/schema';
 import { getPublicProfile } from '@/src/lib/publicProfile';
 import { sanitizeMastered } from '@/src/lib/progress';
 import { dnaSignature } from '@/src/lib/dna';
@@ -12,6 +16,14 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
   const { handle } = await params;
   const data = await getPublicProfile(handle);
   if (!data) notFound();
+
+  // Is the viewer the owner of this handle? (drives a "this is your page" banner)
+  const session = await auth();
+  let isOwner = false;
+  if (session?.user?.id) {
+    const own = await db.query.profile.findFirst({ where: eq(profile.userId, session.user.id) });
+    isOwner = !!own?.handle && own.handle === data.handle;
+  }
 
   const mastered = sanitizeMastered(data.mastered);
   const signature = dnaSignature(mastered);
@@ -27,6 +39,13 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
             <a className="tm-link" href="/">← The map</a>
           </span>
         </nav>
+
+        {isOwner && (
+          <div className="tm-owner">
+            <span><span className="dot" aria-hidden="true" />You’re viewing your public profile — this is what others see.</span>
+            <a className="tm-link-inline" href="/settings">Edit in Settings →</a>
+          </div>
+        )}
 
         <header className="tm-hero">
           <div className="tm-ava" aria-hidden="true">{initial}</div>

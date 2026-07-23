@@ -1,8 +1,13 @@
+import { eq } from 'drizzle-orm';
+import { auth } from '@/auth';
+import { db } from '@/db';
+import { profile } from '@/db/schema';
 import { getPublicProfile } from '@/src/lib/publicProfile';
 import { masteredCount } from '@/src/lib/progress';
 import { perCategoryDetailed, dnaSignature } from '@/src/lib/dna';
 import { DnaRadar } from '@/src/components/DnaRadar';
 import { DnaCompareRadar } from '@/src/components/DnaCompareRadar';
+import { CopyButton } from '@/src/components/CopyButton';
 import type { PublicProfile } from '@/src/lib/types';
 
 // Live DB read (privacy flag + progress): must not be statically cached.
@@ -10,6 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = { title: 'Compare — Tango Map' };
 
+const SITE = 'https://partykamap.vercel.app';
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? '') : (v ?? ''));
 const nameOf = (p: PublicProfile) => p.displayName ?? p.handle;
 
@@ -19,7 +25,15 @@ export default async function Compare({
   searchParams: Promise<{ a?: string | string[]; b?: string | string[] }>;
 }) {
   const sp = await searchParams;
-  const a = one(sp.a).trim();
+  // Prefill side A with the signed-in dancer's own public handle when A is empty,
+  // so compare isn't a blank form for someone who doesn't know a handle.
+  const session = await auth();
+  let myHandle: string | null = null;
+  if (session?.user?.id) {
+    const own = await db.query.profile.findFirst({ where: eq(profile.userId, session.user.id) });
+    myHandle = own?.isPublic ? (own.handle ?? null) : null;
+  }
+  const a = one(sp.a).trim() || (myHandle ?? '');
   const b = one(sp.b).trim();
   const [pa, pb] = await Promise.all([
     a ? getPublicProfile(a) : Promise.resolve(null),
@@ -103,9 +117,10 @@ export default async function Compare({
                 {nameOf(p)} · {cnt}/62 · {dnaSignature(p.mastered)}
               </h2>
               <DnaRadar categories={perCategoryDetailed(p.mastered)} />
-              <p className="tm-empty" style={{ marginTop: '18px' }}>
-                Add a second handle above to see the head-to-head.
-              </p>
+              <div className="tm-invite">
+                <span>Add a second handle above, or send a friend an invite — they just add their handle:</span>
+                <CopyButton className="tm-cta ghost" text={`${SITE}/compare?a=${encodeURIComponent(p.handle)}&b=`} label="Copy invite link" />
+              </div>
             </section>
           );
         })()}
