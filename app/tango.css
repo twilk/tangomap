@@ -11,17 +11,22 @@ body { margin: 0; }
   --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
-  --tm-ground:#E7E1D6; --tm-panel:#F0EBE2; --tm-panel2:#F6F1EA; --tm-hi:rgba(255,255,255,.6);
-  --tm-ink:#1C1611; --tm-muted:#6C6252; --tm-faint:#968B79;
-  --tm-line:rgba(28,22,17,.14); --tm-line2:rgba(28,22,17,.07);
-  --tm-ember:#B95C24; --tm-ember-s:rgba(185,92,36,.15);
+  /* Light "practica" — matched to the map bundle's own palette (#f5ead8 / #201e1d
+     / #c67139 / #dcd3c4) so the app and the map read as one continuous product. */
+  --tm-ground:#f5ead8; --tm-panel:#f9f4ed; --tm-panel2:#fdfbf5; --tm-hi:rgba(255,255,255,.6);
+  --tm-ink:#201e1d; --tm-muted:#645c50; --tm-faint:#968b79;
+  --tm-line:#dcd3c4; --tm-line2:rgba(32,30,29,.07);
+  --tm-ember:#c67139; --tm-ember-s:rgba(198,113,57,.15);
   --tm-verd:#2C7869; --tm-verd-s:rgba(44,120,105,.15);
-  --tm-carmine:#A6172E; --tm-chip:rgba(28,22,17,.05);
-  --tm-elev:0 1px 0 var(--tm-hi),0 2px 6px -2px rgba(28,22,17,.12),0 26px 52px -32px rgba(28,22,17,.5);
-  color-scheme:light dark;
+  --tm-carmine:#A6172E; --tm-chip:rgba(32,30,29,.05);
+  --tm-elev:0 1px 0 var(--tm-hi),0 2px 6px -2px rgba(32,30,29,.1),0 26px 52px -32px rgba(32,30,29,.45);
+  color-scheme:light;
   background:var(--tm-ground); color:var(--tm-ink); font-family:var(--sans); line-height:1.5; min-height:100vh;
 }
-@media (prefers-color-scheme:dark){.tm-profile{
+/* The map defaults to light and ignores the OS, only going dark on an explicit
+   toggle (localStorage tsm-theme). A no-flash script in the layout mirrors that
+   into data-theme, so the app tracks the map rather than the OS. */
+:root[data-theme="dark"] .tm-profile{
   --tm-ground:#110D09; --tm-panel:#1A1510; --tm-panel2:#221B14; --tm-hi:rgba(241,233,220,.045);
   --tm-ink:#F2EADC; --tm-muted:#9E907E; --tm-faint:#6C5F50;
   --tm-line:rgba(241,233,220,.11); --tm-line2:rgba(241,233,220,.05);
@@ -29,7 +34,8 @@ body { margin: 0; }
   --tm-verd:#61AB95; --tm-verd-s:rgba(97,171,149,.15);
   --tm-carmine:#E6415C; --tm-chip:rgba(241,233,220,.05);
   --tm-elev:0 0 0 1px rgba(241,233,220,.04),0 34px 66px -34px rgba(0,0,0,.9);
-}}
+  color-scheme:dark;
+}
 .tm-profile *{box-sizing:border-box}
 .tm-wrap{max-width:760px; margin:0 auto; padding:clamp(20px,5vw,48px) clamp(16px,4vw,32px) 72px;
   padding-left:max(clamp(16px,4vw,32px),env(safe-area-inset-left)); padding-right:max(clamp(16px,4vw,32px),env(safe-area-inset-right))}
@@ -265,5 +271,14 @@ body { margin: 0; }
 .tm-nf .code{font-family:var(--mono); font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--tm-ember)}
 .tm-nf h1{font-family:var(--serif); font-weight:600; font-size:clamp(28px,6vw,44px); margin:14px 0 0}
 .tm-nf p{color:var(--tm-muted); margin:12px auto 24px; max-width:44ch}
+
+/* mobile density: tighten the compare tape; the numbers carry the head-to-head
+   so the minibars (redundant at this size) drop out to free column width. */
+@media(max-width:560px){
+  .tm-th,.tm-tr{grid-template-columns:20px 1fr 46px 12px 46px; gap:6px; padding:7px 6px; margin:0 -6px}
+  .tm-tr .a,.tm-tr .b{font-size:11.5px; gap:5px}
+  .tm-tr .a .tm-minibar,.tm-tr .b .tm-minibar{display:none}
+  .tm-detail.cmp{padding-left:24px}
+}
 
 @media (prefers-reduced-motion:reduce){.tm-profile *{animation:none!important; transition:none!important}}

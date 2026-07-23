@@ -62,7 +62,12 @@ export default async function MePage() {
         </header>
 
         <div className="tm-callout">
-          {isPublic && handle ? (
+          {mastered.length === 0 ? (
+            <>
+              You haven’t marked any skills yet — your Tango DNA fills in as you go.{' '}
+              <a className="tm-link-inline" href="/">Open the map and start your climb →</a>
+            </>
+          ) : isPublic && handle ? (
             <>
               Your profile is live at <a className="tm-publink" href={`/u/${handle}`}>partykamap.vercel.app/u/{handle}</a>.
               {' '}
