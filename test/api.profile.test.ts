@@ -82,4 +82,25 @@ describe('profile API', () => {
     expect(mockInsert).toHaveBeenCalledTimes(1);
     expect(mockOnConflict).toHaveBeenCalledTimes(1);
   });
+
+  test('(f) partial update keeps existing fields (does not clobber)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockFindFirst.mockResolvedValue({ userId: 'u1', handle: 'ana', displayName: 'Ana', isPublic: false, style: null });
+    const { PUT } = await loadRoute();
+    const res = await PUT(putReq({ isPublic: true })); // only isPublic sent
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ handle: 'ana', isPublic: true, displayName: 'Ana', style: null });
+    // the persisted set must retain handle + displayName
+    expect(mockValues).toHaveBeenCalledWith(expect.objectContaining({ handle: 'ana', displayName: 'Ana', isPublic: true }));
+  });
+
+  test('(g) going public with no handle returns 400 handle_required', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockFindFirst.mockResolvedValue(undefined); // no existing profile
+    const { PUT } = await loadRoute();
+    const res = await PUT(putReq({ isPublic: true }));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: 'handle_required' });
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
 });

@@ -33,12 +33,16 @@ function Column({ handle, profile }: { handle: string; profile: PublicProfile | 
   );
 }
 
+const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? '') : (v ?? ''));
+
 export default async function Compare({
   searchParams,
 }: {
-  searchParams: Promise<{ a?: string; b?: string }>;
+  searchParams: Promise<{ a?: string | string[]; b?: string | string[] }>;
 }) {
-  const { a = '', b = '' } = await searchParams;
+  const sp = await searchParams;
+  const a = one(sp.a);
+  const b = one(sp.b);
   const [pa, pb] = await Promise.all([
     a ? getPublicProfile(a) : Promise.resolve(null),
     b ? getPublicProfile(b) : Promise.resolve(null),
