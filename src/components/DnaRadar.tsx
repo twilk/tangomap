@@ -1,7 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
+
+const LIST = { hidden: {}, show: { transition: { staggerChildren: 0.028 } } };
+const ITEM = { hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.25 } } };
+const DETAIL_T = { duration: 0.22, ease: [0.2, 0.7, 0.2, 1] as const };
 
 /**
  * Tango DNA radar: an animated canvas fingerprint (13 axes) paired with an
@@ -16,6 +21,7 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
   const hoverRef = useRef(-1);
   const iconsRef = useRef<{ color: string; imgs: HTMLImageElement[] }>({ color: '', imgs: [] });
   const redrawRef = useRef<() => void>(() => {});
+  const reduce = useReducedMotion();
   const [open, setOpen] = useState(-1);
   const count = categories.reduce((n, c) => n + c.done, 0);
   const total = categories.reduce((n, c) => n + c.total, 0);
@@ -208,13 +214,14 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
           <div className="tm-cap">Tango DNA</div>
         </div>
       </div>
-      <ul className="tm-legend">
+      <motion.ul className="tm-legend" variants={LIST} initial={reduce ? false : 'hidden'} animate={reduce ? false : 'show'}>
         {categories.map((c, i) => (
-          <li key={c.tag} className="tm-lgroup">
-            <button
+          <motion.li key={c.tag} className="tm-lgroup" variants={reduce ? undefined : ITEM}>
+            <motion.button
               type="button"
               className={`tm-lrow${c.done >= c.total && c.total ? ' max' : ''}${c.done === 0 ? ' zero' : ''}${open === i ? ' open' : ''}`}
               aria-expanded={open === i}
+              whileTap={reduce ? undefined : { scale: 0.99 }}
               onMouseEnter={() => {
                 hoverRef.current = i;
                 if (open < 0) {
@@ -240,21 +247,31 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
                 <b>{c.done}</b>/{c.total}
               </span>
               <span className="tm-chev" aria-hidden="true">{open === i ? '▾' : '▸'}</span>
-            </button>
-            {open === i && (
-              <ul className="tm-detail">
-                {c.skills.map((s) => (
-                  <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
-                    <span className="tm-dot" aria-hidden="true" />
-                    <span>{s.name}</span>
-                    {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
+            </motion.button>
+            <AnimatePresence initial={false}>
+              {open === i && (
+                <motion.ul
+                  key="detail"
+                  className="tm-detail"
+                  initial={reduce ? false : { height: 0, opacity: 0 }}
+                  animate={reduce ? {} : { height: 'auto', opacity: 1 }}
+                  exit={reduce ? {} : { height: 0, opacity: 0 }}
+                  transition={DETAIL_T}
+                  style={{ overflow: 'hidden' }}
+                >
+                  {c.skills.map((s) => (
+                    <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
+                      <span className="tm-dot" aria-hidden="true" />
+                      <span>{s.name}</span>
+                      {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
+                    </li>
+                  ))}
+                </motion.ul>
+              )}
+            </AnimatePresence>
+          </motion.li>
         ))}
-      </ul>
+      </motion.ul>
     </div>
   );
 }

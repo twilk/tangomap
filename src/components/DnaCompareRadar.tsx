@@ -1,7 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
+
+const LIST = { hidden: {}, show: { transition: { staggerChildren: 0.028 } } };
+const ITEM = { hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.25 } } };
+const DETAIL_T = { duration: 0.22, ease: [0.2, 0.7, 0.2, 1] as const };
 
 type Side = { name: string; cats: CategoryDetail[] };
 
@@ -18,6 +23,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
   const hoverRef = useRef(-1);
   const iconsRef = useRef<{ color: string; imgs: HTMLImageElement[] }>({ color: '', imgs: [] });
   const redrawRef = useRef<() => void>(() => {});
+  const reduce = useReducedMotion();
   const [open, setOpen] = useState(-1);
   const cats = a.cats;
   const aCount = a.cats.reduce((n, c) => n + c.done, 0);
@@ -211,7 +217,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
         </div>
       </div>
 
-      <div className="tm-tape">
+      <motion.div className="tm-tape" variants={LIST} initial={reduce ? false : 'hidden'} animate={reduce ? false : 'show'}>
         <div className="tm-th">
           <span />
           <span>Category</span>
@@ -225,11 +231,12 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
           const aw = c.done > bc.done;
           const bw = bc.done > c.done;
           return (
-            <div className="tm-trg" key={c.tag}>
-              <button
+            <motion.div className="tm-trg" key={c.tag} variants={reduce ? undefined : ITEM}>
+              <motion.button
                 type="button"
                 className={`tm-tr${open === i ? ' open' : ''}`}
                 aria-expanded={open === i}
+                whileTap={reduce ? undefined : { scale: 0.99 }}
                 onMouseEnter={() => {
                   hoverRef.current = i;
                   if (open < 0) {
@@ -264,25 +271,35 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
                   </span>
                   <b>{bc.done}</b>/{bc.total}
                 </span>
-              </button>
-              {open === i && (
-                <div className="tm-detail cmp">
-                  {c.skills.map((s, k) => {
-                    const bOn = bc.skills[k]?.on ?? false;
-                    return (
-                      <div className="tm-cskill" key={s.slug}>
-                        <span className={`tm-dot a${s.on ? ' on' : ''}`} aria-hidden="true" />
-                        <span className="tm-cskill-name">{s.name}</span>
-                        <span className={`tm-dot b${bOn ? ' on' : ''}`} aria-hidden="true" />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+              </motion.button>
+              <AnimatePresence initial={false}>
+                {open === i && (
+                  <motion.div
+                    key="detail"
+                    className="tm-detail cmp"
+                    initial={reduce ? false : { height: 0, opacity: 0 }}
+                    animate={reduce ? {} : { height: 'auto', opacity: 1 }}
+                    exit={reduce ? {} : { height: 0, opacity: 0 }}
+                    transition={DETAIL_T}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    {c.skills.map((s, k) => {
+                      const bOn = bc.skills[k]?.on ?? false;
+                      return (
+                        <div className="tm-cskill" key={s.slug}>
+                          <span className={`tm-dot a${s.on ? ' on' : ''}`} aria-hidden="true" />
+                          <span className="tm-cskill-name">{s.name}</span>
+                          <span className={`tm-dot b${bOn ? ' on' : ''}`} aria-hidden="true" />
+                        </div>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }

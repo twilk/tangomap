@@ -128,8 +128,7 @@ body { margin: 0; }
 .tm-lrow:hover .tm-cicon,.tm-lrow.open .tm-cicon,.tm-tr:hover .tm-cicon,.tm-tr.open .tm-cicon{color:var(--tm-ember)}
 /* accordion detail (shared by legend + compare tape) */
 .tm-detail{list-style:none; margin:0 -8px 4px; padding:4px 8px 8px 34px; display:flex; flex-direction:column; gap:3px;
-  border-bottom:1px solid var(--tm-line2); animation:tm-reveal .18s ease}
-@keyframes tm-reveal{from{opacity:0; transform:translateY(-3px)}to{opacity:1; transform:none}}
+  border-bottom:1px solid var(--tm-line2)}
 .tm-skill{display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--tm-muted)}
 .tm-skill.on{color:var(--tm-ink)}
 .tm-dot{width:7px; height:7px; border-radius:50%; flex:none; background:var(--tm-line); box-shadow:inset 0 0 0 1px var(--tm-line2)}
