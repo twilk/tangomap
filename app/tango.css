@@ -127,12 +127,14 @@ body { margin: 0; }
 .tm-cicon svg{display:block}
 .tm-lrow:hover .tm-cicon,.tm-lrow.open .tm-cicon,.tm-tr:hover .tm-cicon,.tm-tr.open .tm-cicon{color:var(--tm-ember)}
 /* accordion detail (shared by legend + compare tape) */
-/* accordion height via grid-rows 0fr↔1fr (reliable smooth height:auto) */
-.tm-acc{display:grid; grid-template-rows:0fr; transition:grid-template-rows .24s cubic-bezier(.2,.7,.2,1)}
+/* accordion height via grid-rows 0fr↔1fr (reliable smooth height:auto).
+   The grid child must be a plain BLOCK with overflow:hidden — a flex child's
+   min-content collapses to 0 and 1fr never expands. */
+.tm-acc{display:grid; grid-template-rows:0fr; transition:grid-template-rows .26s cubic-bezier(.2,.7,.2,1)}
 .tm-acc.open{grid-template-rows:1fr}
-.tm-acc>*{min-height:0; overflow:hidden; opacity:0; transition:opacity .2s ease}
-.tm-acc.open>*{opacity:1}
-@media(prefers-reduced-motion:reduce){.tm-acc,.tm-acc>*{transition:none}}
+.tm-acc>.tm-accwrap{overflow:hidden; opacity:0; transition:opacity .2s ease}
+.tm-acc.open>.tm-accwrap{opacity:1}
+@media(prefers-reduced-motion:reduce){.tm-acc,.tm-acc>.tm-accwrap{transition:none}}
 .tm-detail{list-style:none; margin:0; padding:4px 8px 10px 34px; display:flex; flex-direction:column; gap:3px;
   border-bottom:1px solid var(--tm-line2)}
 .tm-skill{display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--tm-muted)}
