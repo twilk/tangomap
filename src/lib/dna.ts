@@ -23,8 +23,8 @@ export const CATEGORIES: { tag: string; label: string; icon: string }[] = [
   { tag: 'CONTACT', label: 'Contact', icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>' },
   // Free Leg — lucide "wind" (a sweeping motion)
   { tag: 'FREE LEG', label: 'Free Leg', icon: '<path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>' },
-  // Off-Axis — a post leaning off vertical (Lucide-styled custom; no standard glyph fits)
-  { tag: 'OFF AXIS', label: 'Off-Axis', icon: '<path d="M8 21 15 3"/><path d="M5 21h6"/><path d="M12 3h6"/>' },
+  // Off-Axis — the person-standing figure tilted off vertical (rhymes with Body; no standard glyph fits)
+  { tag: 'OFF AXIS', label: 'Off-Axis', icon: '<g transform="rotate(18 12 20)"><circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></g>' },
   // Dynamics — lucide "zap" (lightning bolt)
   { tag: 'DYNAMICS', label: 'Dynamics', icon: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>' },
   // Genres — lucide "disc-3" (a record)
