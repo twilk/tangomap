@@ -4,9 +4,12 @@ import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile, progress } from '@/db/schema';
 import type { ProfileDTO, Style } from '@/src/lib/types';
-import { masteredCount } from '@/src/lib/progress';
-import { TangoDNA } from '@/src/components/TangoDNA';
+import { masteredCount, milestones, sanitizeMastered } from '@/src/lib/progress';
+import { perCategory, topStrengths } from '@/src/lib/dna';
+import { DnaRadar } from '@/src/components/DnaRadar';
 import SettingsForm from './SettingsForm';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Settings — Tango Map',
@@ -30,20 +33,64 @@ export default async function SettingsPage() {
     displayName: prof?.displayName ?? null,
     style: (prof?.style as Style | null) ?? null,
   };
-  const mastered = prog?.mastered ?? [];
+  const mastered = sanitizeMastered(prog?.mastered ?? []);
+  const count = masteredCount(mastered);
+  const cats = perCategory(mastered);
+  const strong = topStrengths(mastered, 1)[0];
+  const badges = milestones(count).length;
 
   return (
-    <main style={{ maxWidth: 640, margin: '0 auto', padding: '2rem 1rem' }}>
-      <h1 style={{ marginTop: 0 }}>Settings</h1>
+    <div className="tm-profile">
+      <main className="tm-wrap">
+        <nav className="tm-top">
+          <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
+          <span className="tm-nav">
+            <a className="tm-link" href="/">← The map</a>
+            {initial.isPublic && initial.handle && (
+              <a className="tm-link" href={`/u/${initial.handle}`}>View public</a>
+            )}
+            <a className="tm-link" href="/api/auth/signout">Sign out</a>
+          </span>
+        </nav>
 
-      <p style={{ fontSize: '1.25rem', margin: '0 0 1rem' }}>
-        <strong>{masteredCount(mastered)}</strong> / 62 mastered
-      </p>
-      <div style={{ margin: '0 0 2rem' }}>
-        <TangoDNA mastered={mastered} />
-      </div>
+        <h1 className="tm-h1">Your cockpit</h1>
+        <p className="tm-lead">Read your own Tango DNA, then decide who else gets to. Publishing is off until you switch it on.</p>
 
-      <SettingsForm initial={initial} />
-    </main>
+        <div className="tm-strip" style={{ marginTop: '22px' }}>
+          <div className="tm-s">
+            <div className="tm-k">Mastered</div>
+            <div className="tm-v">
+              {count}
+              <small>/62</small>
+            </div>
+          </div>
+          <div className="tm-s">
+            <div className="tm-k">Strongest</div>
+            <div className="tm-v tm-sm">{strong ? strong.label : '—'}</div>
+          </div>
+          <div className="tm-s">
+            <div className="tm-k">Milestones</div>
+            <div className="tm-v">
+              {badges}
+              <small>/4</small>
+            </div>
+          </div>
+          <div className="tm-s">
+            <div className="tm-k">Visibility</div>
+            <div className="tm-v tm-sm">{initial.isPublic ? 'Public' : 'Private'}</div>
+          </div>
+        </div>
+
+        <section className="tm-sec">
+          <h2 className="tm-sh">Your Tango DNA</h2>
+          <DnaRadar categories={cats} />
+        </section>
+
+        <section className="tm-sec">
+          <h2 className="tm-sh">Profile &amp; privacy</h2>
+          <SettingsForm initial={initial} />
+        </section>
+      </main>
+    </div>
   );
 }
