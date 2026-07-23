@@ -273,23 +273,24 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
                 </span>
               </motion.button>
               <motion.div
-                className="tm-detail cmp"
                 initial={false}
                 animate={{ height: open === i ? 'auto' : 0, opacity: open === i ? 1 : 0 }}
                 transition={reduce ? { duration: 0 } : DETAIL_T}
                 style={{ overflow: 'hidden' }}
                 aria-hidden={open !== i}
               >
-                {c.skills.map((s, k) => {
-                  const bOn = bc.skills[k]?.on ?? false;
-                  return (
-                    <div className="tm-cskill" key={s.slug}>
-                      <span className={`tm-dot a${s.on ? ' on' : ''}`} aria-hidden="true" />
-                      <span className="tm-cskill-name">{s.name}</span>
-                      <span className={`tm-dot b${bOn ? ' on' : ''}`} aria-hidden="true" />
-                    </div>
-                  );
-                })}
+                <div className="tm-detail cmp">
+                  {c.skills.map((s, k) => {
+                    const bOn = bc.skills[k]?.on ?? false;
+                    return (
+                      <div className="tm-cskill" key={s.slug}>
+                        <span className={`tm-dot a${s.on ? ' on' : ''}`} aria-hidden="true" />
+                        <span className="tm-cskill-name">{s.name}</span>
+                        <span className={`tm-dot b${bOn ? ' on' : ''}`} aria-hidden="true" />
+                      </div>
+                    );
+                  })}
+                </div>
               </motion.div>
             </motion.div>
           );

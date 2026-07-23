@@ -248,22 +248,23 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
               </span>
               <span className="tm-chev" aria-hidden="true">{open === i ? '▾' : '▸'}</span>
             </motion.button>
-            <motion.ul
-              className="tm-detail"
+            <motion.div
               initial={false}
               animate={{ height: open === i ? 'auto' : 0, opacity: open === i ? 1 : 0 }}
               transition={reduce ? { duration: 0 } : DETAIL_T}
               style={{ overflow: 'hidden' }}
               aria-hidden={open !== i}
             >
-              {c.skills.map((s) => (
-                <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
-                  <span className="tm-dot" aria-hidden="true" />
-                  <span>{s.name}</span>
-                  {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
-                </li>
-              ))}
-            </motion.ul>
+              <ul className="tm-detail">
+                {c.skills.map((s) => (
+                  <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
+                    <span className="tm-dot" aria-hidden="true" />
+                    <span>{s.name}</span>
+                    {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </motion.li>
         ))}
       </motion.ul>
