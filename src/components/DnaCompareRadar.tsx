@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
+import { traceSmooth } from '@/src/lib/radarPath';
 
 const LIST = { hidden: {}, show: { transition: { staggerChildren: 0.028 } } };
 const ITEM = { hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.25 } } };
@@ -125,37 +126,45 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
     ];
     for (const [scats, col] of series) {
       const pct = scats.map((c) => (c.total ? c.done / c.total : 0));
-      ctx.beginPath();
-      for (let i = 0; i <= N; i++) {
-        const ii = i % N;
-        const an = ang(ii);
-        const r = rad * pct[ii] * p;
-        const x = cx + Math.cos(an) * r;
-        const y = cy + Math.sin(an) * r;
-        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-      }
-      ctx.closePath();
-      ctx.fillStyle = hexA(col, 0.16);
-      ctx.fill();
-      ctx.strokeStyle = col;
-      ctx.lineWidth = 2;
-      ctx.lineJoin = 'round';
-      ctx.stroke();
+      // Soft blob: smoothed spline, thin stroke, light fill.
+      const poly = [];
       for (let i = 0; i < N; i++) {
         const an = ang(i);
+        const r = rad * pct[i] * p;
+        poly.push({ x: cx + Math.cos(an) * r, y: cy + Math.sin(an) * r });
+      }
+      ctx.beginPath();
+      traceSmooth(ctx, poly, 0.4);
+      ctx.fillStyle = hexA(col, 0.12);
+      ctx.fill();
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.5;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      // Quiet idle vertices; the hovered one grows and glows.
+      for (let i = 0; i < N; i++) {
         const pt = pct[i];
+        if (!pt) continue;
+        const an = ang(i);
         const r = rad * pt * p;
         const on = i === hiI;
         const x = cx + Math.cos(an) * r;
         const y = cy + Math.sin(an) * r;
-        ctx.save();
-        ctx.shadowColor = col;
-        ctx.shadowBlur = pt ? (on ? 12 : 6) : 0;
-        ctx.fillStyle = col;
-        ctx.beginPath();
-        ctx.arc(x, y, pt ? (on ? 4 : 2.2 + 1.8 * pt) : 1.4, 0, 7);
-        ctx.fill();
-        ctx.restore();
+        if (on) {
+          ctx.save();
+          ctx.shadowColor = col;
+          ctx.shadowBlur = 10;
+          ctx.fillStyle = col;
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, 7);
+          ctx.fill();
+          ctx.restore();
+        } else {
+          ctx.fillStyle = hexA(col, 0.85);
+          ctx.beginPath();
+          ctx.arc(x, y, 1.4, 0, 7);
+          ctx.fill();
+        }
       }
     }
   }, [a.cats, b.cats, cats.length]);

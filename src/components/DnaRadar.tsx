@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
+import { traceSmooth } from '@/src/lib/radarPath';
 
 const LIST = { hidden: {}, show: { transition: { staggerChildren: 0.028 } } };
 const ITEM = { hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.25 } } };
@@ -115,46 +116,54 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
       const is = Math.max(15, size * (on ? 0.062 : 0.052));
       if (img && img.complete && img.naturalWidth) ctx.drawImage(img, ex - is / 2, ey - is / 2, is, is);
     }
-    ctx.beginPath();
-    for (let i = 0; i <= N; i++) {
-      const ii = i % N;
-      const a = ang(ii);
-      const r = rad * pct[ii] * p;
-      const x = cx + Math.cos(a) * r;
-      const y = cy + Math.sin(a) * r;
-      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    // Soft "blob": a gently smoothed spline through the vertices (not a spiky
+    // polygon), a thin stroke, and a light fill.
+    const poly = [];
+    for (let i = 0; i < N; i++) {
+      const a = ang(i);
+      const r = rad * pct[i] * p;
+      poly.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
     }
-    ctx.closePath();
+    ctx.beginPath();
+    traceSmooth(ctx, poly, 0.4);
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
-    g.addColorStop(0, hexA(ember, 0.34));
-    g.addColorStop(1, hexA(ember, 0.05));
+    g.addColorStop(0, hexA(ember, 0.22));
+    g.addColorStop(1, hexA(ember, 0.04));
     ctx.fillStyle = g;
     ctx.fill();
     ctx.strokeStyle = ember;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     ctx.lineJoin = 'round';
     ctx.stroke();
+    // Vertices stay quiet: tiny idle dots (carmine marks a maxed category), and
+    // only the hovered vertex grows and gets a moonlight ring.
     for (let i = 0; i < N; i++) {
       const a = ang(i);
       const pt = pct[i];
+      if (!pt) continue;
       const r = rad * pt * p;
       const on = i === hiI;
       const x = cx + Math.cos(a) * r;
       const y = cy + Math.sin(a) * r;
-      ctx.save();
-      ctx.shadowColor = ember;
-      ctx.shadowBlur = pt ? (on ? 14 : 8) : 0;
-      ctx.fillStyle = pt >= 1 ? carm : ember;
-      ctx.beginPath();
-      ctx.arc(x, y, pt ? (on ? 4.5 : 2.4 + 2.2 * pt) : 1.6, 0, 7);
-      ctx.fill();
-      ctx.restore();
-      if (pt >= 1) {
+      if (on) {
+        ctx.save();
+        ctx.shadowColor = ember;
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = pt >= 1 ? carm : ember;
         ctx.beginPath();
-        ctx.strokeStyle = carm;
+        ctx.arc(x, y, 4.5, 0, 7);
+        ctx.fill();
+        ctx.restore();
+        ctx.beginPath();
+        ctx.strokeStyle = focus;
         ctx.lineWidth = 1.5;
-        ctx.arc(x, y, on ? 9 : 7, 0, 7);
+        ctx.arc(x, y, 8, 0, 7);
         ctx.stroke();
+      } else {
+        ctx.fillStyle = pt >= 1 ? carm : hexA(ember, 0.85);
+        ctx.beginPath();
+        ctx.arc(x, y, pt >= 1 ? 2.2 : 1.5, 0, 7);
+        ctx.fill();
       }
     }
   }, [categories]);
