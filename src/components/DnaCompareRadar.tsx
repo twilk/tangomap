@@ -15,10 +15,12 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progRef = useRef(0);
   const hiRef = useRef(-1);
+  const hoverRef = useRef(-1);
   const [open, setOpen] = useState(-1);
   const cats = a.cats;
   const aCount = a.cats.reduce((n, c) => n + c.done, 0);
   const bCount = b.cats.reduce((n, c) => n + c.done, 0);
+  const total = a.cats.reduce((n, c) => n + c.total, 0);
 
   const draw = useCallback(() => {
     const cv = canvasRef.current;
@@ -156,7 +158,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
   }, [draw]);
 
   useEffect(() => {
-    hiRef.current = open;
+    hiRef.current = open >= 0 ? open : hoverRef.current;
     draw();
   }, [open, draw]);
 
@@ -169,7 +171,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
             ref={canvasRef}
             className="tm-radar"
             role="img"
-            aria-label={`Comparison radar: ${a.name} ${aCount} of 62 versus ${b.name} ${bCount} of 62`}
+            aria-label={`Comparison radar: ${a.name} ${aCount} of ${total} versus ${b.name} ${bCount} of ${total}`}
           />
         </div>
         <div className="tm-keys">
@@ -194,6 +196,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
         </div>
         {cats.map((c, i) => {
           const bc = b.cats[i];
+          if (!bc) return null;
           const aw = c.done > bc.done;
           const bw = bc.done > c.done;
           return (
@@ -203,12 +206,14 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
                 className={`tm-tr${open === i ? ' open' : ''}`}
                 aria-expanded={open === i}
                 onMouseEnter={() => {
+                  hoverRef.current = i;
                   if (open < 0) {
                     hiRef.current = i;
                     draw();
                   }
                 }}
                 onMouseLeave={() => {
+                  hoverRef.current = -1;
                   if (open < 0) {
                     hiRef.current = -1;
                     draw();

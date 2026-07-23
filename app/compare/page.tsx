@@ -67,13 +67,13 @@ export default async function Compare({
         <p className="tm-lead">Two dancers, one radar — see who’s stronger in each of the 13 categories at a glance.</p>
 
         <form className="tm-cform" method="get" action="/compare" style={{ marginTop: '22px' }}>
-          <label className="tm-inp" aria-label="First handle">
-            <span className="pre">@</span>
-            <input name="a" defaultValue={a} placeholder="handle…" autoComplete="off" spellCheck={false} />
+          <label className="tm-inp">
+            <span className="pre" aria-hidden="true">@</span>
+            <input name="a" aria-label="First dancer’s handle" defaultValue={a} placeholder="handle…" autoComplete="off" spellCheck={false} />
           </label>
-          <label className="tm-inp" aria-label="Second handle">
-            <span className="pre">@</span>
-            <input name="b" defaultValue={b} placeholder="handle…" autoComplete="off" spellCheck={false} />
+          <label className="tm-inp">
+            <span className="pre" aria-hidden="true">@</span>
+            <input name="b" aria-label="Second dancer’s handle" defaultValue={b} placeholder="handle…" autoComplete="off" spellCheck={false} />
           </label>
           <button type="submit">Compare</button>
         </form>

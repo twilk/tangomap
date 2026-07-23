@@ -13,6 +13,7 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progRef = useRef(0);
   const hiRef = useRef(-1);
+  const hoverRef = useRef(-1);
   const [open, setOpen] = useState(-1);
   const count = categories.reduce((n, c) => n + c.done, 0);
   const total = categories.reduce((n, c) => n + c.total, 0);
@@ -155,9 +156,11 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
     };
   }, [draw]);
 
-  // Expanding a row pins its axis on the radar; collapsing releases it.
+  // Expanding a row pins its axis on the radar; collapsing falls back to the
+  // currently-hovered row (so collapsing without moving the pointer keeps the
+  // hover highlight rather than clearing it).
   useEffect(() => {
-    hiRef.current = open;
+    hiRef.current = open >= 0 ? open : hoverRef.current;
     draw();
   }, [open, draw]);
 
@@ -187,12 +190,14 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
               className={`tm-lrow${c.done >= c.total && c.total ? ' max' : ''}${c.done === 0 ? ' zero' : ''}${open === i ? ' open' : ''}`}
               aria-expanded={open === i}
               onMouseEnter={() => {
+                hoverRef.current = i;
                 if (open < 0) {
                   hiRef.current = i;
                   draw();
                 }
               }}
               onMouseLeave={() => {
+                hoverRef.current = -1;
                 if (open < 0) {
                   hiRef.current = -1;
                   draw();

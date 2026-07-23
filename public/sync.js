@@ -4,13 +4,15 @@
     function lget(k){ try { return localStorage.getItem(k); } catch (e) { return null; } }
     function lset(k,v){ try { localStorage.setItem(k,v); } catch (e) {} }
     function localMastered(){ try { var a = JSON.parse(lget(KEY_M) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-    var server = null, t = 0;
+    var server = null, t = 0, merged = false;
     function pushNow(){
+      // Union local ∪ server ONCE (first push = migration/merge across devices),
+      // then treat local as authoritative so un-mastering a skill propagates.
       var u = {}; localMastered().forEach(function (s){ u[s] = 1; });
-      if (server && server.mastered) server.mastered.forEach(function (s){ u[s] = 1; });
+      if (!merged && server && server.mastered) server.mastered.forEach(function (s){ u[s] = 1; });
       fetch('/api/progress', { method:'PUT', credentials:'same-origin', headers:{'content-type':'application/json'},
         body: JSON.stringify({ mastered: Object.keys(u), theme: lget(KEY_T), sel: null }) })
-        .then(function (r){ return r.ok ? r.json() : null; }).then(function (j){ if (j) server = j; }).catch(function(){});
+        .then(function (r){ return r.ok ? r.json() : null; }).then(function (j){ if (j) { server = j; merged = true; } }).catch(function(){});
     }
     function schedule(){ clearTimeout(t); t = setTimeout(pushNow, 800); }
     fetch('/api/progress', { credentials:'same-origin' }).then(function (r){ return r.ok ? r.json() : null; }).then(function (s){

@@ -24,7 +24,14 @@ export async function PUT(req: Request) {
   const session = await auth();
   if (!session?.user?.id) return Response.json({ error: 'unauthorized' }, { status: 401 });
   const userId = session.user.id;
-  const body = (await req.json()) as ProfileInput;
+  let body: ProfileInput;
+  try {
+    const parsed = await req.json();
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('bad body');
+    body = parsed as ProfileInput;
+  } catch {
+    return Response.json({ error: 'invalid_body' }, { status: 400 });
+  }
 
   const existing = await db.query.profile.findFirst({ where: eq(profile.userId, userId) });
 
@@ -46,7 +53,7 @@ export async function PUT(req: Request) {
   const isPublic = body.isPublic !== undefined ? body.isPublic === true : (existing?.isPublic ?? false);
   const displayName =
     body.displayName !== undefined
-      ? typeof body.displayName === 'string'
+      ? typeof body.displayName === 'string' && body.displayName.trim() !== ''
         ? body.displayName
         : null
       : (existing?.displayName ?? null);

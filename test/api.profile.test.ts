@@ -103,4 +103,23 @@ describe('profile API', () => {
     expect(await res.json()).toEqual({ error: 'handle_required' });
     expect(mockInsert).not.toHaveBeenCalled();
   });
+
+  test('(h) an empty displayName is coerced to null (page & OG agree)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockFindFirst.mockResolvedValue(undefined);
+    const { PUT } = await loadRoute();
+    const res = await PUT(putReq({ handle: 'ada-tango', displayName: '   ' }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ displayName: null });
+    expect(mockValues).toHaveBeenCalledWith(expect.objectContaining({ displayName: null }));
+  });
+
+  test('(i) a non-object JSON body returns 400 invalid_body (not a 500)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    const { PUT } = await loadRoute();
+    const res = await PUT(putReq([1, 2, 3]));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: 'invalid_body' });
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
 });

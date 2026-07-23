@@ -8,6 +8,10 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 export const alt = 'Tango Map profile';
 
+// Live DB read: never statically cache, or a profile flipped to private would
+// keep serving its old public share-card from the cache.
+export const dynamic = 'force-dynamic';
+
 // Milonga-night palette (matches the app's dark theme / share surface).
 const GROUND = '#14100C';
 const PANEL = '#211A13';

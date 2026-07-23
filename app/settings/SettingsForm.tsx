@@ -81,6 +81,8 @@ export default function SettingsForm({ initial }: { initial: ProfileDTO }) {
               type="text"
               name="handle"
               aria-label="handle"
+              aria-invalid={handleError ? true : undefined}
+              aria-describedby={handleError ? 'tm-handle-err' : undefined}
               autoComplete="off"
               spellCheck={false}
               autoCapitalize="none"
@@ -94,7 +96,7 @@ export default function SettingsForm({ initial }: { initial: ProfileDTO }) {
         </label>
       </div>
       {handleError ? (
-        <span className="tm-alert" role="alert" aria-label="handleError">
+        <span className="tm-alert" id="tm-handle-err" role="alert" aria-label="handleError">
           {handleError}
         </span>
       ) : null}

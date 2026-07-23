@@ -3,7 +3,8 @@
    laid out by level), so this injected enhancement replaces it with the 13 skill
    categories (the Tango DNA tags) — a genuinely new axis. Hovering a category
    previews it on the map; clicking pins it (its nodes light up, the rest dim).
-   Self-contained; degrades to a no-op if the map never renders. */
+   Nodes are matched to categories by NAME on every apply (never cached), so it
+   survives the map's own re-renders. Self-contained; no-op if the map never renders. */
 (function () {
   try {
     var CATS = [
@@ -21,13 +22,14 @@
       { label: 'Styles', names: ['Tango Salón', 'Estilo Milonguero', 'Tango Nuevo'] },
       { label: 'Mastery', names: ['Improvisation', 'Stops & Endings'] }
     ];
+    var norm = function (s) { try { return String(s).normalize('NFC'); } catch (e) { return String(s); } };
     var nameToCat = {};
-    CATS.forEach(function (c, i) { c.names.forEach(function (n) { nameToCat[n] = i; }); });
+    CATS.forEach(function (c, i) { c.names.forEach(function (n) { nameToCat[norm(n)] = i; }); });
 
     var ACCENT = '#c67139';
     var pinned = -1;
     var built = false;
-    var catNodes = [];
+    var listRef = null;
 
     function nodes() {
       return Array.prototype.slice.call(document.querySelectorAll('button')).filter(function (b) {
@@ -36,39 +38,30 @@
         return /position:\s*absolute/.test(s) && /Level\s*\d/i.test(a);
       });
     }
-    function nameOf(b) { return (b.getAttribute('aria-label') || '').split(' — ')[0].trim(); }
+    function nameOf(b) { return norm((b.getAttribute('aria-label') || '').split(' — ')[0].trim()); }
 
     function build() {
       var ns = nodes();
       if (ns.length < 60) return false;
-      catNodes = CATS.map(function () { return []; });
-      ns.forEach(function (b) {
-        var idx = nameToCat[nameOf(b)];
-        if (idx != null) catNodes[idx].push(b);
-        if (b.__co === undefined) b.__co = b.style.opacity || '1';
-        if (b.__cs === undefined) b.__cs = b.style.boxShadow || '';
-      });
       var a = getComputedStyle(ns[0]).getPropertyValue('--t-accent').trim();
       if (a) ACCENT = a;
       built = true;
       return true;
     }
 
+    // Highlight the pinned/previewed category by matching each CURRENT node by
+    // name (no stale element references). idx < 0 restores every node.
     function apply(idx) {
       if (!built) return;
-      var ns = nodes();
-      if (idx < 0) {
-        ns.forEach(function (b) {
-          b.style.opacity = (b.__co !== undefined ? b.__co : '1');
-          b.style.boxShadow = (b.__cs !== undefined ? b.__cs : '');
-        });
-        return;
-      }
-      var set = catNodes[idx] || [];
-      ns.forEach(function (b) {
+      nodes().forEach(function (b) {
         if (b.__co === undefined) b.__co = b.style.opacity || '1';
         if (b.__cs === undefined) b.__cs = b.style.boxShadow || '';
-        if (set.indexOf(b) >= 0) {
+        if (idx < 0) {
+          b.style.opacity = b.__co;
+          b.style.boxShadow = b.__cs;
+          return;
+        }
+        if (nameToCat[nameOf(b)] === idx) {
           b.style.opacity = '1';
           b.style.boxShadow = '0 0 0 2px ' + ACCENT + ', 0 0 18px -4px ' + ACCENT;
         } else {
@@ -98,7 +91,10 @@
         return /Beginners.*First Steps/i.test((e.textContent || '').replace(/\s+/g, ' ')) && e.querySelectorAll('*').length < 12;
       });
       if (!row || !row.parentElement) return null;
-      return { nav: nav, list: row.parentElement };
+      var list = row.parentElement;
+      // The level list holds ~10 rows; refuse to hide a smaller/wrong container.
+      if (list.children.length < 6) return null;
+      return { nav: nav, list: list };
     }
 
     function setPinned(idx) { pinned = idx; apply(pinned); }
@@ -108,7 +104,7 @@
       ACCENT = accent;
       function rowHtml(i) {
         var cat = CATS[i];
-        var n = catNodes[i] ? catNodes[i].length : cat.names.length;
+        var n = cat.names.length; // static, always correct
         var active = pinned === i;
         return '<button class="tm-cat-row" data-i="' + i + '" style="display:flex;align-items:center;gap:10px;width:calc(100% - 12px);margin:1px 6px;padding:7px 10px;border:0;border-radius:9px;cursor:pointer;text-align:left;font:600 14.5px Figtree,system-ui,sans-serif;' +
           (active ? 'background:' + hexa(accent, 0.14) + ';color:' + accent : 'background:transparent;color:' + ink) + '">' +
@@ -141,8 +137,7 @@
 
     function mount() {
       var f = findList();
-      if (!f || !built) return false;
-      // hide the redundant level list, relabel the sub-count, inject categories
+      if (!f || !built) return null;
       f.list.style.display = 'none';
       try {
         var st = Array.prototype.slice.call(f.nav.querySelectorAll('*')).find(function (e) {
@@ -157,16 +152,16 @@
         f.list.parentNode.insertBefore(cont, f.list.nextSibling);
       }
       render(cont);
-      return true;
+      return f.list;
     }
 
-    // Boot + keep stable against the map's own re-renders (cheap DOM checks).
+    // Light guard: only touch the DOM when not already in the mounted steady
+    // state (survives the map's own re-renders without constant re-scanning).
     setInterval(function () {
-      if (!built) build();
-      if (!built) return;
-      var f = findList();
-      if (f && (f.list.style.display !== 'none' || !document.getElementById('tm-catnav'))) mount();
+      if (!built && !build()) return;
+      var steady = listRef && listRef.isConnected && listRef.style.display === 'none' && document.getElementById('tm-catnav');
+      if (!steady) listRef = mount();
       if (pinned >= 0) apply(pinned);
-    }, 400);
+    }, 700);
   } catch (e) {}
 })();
