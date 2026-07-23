@@ -136,6 +136,7 @@ export default async function Compare({
               {dancers.map((d) => {
                 const cnt = masteredCount(d.mastered);
                 const initial = (d.displayName ?? d.handle).trim()[0]?.toUpperCase() ?? '·';
+                const isSelf = !!a && d.handle === a;
                 const href = a
                   ? `/compare?a=${encodeURIComponent(a)}&b=${encodeURIComponent(d.handle)}`
                   : `/compare?a=${encodeURIComponent(d.handle)}`;
@@ -150,13 +151,17 @@ export default async function Compare({
                         </span>
                       </span>
                     </a>
-                    <a className="tm-cbtn" href={href} aria-label={`Compare with ${d.displayName ?? d.handle}`}>
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M4 8h13m0 0-4-4m4 4-4 4" />
-                        <path d="M20 16H7m0 0 4 4m-4-4 4-4" />
-                      </svg>
-                      Compare
-                    </a>
+                    {isSelf ? (
+                      <span className="tm-cself" aria-label="This is you">You</span>
+                    ) : (
+                      <a className="tm-cbtn" href={href} aria-label={`Compare with ${d.displayName ?? d.handle}`}>
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M4 8h13m0 0-4-4m4 4-4 4" />
+                          <path d="M20 16H7m0 0 4 4m-4-4 4-4" />
+                        </svg>
+                        Compare
+                      </a>
+                    )}
                   </div>
                 );
               })}

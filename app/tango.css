@@ -296,6 +296,8 @@ body { margin: 0; }
 .tm-cbtn:hover{border-color:var(--tm-ember); background:var(--tm-ember-s)}
 .tm-cbtn:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
 .tm-cbtn svg{color:var(--tm-ember)}
+/* the viewer's own row in the directory — no self-compare button */
+.tm-cself{display:inline-flex; align-items:center; flex:none; font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--tm-faint); border:1px dashed var(--tm-line); border-radius:9px; padding:7px 11px}
 
 /* not-found */
 .tm-nf{text-align:center; padding:clamp(40px,12vh,120px) 0}
