@@ -34,7 +34,7 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
     const pct = categories.map((c) => (c.total ? c.done / c.total : 0));
     const cx = size / 2;
     const cy = size / 2;
-    const rad = size / 2 - Math.max(22, size * 0.09);
+    const rad = size / 2 - Math.max(28, size * 0.12);
     const p = progRef.current;
     const hiI = hiRef.current;
     const gv = (n: string) => getComputedStyle(cv).getPropertyValue(n).trim() || '#888';
@@ -72,12 +72,22 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + Math.cos(a) * rad, cy + Math.sin(a) * rad);
       ctx.stroke();
-      ctx.fillStyle = on ? ember : faint;
-      ctx.font = `${on ? 700 : 600} ${Math.max(8, size * 0.026)}px ui-monospace,Menlo,monospace`;
+      // category icon (replaces the axis number); highlight = ember disc behind it
+      const lr = rad + Math.max(15, size * 0.055);
+      const ex = cx + Math.cos(a) * lr;
+      const ey = cy + Math.sin(a) * lr;
+      if (on) {
+        ctx.save();
+        ctx.fillStyle = hexA(ember, 0.18);
+        ctx.beginPath();
+        ctx.arc(ex, ey, Math.max(12, size * 0.043), 0, 7);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.font = `${Math.max(13, size * (on ? 0.052 : 0.046))}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const lr = rad + Math.max(12, size * 0.05);
-      ctx.fillText(String(i + 1).padStart(2, '0'), cx + Math.cos(a) * lr, cy + Math.sin(a) * lr);
+      ctx.fillText(categories[i].icon, ex, ey);
     }
     ctx.beginPath();
     for (let i = 0; i <= N; i++) {
@@ -206,7 +216,7 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
               onClick={() => setOpen(open === i ? -1 : i)}
             >
               <span className="tm-ix">{String(i + 1).padStart(2, '0')}</span>
-              <span className="tm-lab">{c.label}</span>
+              <span className="tm-lab"><span className="tm-cicon" aria-hidden="true">{c.icon}</span>{c.label}</span>
               <span className="tm-track">
                 <span className="tm-fill" style={{ width: `${c.pct}%` }} />
               </span>

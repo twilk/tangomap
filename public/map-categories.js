@@ -8,19 +8,19 @@
 (function () {
   try {
     var CATS = [
-      { label: 'Connection', names: ['Mirada & Cabeceo', 'The Embrace', 'Leader & Follower', 'Close Embrace', 'Connection', 'Cross System', 'Embrace Transitions', 'Change of Role', 'Embrace & Communication'] },
-      { label: 'Body & Posture', names: ['Posture', 'Dissociation', 'Energy from the Ground', 'Posture & Walking Refined'] },
-      { label: 'Footwork', names: ['Walking', 'The Square', 'Change of Weight', 'Walking Outside', 'The Cross', 'Exits from the Cross', 'Americana'] },
-      { label: 'Musicality', names: ['Music & Timing', 'Double Timing', 'Traspié', 'Musicality', 'The Orchestras', 'Switching the Instrument'] },
-      { label: 'Turns', names: ['Ocho Adelante', 'Ocho Atrás', 'Ocho Cortado', 'Molinete', 'Giro to the Left', 'Giro to the Right', 'Calesita', 'Linear Giro', 'Asymmetric Giro', 'Media Luna via Crosses'] },
-      { label: 'Navigation', names: ['The Ronda', 'Sacada', 'Giro with Sacadas', 'Follower’s Sacada', 'Cadenas', 'Sacada Against Sacada'] },
-      { label: 'Contact', names: ['Parada', 'Mordida', 'Barrida & Arrastre', 'Gancho', 'Pasada'] },
-      { label: 'Free Leg', names: ['Adornos & Lustrada', 'Boleo', 'Planeo'] },
-      { label: 'Off-Axis', names: ['Volcada', 'Colgada'] },
-      { label: 'Dynamics', names: ['Bounce & Rebound', 'Soltadas'] },
-      { label: 'Genres', names: ['Vals', 'Milonga', 'Chacarera'] },
-      { label: 'Styles', names: ['Tango Salón', 'Estilo Milonguero', 'Tango Nuevo'] },
-      { label: 'Mastery', names: ['Improvisation', 'Stops & Endings'] }
+      { label: 'Connection', icon: '🤝', names: ['Mirada & Cabeceo', 'The Embrace', 'Leader & Follower', 'Close Embrace', 'Connection', 'Cross System', 'Embrace Transitions', 'Change of Role', 'Embrace & Communication'] },
+      { label: 'Body & Posture', icon: '🧍', names: ['Posture', 'Dissociation', 'Energy from the Ground', 'Posture & Walking Refined'] },
+      { label: 'Footwork', icon: '👣', names: ['Walking', 'The Square', 'Change of Weight', 'Walking Outside', 'The Cross', 'Exits from the Cross', 'Americana'] },
+      { label: 'Musicality', icon: '🎵', names: ['Music & Timing', 'Double Timing', 'Traspié', 'Musicality', 'The Orchestras', 'Switching the Instrument'] },
+      { label: 'Turns', icon: '🌀', names: ['Ocho Adelante', 'Ocho Atrás', 'Ocho Cortado', 'Molinete', 'Giro to the Left', 'Giro to the Right', 'Calesita', 'Linear Giro', 'Asymmetric Giro', 'Media Luna via Crosses'] },
+      { label: 'Navigation', icon: '🧭', names: ['The Ronda', 'Sacada', 'Giro with Sacadas', 'Follower’s Sacada', 'Cadenas', 'Sacada Against Sacada'] },
+      { label: 'Contact', icon: '🔗', names: ['Parada', 'Mordida', 'Barrida & Arrastre', 'Gancho', 'Pasada'] },
+      { label: 'Free Leg', icon: '🦵', names: ['Adornos & Lustrada', 'Boleo', 'Planeo'] },
+      { label: 'Off-Axis', icon: '🤸', names: ['Volcada', 'Colgada'] },
+      { label: 'Dynamics', icon: '⚡', names: ['Bounce & Rebound', 'Soltadas'] },
+      { label: 'Genres', icon: '🎻', names: ['Vals', 'Milonga', 'Chacarera'] },
+      { label: 'Styles', icon: '💃', names: ['Tango Salón', 'Estilo Milonguero', 'Tango Nuevo'] },
+      { label: 'Mastery', icon: '🏆', names: ['Improvisation', 'Stops & Endings'] }
     ];
     var norm = function (s) { try { return String(s).normalize('NFC'); } catch (e) { return String(s); } };
     var nameToCat = {};
@@ -109,6 +109,7 @@
         return '<button class="tm-cat-row" data-i="' + i + '" style="display:flex;align-items:center;gap:10px;width:calc(100% - 12px);margin:1px 6px;padding:7px 10px;border:0;border-radius:9px;cursor:pointer;text-align:left;font:600 14.5px Figtree,system-ui,sans-serif;' +
           (active ? 'background:' + hexa(accent, 0.14) + ';color:' + accent : 'background:transparent;color:' + ink) + '">' +
           '<span style="font:600 10px ui-monospace,Menlo,monospace;color:' + (active ? accent : muted) + ';width:16px;flex:none">' + (i + 1 < 10 ? '0' : '') + (i + 1) + '</span>' +
+          '<span style="font-size:14px;flex:none">' + cat.icon + '</span>' +
           '<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + cat.label + '</span>' +
           '<span style="font:600 12px ui-monospace,Menlo,monospace;color:' + muted + ';flex:none">' + n + '</span>' +
           '</button>';
