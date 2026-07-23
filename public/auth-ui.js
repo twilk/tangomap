@@ -60,6 +60,17 @@
       .then(function (s) {
         signedIn = !!(s && s.user);
         mount();
+        // Re-render the pills whenever the map flips theme, so their colours
+        // (panel/ink/line/accent) track light↔dark instead of freezing at the
+        // value read when they first mounted. attributeFilter keeps this cheap:
+        // it only fires on data-theme mutations, wherever in the tree they land.
+        try {
+          var mo = new MutationObserver(function () {
+            var el = document.getElementById('tm-auth');
+            if (el) render(el);
+          });
+          mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'], subtree: true });
+        } catch (e) {}
         // Keep it mounted in the header through the map's own re-renders.
         setInterval(function () {
           var header = document.querySelector('header');
