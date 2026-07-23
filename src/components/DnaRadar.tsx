@@ -1,18 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
-import type { CategoryStat } from '@/src/lib/dna';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CategoryDetail } from '@/src/lib/dna';
 
 /**
  * Tango DNA radar: an animated canvas fingerprint (13 axes) paired with an
- * interactive legend. Hovering a legend row lights its axis on the radar, so
- * the shape and the exact done/total are always cross-referable. The legend is
- * the accessible text alternative; the canvas is a progressive enhancement.
+ * interactive legend. Hovering a legend row lights its axis on the radar;
+ * clicking a row expands it (accordion — one open at a time) to reveal the
+ * individual skills in that category and their mastery.
  */
-export function DnaRadar({ categories }: { categories: CategoryStat[] }) {
+export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progRef = useRef(0);
   const hiRef = useRef(-1);
+  const [open, setOpen] = useState(-1);
   const count = categories.reduce((n, c) => n + c.done, 0);
   const total = categories.reduce((n, c) => n + c.total, 0);
 
@@ -48,7 +49,6 @@ export function DnaRadar({ categories }: { categories: CategoryStat[] }) {
     };
     const ang = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / N;
 
-    // grid rings
     ctx.strokeStyle = line;
     ctx.lineWidth = 1;
     for (let k = 1; k <= 4; k++) {
@@ -62,7 +62,6 @@ export function DnaRadar({ categories }: { categories: CategoryStat[] }) {
       }
       ctx.stroke();
     }
-    // spokes + axis numbers
     for (let i = 0; i < N; i++) {
       const a = ang(i);
       const on = i === hiI;
@@ -79,7 +78,6 @@ export function DnaRadar({ categories }: { categories: CategoryStat[] }) {
       const lr = rad + Math.max(12, size * 0.05);
       ctx.fillText(String(i + 1).padStart(2, '0'), cx + Math.cos(a) * lr, cy + Math.sin(a) * lr);
     }
-    // mastery polygon
     ctx.beginPath();
     for (let i = 0; i <= N; i++) {
       const ii = i % N;
@@ -99,7 +97,6 @@ export function DnaRadar({ categories }: { categories: CategoryStat[] }) {
     ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
     ctx.stroke();
-    // vertices (carmine = category fully mastered)
     for (let i = 0; i < N; i++) {
       const a = ang(i);
       const pt = pct[i];
@@ -158,14 +155,11 @@ export function DnaRadar({ categories }: { categories: CategoryStat[] }) {
     };
   }, [draw]);
 
-  const enter = (i: number) => {
-    hiRef.current = i;
+  // Expanding a row pins its axis on the radar; collapsing releases it.
+  useEffect(() => {
+    hiRef.current = open;
     draw();
-  };
-  const leave = () => {
-    hiRef.current = -1;
-    draw();
-  };
+  }, [open, draw]);
 
   return (
     <div className="tm-dnablock">
@@ -187,20 +181,46 @@ export function DnaRadar({ categories }: { categories: CategoryStat[] }) {
       </div>
       <ul className="tm-legend">
         {categories.map((c, i) => (
-          <li
-            key={c.tag}
-            className={`tm-lrow${c.done >= c.total && c.total ? ' max' : ''}${c.done === 0 ? ' zero' : ''}`}
-            onMouseEnter={() => enter(i)}
-            onMouseLeave={leave}
-          >
-            <span className="tm-ix">{String(i + 1).padStart(2, '0')}</span>
-            <span className="tm-lab">{c.label}</span>
-            <span className="tm-track">
-              <span className="tm-fill" style={{ width: `${c.pct}%` }} />
-            </span>
-            <span className="tm-val">
-              <b>{c.done}</b>/{c.total}
-            </span>
+          <li key={c.tag} className="tm-lgroup">
+            <button
+              type="button"
+              className={`tm-lrow${c.done >= c.total && c.total ? ' max' : ''}${c.done === 0 ? ' zero' : ''}${open === i ? ' open' : ''}`}
+              aria-expanded={open === i}
+              onMouseEnter={() => {
+                if (open < 0) {
+                  hiRef.current = i;
+                  draw();
+                }
+              }}
+              onMouseLeave={() => {
+                if (open < 0) {
+                  hiRef.current = -1;
+                  draw();
+                }
+              }}
+              onClick={() => setOpen(open === i ? -1 : i)}
+            >
+              <span className="tm-ix">{String(i + 1).padStart(2, '0')}</span>
+              <span className="tm-lab">{c.label}</span>
+              <span className="tm-track">
+                <span className="tm-fill" style={{ width: `${c.pct}%` }} />
+              </span>
+              <span className="tm-val">
+                <b>{c.done}</b>/{c.total}
+              </span>
+              <span className="tm-chev" aria-hidden="true">{open === i ? '▾' : '▸'}</span>
+            </button>
+            {open === i && (
+              <ul className="tm-detail">
+                {c.skills.map((s) => (
+                  <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
+                    <span className="tm-dot" aria-hidden="true" />
+                    <span>{s.name}</span>
+                    {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>

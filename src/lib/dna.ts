@@ -19,6 +19,8 @@ export const CATEGORIES: { tag: string; label: string }[] = [
 ];
 
 export type CategoryStat = { tag: string; label: string; done: number; total: number; pct: number };
+export type CategorySkill = { name: string; slug: string; on: boolean };
+export type CategoryDetail = CategoryStat & { skills: CategorySkill[] };
 
 // Precompute tag -> skill slugs once (module load) so perCategory does not re-scan all 62.
 const SLUGS_BY_TAG: Map<string, string[]> = (() => {
@@ -26,6 +28,24 @@ const SLUGS_BY_TAG: Map<string, string[]> = (() => {
   for (const s of SKILLS) (m.get(s.tag) ?? m.set(s.tag, []).get(s.tag)!).push(s.slug);
   return m;
 })();
+
+// tag -> full skill rows (for per-category drill-down).
+const SKILLS_BY_TAG: Map<string, typeof SKILLS> = (() => {
+  const m = new Map<string, typeof SKILLS>();
+  for (const s of SKILLS) (m.get(s.tag) ?? m.set(s.tag, []).get(s.tag)!).push(s);
+  return m;
+})();
+
+/** Like perCategory, but each category also carries its individual skills + mastery. */
+export function perCategoryDetailed(mastered: string[]): CategoryDetail[] {
+  const set = new Set(sanitizeMastered(mastered));
+  return CATEGORIES.map(({ tag, label }) => {
+    const skills = (SKILLS_BY_TAG.get(tag) ?? []).map((s) => ({ name: s.name, slug: s.slug, on: set.has(s.slug) }));
+    const done = skills.reduce((n, s) => n + (s.on ? 1 : 0), 0);
+    const total = skills.length;
+    return { tag, label, done, total, pct: total ? Math.round((done / total) * 100) : 0, skills };
+  });
+}
 
 /** "Tango DNA": mastery strength per category. Always returns all 13, in display order. */
 export function perCategory(mastered: string[]): CategoryStat[] {

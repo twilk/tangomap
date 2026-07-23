@@ -1,6 +1,6 @@
 import { getPublicProfile } from '@/src/lib/publicProfile';
 import { masteredCount } from '@/src/lib/progress';
-import { perCategory, dnaSignature } from '@/src/lib/dna';
+import { perCategoryDetailed, dnaSignature } from '@/src/lib/dna';
 import { DnaRadar } from '@/src/components/DnaRadar';
 import { DnaCompareRadar } from '@/src/components/DnaCompareRadar';
 import type { PublicProfile } from '@/src/lib/types';
@@ -88,8 +88,8 @@ export default async function Compare({
           <>
             {verdict}
             <DnaCompareRadar
-              a={{ name: nameOf(pa), cats: perCategory(pa.mastered) }}
-              b={{ name: nameOf(pb), cats: perCategory(pb.mastered) }}
+              a={{ name: nameOf(pa), cats: perCategoryDetailed(pa.mastered) }}
+              b={{ name: nameOf(pb), cats: perCategoryDetailed(pb.mastered) }}
             />
           </>
         )}
@@ -102,7 +102,7 @@ export default async function Compare({
               <h2 className="tm-sh">
                 {nameOf(p)} · {cnt}/62 · {dnaSignature(p.mastered)}
               </h2>
-              <DnaRadar categories={perCategory(p.mastered)} />
+              <DnaRadar categories={perCategoryDetailed(p.mastered)} />
               <p className="tm-empty" style={{ marginTop: '18px' }}>
                 Add a second handle above to see the head-to-head.
               </p>

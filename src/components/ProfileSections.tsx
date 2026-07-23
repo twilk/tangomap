@@ -1,5 +1,5 @@
 import { masteredCount, perLevel, milestones, sanitizeMastered } from '@/src/lib/progress';
-import { perCategory, topStrengths } from '@/src/lib/dna';
+import { perCategoryDetailed, topStrengths } from '@/src/lib/dna';
 import { LEVELS, TIER_NAME, TIER_SHORT, furthestTier } from '@/src/lib/levels';
 import { SKILLS } from '@/src/data/skills';
 import { DnaRadar } from '@/src/components/DnaRadar';
@@ -15,7 +15,7 @@ export function ProfileSections({ mastered: raw }: { mastered: string[] }) {
   const mastered = sanitizeMastered(raw);
   const set = new Set(mastered);
   const count = masteredCount(mastered);
-  const cats = perCategory(mastered);
+  const cats = perCategoryDetailed(mastered);
   const levels = perLevel(mastered);
   const badges = new Set(milestones(count));
   const strong = topStrengths(mastered, 1)[0];

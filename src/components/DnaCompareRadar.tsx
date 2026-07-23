@@ -1,19 +1,21 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
-import type { CategoryStat } from '@/src/lib/dna';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CategoryDetail } from '@/src/lib/dna';
 
-type Side = { name: string; cats: CategoryStat[] };
+type Side = { name: string; cats: CategoryDetail[] };
 
 /**
  * Head-to-head Tango DNA: two mastery polygons overlaid on one radar (side A in
  * ember, side B in verdigris), plus a "tape" reading every category. Hovering a
- * tape row lights that axis on the radar.
+ * tape row lights that axis on the radar; clicking expands it (accordion — one
+ * open at a time) to reveal the per-skill comparison between the two dancers.
  */
 export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progRef = useRef(0);
   const hiRef = useRef(-1);
+  const [open, setOpen] = useState(-1);
   const cats = a.cats;
   const aCount = a.cats.reduce((n, c) => n + c.done, 0);
   const bCount = b.cats.reduce((n, c) => n + c.done, 0);
@@ -79,7 +81,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
       ctx.fillText(String(i + 1).padStart(2, '0'), cx + Math.cos(an) * lr, cy + Math.sin(an) * lr);
     }
 
-    const series: [CategoryStat[], string][] = [
+    const series: [CategoryDetail[], string][] = [
       [b.cats, verd],
       [a.cats, ember],
     ];
@@ -153,10 +155,10 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
     };
   }, [draw]);
 
-  const setHi = (i: number) => {
-    hiRef.current = i;
+  useEffect(() => {
+    hiRef.current = open;
     draw();
-  };
+  }, [open, draw]);
 
   return (
     <div className="tm-cmpwrap">
@@ -195,22 +197,58 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
           const aw = c.done > bc.done;
           const bw = bc.done > c.done;
           return (
-            <div className="tm-tr" key={c.tag} onMouseEnter={() => setHi(i)} onMouseLeave={() => setHi(-1)}>
-              <span className="ix">{String(i + 1).padStart(2, '0')}</span>
-              <span className="lab">{c.label}</span>
-              <span className={`a${aw ? ' win' : ''}`}>
-                <b>{c.done}</b>/{c.total}
-                <span className="tm-minibar">
-                  <i style={{ width: `${c.pct}%`, background: 'var(--tm-ember)' }} />
+            <div className="tm-trg" key={c.tag}>
+              <button
+                type="button"
+                className={`tm-tr${open === i ? ' open' : ''}`}
+                aria-expanded={open === i}
+                onMouseEnter={() => {
+                  if (open < 0) {
+                    hiRef.current = i;
+                    draw();
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (open < 0) {
+                    hiRef.current = -1;
+                    draw();
+                  }
+                }}
+                onClick={() => setOpen(open === i ? -1 : i)}
+              >
+                <span className="ix">{String(i + 1).padStart(2, '0')}</span>
+                <span className="lab">
+                  {c.label}
+                  <span className="tm-chev" aria-hidden="true">{open === i ? ' ▾' : ' ▸'}</span>
                 </span>
-              </span>
-              <span className="mid">{c.done === bc.done ? '=' : aw ? '◂' : '▸'}</span>
-              <span className={`b${bw ? ' win' : ''}`}>
-                <span className="tm-minibar">
-                  <i style={{ width: `${bc.pct}%`, background: 'var(--tm-verd)' }} />
+                <span className={`a${aw ? ' win' : ''}`}>
+                  <b>{c.done}</b>/{c.total}
+                  <span className="tm-minibar">
+                    <i style={{ width: `${c.pct}%`, background: 'var(--tm-ember)' }} />
+                  </span>
                 </span>
-                <b>{bc.done}</b>/{bc.total}
-              </span>
+                <span className="mid">{c.done === bc.done ? '=' : aw ? '◂' : '▸'}</span>
+                <span className={`b${bw ? ' win' : ''}`}>
+                  <span className="tm-minibar">
+                    <i style={{ width: `${bc.pct}%`, background: 'var(--tm-verd)' }} />
+                  </span>
+                  <b>{bc.done}</b>/{bc.total}
+                </span>
+              </button>
+              {open === i && (
+                <div className="tm-detail cmp">
+                  {c.skills.map((s, k) => {
+                    const bOn = bc.skills[k]?.on ?? false;
+                    return (
+                      <div className="tm-cskill" key={s.slug}>
+                        <span className={`tm-dot a${s.on ? ' on' : ''}`} aria-hidden="true" />
+                        <span className="tm-cskill-name">{s.name}</span>
+                        <span className={`tm-dot b${bOn ? ' on' : ''}`} aria-hidden="true" />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
