@@ -1,13 +1,10 @@
+import { TopNav } from '@/src/components/TopNav';
+
 export default function NotFound() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <nav className="tm-top">
-          <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
-          <span className="tm-nav">
-            <a className="tm-link" href="/">← The map</a>
-          </span>
-        </nav>
+        <TopNav />
         <div className="tm-nf">
           <p className="code">404 · off the floor</p>
           <h1>This dancer stepped away</h1>

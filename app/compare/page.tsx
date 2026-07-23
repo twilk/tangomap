@@ -8,6 +8,7 @@ import { perCategoryDetailed, dnaSignature } from '@/src/lib/dna';
 import { DnaRadar } from '@/src/components/DnaRadar';
 import { DnaCompareRadar } from '@/src/components/DnaCompareRadar';
 import { CopyButton } from '@/src/components/CopyButton';
+import { TopNav } from '@/src/components/TopNav';
 import type { PublicProfile } from '@/src/lib/types';
 
 // Live DB read (privacy flag + progress): must not be statically cached.
@@ -72,12 +73,7 @@ export default async function Compare({
   return (
     <div className="tm-profile">
       <main className="tm-wrap wide">
-        <nav className="tm-top">
-          <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
-          <span className="tm-nav">
-            <a className="tm-link" href="/">← The map</a>
-          </span>
-        </nav>
+        <TopNav />
 
         <h1 className="tm-h1">Compare dancers</h1>
         <p className="tm-lead">Two dancers, one radar — see who’s stronger in each of the 13 categories at a glance.</p>

@@ -1,4 +1,5 @@
 import { signOut } from '@/auth';
+import { TopNav } from '@/src/components/TopNav';
 
 export const metadata = { title: 'Sign out — Tango Map' };
 
@@ -6,12 +7,7 @@ export default function SignOutPage() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <nav className="tm-top">
-          <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
-          <span className="tm-nav">
-            <a className="tm-link" href="/">← The map</a>
-          </span>
-        </nav>
+        <TopNav />
 
         <div className="tm-nf">
           <p className="code">See you on the floor</p>

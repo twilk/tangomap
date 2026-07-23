@@ -7,6 +7,7 @@ import { sanitizeMastered } from '@/src/lib/progress';
 import { dnaSignature } from '@/src/lib/dna';
 import { ProfileSections } from '@/src/components/ProfileSections';
 import { CopyButton } from '@/src/components/CopyButton';
+import { TopNav } from '@/src/components/TopNav';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,14 +33,10 @@ export default async function MePage() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <nav className="tm-top">
-          <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
-          <span className="tm-nav">
-            <a className="tm-link" href="/">← The map</a>
-            <a className="tm-link" href="/settings">Settings</a>
-            <a className="tm-link" href="/signout">Sign out</a>
-          </span>
-        </nav>
+        <TopNav>
+          <a className="tm-link" href="/settings">Settings</a>
+          <a className="tm-link" href="/signout">Sign out</a>
+        </TopNav>
 
         <header className="tm-hero">
           <div className="tm-ava" aria-hidden="true">{initial}</div>

@@ -1,4 +1,5 @@
 import { signIn } from '@/auth';
+import { TopNav } from '@/src/components/TopNav';
 
 export const metadata = { title: 'Sign in — Tango Map' };
 
@@ -18,12 +19,7 @@ export default function SignIn() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <nav className="tm-top">
-          <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
-          <span className="tm-nav">
-            <a className="tm-link" href="/">← The map</a>
-          </span>
-        </nav>
+        <TopNav />
 
         <div className="tm-nf">
           <p className="code">Your Tango DNA, saved</p>

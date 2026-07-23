@@ -7,6 +7,7 @@ import { getPublicProfile } from '@/src/lib/publicProfile';
 import { sanitizeMastered } from '@/src/lib/progress';
 import { dnaSignature } from '@/src/lib/dna';
 import { ProfileSections } from '@/src/components/ProfileSections';
+import { TopNav } from '@/src/components/TopNav';
 
 // Live DB read: never statically cache, or a profile flipped to private would
 // stay visible from the cache (a privacy leak) and progress would go stale.
@@ -33,12 +34,7 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <nav className="tm-top">
-          <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
-          <span className="tm-nav">
-            <a className="tm-link" href="/">← The map</a>
-          </span>
-        </nav>
+        <TopNav />
 
         {isOwner && (
           <div className="tm-owner">

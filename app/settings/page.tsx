@@ -6,6 +6,7 @@ import { profile } from '@/db/schema';
 import type { ProfileDTO, Style } from '@/src/lib/types';
 import SettingsForm from './SettingsForm';
 import { DeleteAccount } from '@/src/components/DeleteAccount';
+import { TopNav } from '@/src/components/TopNav';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,14 +33,10 @@ export default async function SettingsPage() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <nav className="tm-top">
-          <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
-          <span className="tm-nav">
-            <a className="tm-link" href="/">← The map</a>
-            <a className="tm-link" href="/me">Profile</a>
-            <a className="tm-link" href="/signout">Sign out</a>
-          </span>
-        </nav>
+        <TopNav>
+          <a className="tm-link" href="/me">Profile</a>
+          <a className="tm-link" href="/signout">Sign out</a>
+        </TopNav>
 
         <h1 className="tm-h1">Settings</h1>
         <p className="tm-lead">Your handle, display name and style — and whether your profile is public. Publishing is off until you switch it on.</p>
