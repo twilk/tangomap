@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile } from '@/db/schema';
-import { getPublicProfile } from '@/src/lib/publicProfile';
+import { getPublicProfile, listPublicProfiles } from '@/src/lib/publicProfile';
 import { masteredCount } from '@/src/lib/progress';
 import { perCategoryDetailed, dnaSignature } from '@/src/lib/dna';
 import { DnaRadar } from '@/src/components/DnaRadar';
@@ -44,6 +44,8 @@ export default async function Compare({
     ...(a && !pa ? [a] : []),
     ...(b && !pb ? [b] : []),
   ];
+
+  const dancers = await listPublicProfiles(60);
 
   let verdict: React.ReactNode = null;
   if (pa && pb) {
@@ -127,8 +129,43 @@ export default async function Compare({
 
         {!pa && !pb && missing.length === 0 && (
           <p className="tm-empty">
-            Enter two public handles above — e.g. <b>@wilk</b> — to compare their Tango DNA.
+            Enter two public handles above — e.g. <b>@wilk</b> — or pick a dancer below.
           </p>
+        )}
+
+        {dancers.length > 0 && (
+          <section className="tm-sec">
+            <h2 className="tm-sh">Public dancers · {dancers.length} · compare with anyone</h2>
+            <div className="tm-dancers">
+              {dancers.map((d) => {
+                const cnt = masteredCount(d.mastered);
+                const initial = (d.displayName ?? d.handle).trim()[0]?.toUpperCase() ?? '·';
+                const href = a
+                  ? `/compare?a=${encodeURIComponent(a)}&b=${encodeURIComponent(d.handle)}`
+                  : `/compare?a=${encodeURIComponent(d.handle)}`;
+                return (
+                  <div className="tm-dancer" key={d.handle}>
+                    <a className="tm-dancer-main" href={`/u/${d.handle}`}>
+                      <span className="tm-dancer-ava" aria-hidden="true">{initial}</span>
+                      <span className="tm-dancer-info">
+                        <span className="tm-dancer-name">{d.displayName ?? d.handle}</span>
+                        <span className="tm-dancer-meta">
+                          @{d.handle} · {cnt}/62{d.style ? ` · ${d.style}` : ''}
+                        </span>
+                      </span>
+                    </a>
+                    <a className="tm-cbtn" href={href} aria-label={`Compare with ${d.displayName ?? d.handle}`}>
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M4 8h13m0 0-4-4m4 4-4 4" />
+                        <path d="M20 16H7m0 0 4 4m-4-4 4-4" />
+                      </svg>
+                      Compare
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         )}
       </main>
     </div>

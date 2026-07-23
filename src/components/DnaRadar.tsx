@@ -6,7 +6,6 @@ import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
 
 const LIST = { hidden: {}, show: { transition: { staggerChildren: 0.028 } } };
 const ITEM = { hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.25 } } };
-const DETAIL_T = { duration: 0.22, ease: [0.2, 0.7, 0.2, 1] as const };
 
 /**
  * Tango DNA radar: an animated canvas fingerprint (13 axes) paired with an
@@ -248,13 +247,7 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
               </span>
               <span className="tm-chev" aria-hidden="true">{open === i ? '▾' : '▸'}</span>
             </motion.button>
-            <motion.div
-              initial={false}
-              animate={{ height: open === i ? 'auto' : 0, opacity: open === i ? 1 : 0 }}
-              transition={reduce ? { duration: 0 } : DETAIL_T}
-              style={{ overflow: 'hidden' }}
-              aria-hidden={open !== i}
-            >
+            <div className={`tm-acc${open === i ? ' open' : ''}`} aria-hidden={open !== i}>
               <ul className="tm-detail">
                 {c.skills.map((s) => (
                   <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
@@ -264,7 +257,7 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           </motion.li>
         ))}
       </motion.ul>
