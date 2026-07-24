@@ -15,15 +15,20 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
-// The complete startup chain, in load order (all defer, so order is cosmetic):
+// The complete startup chain, in load order (all defer, so order is cosmetic —
+// and note that already-present tags keep their existing document position, so a
+// newly added script lands last regardless of where it sits in this array; the
+// runtime coordinator is order-independent by design, see public/map-runtime.js):
 //   sync           — progress persistence to /api/progress
+//   map-runtime    — shared reconcile coordinator (one debounced observer + backstop)
+//                    driving map-categories / map-skilllink; must be available to both
 //   map-categories — "Browse by category" sidebar navigator (+ Learn links)
 //   map-skilllink  — "Read the guide →" (+ teacher video badge) in the Skill Details panel
 //   auth-ui        — Profile/Settings/Sign-in-out controls in the map header
 //   theme-sync     — cross-tab / bfcache theme sync + meta[theme-color] for the map
 //   onboarding     — first-visit welcome overlay
 //   sw-register    — service-worker registration (installable/offline PWA)
-const SCRIPTS = ['/sync.js', '/map-categories.js', '/map-skilllink.js', '/auth-ui.js', '/theme-sync.js', '/onboarding.js', '/sw-register.js'];
+const SCRIPTS = ['/sync.js', '/map-runtime.js', '/map-categories.js', '/map-skilllink.js', '/auth-ui.js', '/theme-sync.js', '/onboarding.js', '/sw-register.js'];
 const OPEN = '<script type="__bundler/template">';
 
 // Insert `<script src defer>` before </head> inside the bundle's JSON-encoded
