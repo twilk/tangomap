@@ -23,6 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         {children}
+        {/* Register the service worker for offline / installable PWA (public/sw.js). */}
+        <script src="/sw-register.js" defer />
       </body>
     </html>
   );
