@@ -44,8 +44,10 @@ const R = 76;
 // Category icons ring the radar just outside the outer grid ring, so each spike
 // is legible as a category — the same 13 icons the app's DNA radar shows.
 const ICON_R = 90;
-// Muted parchment: frames the blob without competing with the ember stroke.
-const AXICON = 'rgba(241,233,220,.5)';
+// The dark value of the app's --tm-muted, so the card's axis icons read as the
+// same treatment as the /me radar and genome icons (and match the card's own
+// muted text). The card is dark in both themes, so this stays a fixed literal.
+const AXICON = '#9E907E';
 // The card's `dna` arrives in CATEGORIES order, but match by label so the icon
 // can never end up on the wrong spike if that ever changes.
 const ICON_BY_LABEL: Record<string, string> = Object.fromEntries(CATEGORIES.map((c) => [c.label, c.icon]));
