@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import '@/src/styles/knowledge.css';
 import { SKILLS } from '@/src/data/skills';
-import { CATEGORIES, iconSvg } from '@/src/lib/dna';
+import { CATEGORIES, iconSvg, catAnchor } from '@/src/lib/dna';
 import { getCategoryOverview, hasSkillContent, getSkillContent } from '@/src/lib/knowledge';
 import { TopNav } from '@/src/components/TopNav';
+import { VideoMarkers } from '@/src/components/VideoMarkers';
 
 export const metadata: Metadata = {
   title: 'Learn — the 62 tango skills — Tango Map',
@@ -15,6 +16,7 @@ export default function SkillsIndex() {
     <div className="tm-profile">
       <main className="tm-wrap wide">
         <TopNav />
+        <VideoMarkers />
 
         <h1 className="tm-h1">Learn the dance</h1>
         <p className="tm-lead">Every one of the 62 skills, grouped into the 13 strands of your Tango DNA — what it is, how it works, and what to watch for.</p>
@@ -23,7 +25,7 @@ export default function SkillsIndex() {
           const skills = SKILLS.filter((s) => s.tag === cat.tag).sort((a, b) => a.level - b.level);
           if (skills.length === 0) return null;
           return (
-            <section className="tm-sec" key={cat.tag}>
+            <section className="tm-sec" id={catAnchor(cat.tag)} key={cat.tag}>
               <h2 className="tm-catsh">
                 <span className="tm-catico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(cat.icon, 18) }} />
                 {cat.label}
@@ -34,10 +36,13 @@ export default function SkillsIndex() {
                   const c = getSkillContent(s.slug);
                   return (
                     <li key={s.slug}>
-                      <a className={`tm-skcard${hasSkillContent(s.slug) ? '' : ' soon'}`} href={`/skill/${s.slug}`}>
+                      <a className={`tm-skcard${hasSkillContent(s.slug) ? '' : ' soon'}`} href={`/skill/${s.slug}`} data-skill-slug={s.slug}>
                         <span className="tm-skcard-lvl" aria-label={`Level ${s.level}`}>L{s.level}</span>
                         <span className="tm-skcard-body">
-                          <span className="tm-skcard-name">{s.name}</span>
+                          <span className="tm-skcard-name">
+                            {s.name}
+                            <span className="tm-vidbadge" aria-hidden="true">▶ video</span>
+                          </span>
                           {c?.tagline && <span className="tm-skcard-tag">{c.tagline}</span>}
                         </span>
                         <span className="tm-skcard-ar" aria-hidden="true">→</span>
