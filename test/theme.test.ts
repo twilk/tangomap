@@ -1,7 +1,7 @@
 import { test, expect } from 'vitest';
 import { parseTheme, deriveTokens, AA_CONTRAST, type Theme } from '@/src/lib/theme';
 import { light, dark } from '@/design/tokens';
-import { parseHex, contrastRatio } from '@/src/lib/color';
+import { parseHex, contrastRatio, mix, relativeLuminance } from '@/src/lib/color';
 
 // A legible light seed set: dark ink on a pale ground clears AA comfortably.
 const validLight = { v: 1, ground: '#f5ead8', ink: '#201e1d', accent: '#c67139', accent2: '#7a8a5e' };
@@ -132,6 +132,35 @@ test('deriveTokens is deterministic', () => {
   expect(deriveTokens(lightSeed)).toEqual(deriveTokens(lightSeed));
 });
 
+test('deriveTokens self-corrects muted so secondary text stays AA-legible', () => {
+  // Accepted (ink/ground ~5.9:1), but a fixed 40% mix toward ground lands ~2.5:1 —
+  // the exact case the old derivation shipped as illegible secondary text.
+  const theme = parseTheme({ v: 1, ground: '#ffffff', ink: '#646464', accent: '#3a3a3a', accent2: '#2a2a2a' });
+  expect(theme).not.toBeNull();
+  const ground = parseHex('#ffffff')!;
+  const ink = parseHex('#646464')!;
+  // what the old fixed-0.4 derivation would have produced — below AA:
+  expect(contrastRatio(mix(ink, ground, 0.4), ground)).toBeLessThan(AA_CONTRAST);
+  // the self-correcting derivation clears AA against the ground:
+  const d = deriveTokens(theme!);
+  expect(contrastRatio(parseHex(d.muted)!, ground)).toBeGreaterThanOrEqual(AA_CONTRAST);
+});
+
+test('deriveTokens raises panels above the ground (lighter, matching the presets)', () => {
+  const d = deriveTokens(lightSeed);
+  const groundL = relativeLuminance(parseHex(lightSeed.ground)!);
+  expect(relativeLuminance(parseHex(d.panel)!)).toBeGreaterThan(groundL);
+  expect(relativeLuminance(parseHex(d.panel2)!)).toBeGreaterThan(relativeLuminance(parseHex(d.panel)!));
+});
+
+test('deriveTokens is total — it canonicalises even a non-canonical `x as Theme`', () => {
+  const d = deriveTokens({ v: 1, ground: '#FFF', ink: '#000', accent: '#333', accent2: '#222' } as Theme);
+  expect(d.ground).toBe('#ffffff');
+  expect(d.ink).toBe('#000000');
+  expect(d.ember).toBe('#333333');
+  expect(d.verd).toBe('#222222');
+});
+
 // --- property: the contrast guarantee survives derivation ------------------
 // parseTheme gates ink/ground at AA; deriveTokens must never spend that margin.
 // A seeded LCG (numerical-recipes constants, Math.imul for a true 32-bit product)
@@ -150,8 +179,12 @@ test('every random theme parseTheme accepts derives to an AA-legible palette', (
     if (!theme) continue;
     accepted++;
     const d = deriveTokens(theme);
-    const ratio = contrastRatio(parseHex(d.ink)!, parseHex(d.ground)!);
-    expect(ratio, `theme #${i} derived below AA: ${ratio}`).toBeGreaterThanOrEqual(AA_CONTRAST);
+    const ground = parseHex(d.ground)!;
+    const inkRatio = contrastRatio(parseHex(d.ink)!, ground);
+    expect(inkRatio, `theme #${i} ink below AA: ${inkRatio}`).toBeGreaterThanOrEqual(AA_CONTRAST);
+    // the core guarantee: derived secondary text is legible for EVERY accepted theme.
+    const mutedRatio = contrastRatio(parseHex(d.muted)!, ground);
+    expect(mutedRatio, `theme #${i} muted below AA: ${mutedRatio}`).toBeGreaterThanOrEqual(AA_CONTRAST);
   }
   // Non-vacuity: a real share of the 2000 random themes must clear the boundary,
   // or the guarantee above would hold trivially over an empty set. The accent 3:1
