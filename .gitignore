@@ -12,3 +12,5 @@ next-env.d.ts
 
 # TypeScript incremental build info
 tsconfig.tsbuildinfo
+
+.context/

@@ -82,9 +82,12 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
 
         <ProfileSections mastered={mastered} />
 
-        <div className="tm-cta-row">
+        <div className="tm-cta-row" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <a className="tm-cta" href={`/compare?a=${encodeURIComponent(data.handle)}`}>
             Compare with another dancer <span className="tm-ar" aria-hidden="true">→</span>
+          </a>
+          <a className="tm-cta ghost" href={`/u/${encodeURIComponent(data.handle)}/card`}>
+            Dancer card <span className="tm-ar" aria-hidden="true">→</span>
           </a>
         </div>
       </main>
