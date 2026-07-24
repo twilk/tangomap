@@ -29,6 +29,10 @@ export default async function SettingsPage() {
     isPublic: prof?.isPublic ?? false,
     displayName: prof?.displayName ?? null,
     style: (prof?.style as Style | null) ?? null,
+    customTheme: prof?.customTheme ?? null,
+    cardUsesCustomTheme: prof?.cardUsesCustomTheme ?? false,
+    themeShared: prof?.themeShared ?? false,
+    customThemeUpdatedAt: prof?.customThemeUpdatedAt ? prof.customThemeUpdatedAt.toISOString() : null,
   };
 
   return (

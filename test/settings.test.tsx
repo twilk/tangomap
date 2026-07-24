@@ -15,6 +15,10 @@ const baseInitial: ProfileDTO = {
   isPublic: false,
   displayName: null,
   style: null,
+  customTheme: null,
+  cardUsesCustomTheme: false,
+  themeShared: false,
+  customThemeUpdatedAt: null,
 };
 
 beforeEach(() => {
@@ -63,6 +67,7 @@ function saveButton(): HTMLButtonElement {
 describe('SettingsForm', () => {
   test('renders fields from the initial ProfileDTO', async () => {
     await render({
+      ...baseInitial,
       handle: 'zbig',
       isPublic: true,
       displayName: 'Zbigniew',
