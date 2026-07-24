@@ -420,4 +420,23 @@ body { margin: 0; }
   .tm-dval{font-size:10.5px}
 }
 
+/* ---- "What's next" recommendations ---- */
+.tm-recs{display:flex; flex-direction:column; gap:8px; margin:0 0 14px; padding:0; list-style:none}
+.tm-rec{display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:12px; padding:11px 14px; border:1px solid var(--tm-line); border-left:3px solid var(--tm-ember); border-radius:12px; background:var(--tm-panel)}
+.tm-rec.k-weak{border-left-color:var(--tm-carmine)}
+.tm-rec.k-frontier{border-left-color:var(--tm-verd)}
+.tm-rec-ico{color:var(--tm-ember); line-height:0; flex:none}
+.tm-rec.k-weak .tm-rec-ico{color:var(--tm-carmine)}
+.tm-rec.k-frontier .tm-rec-ico{color:var(--tm-verd)}
+.tm-rec-body{display:flex; flex-direction:column; gap:2px; min-width:0}
+.tm-rec-name{font-size:14px; font-weight:600; color:var(--tm-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tm-rec-reason{font-size:12px; color:var(--tm-muted)}
+.tm-rec-tag{font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--tm-muted); border:1px solid var(--tm-line); border-radius:999px; padding:3px 9px; white-space:nowrap}
+.tm-rec-lvl{font-family:var(--mono); font-size:11px; color:var(--tm-faint); min-width:22px; text-align:right; font-variant-numeric:tabular-nums}
+@media(max-width:520px){
+  .tm-rec{grid-template-columns:auto 1fr auto; gap:10px; padding:10px 12px}
+  .tm-rec-tag{display:none}
+  .tm-rec-reason{font-size:11.5px}
+}
+
 @media (prefers-reduced-motion:reduce){.tm-profile *{animation:none!important; transition:none!important}}

@@ -6,6 +6,7 @@ import { profile, progress } from '@/db/schema';
 import { sanitizeMastered } from '@/src/lib/progress';
 import { dnaSignature } from '@/src/lib/dna';
 import { ProfileSections } from '@/src/components/ProfileSections';
+import { Recommendations } from '@/src/components/Recommendations';
 import { CopyButton } from '@/src/components/CopyButton';
 import { TopNav } from '@/src/components/TopNav';
 
@@ -85,6 +86,8 @@ export default async function MePage() {
             This is your private view — only you can see it. <a className="tm-link-inline" href="/settings">Publish it in Settings →</a>
           </div>
         )}
+
+        {mastered.length > 0 && <Recommendations mastered={mastered} />}
 
         <ProfileSections mastered={mastered} />
 
