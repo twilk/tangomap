@@ -12,7 +12,14 @@
 // data-theme covers every source (the map's own toggle included).
 (function () {
   function want() {
-    try { return localStorage.getItem('tsm-theme') === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; }
+    try {
+      // The map can't render the custom palette, so it falls back to the custom
+      // ground's polarity (dark|light) — the closest built-in the map does have.
+      if (localStorage.getItem('tsm-theme') === 'custom') {
+        return localStorage.getItem('tsm-custom-polarity') === 'dark' ? 'dark' : 'light';
+      }
+      return localStorage.getItem('tsm-theme') === 'dark' ? 'dark' : 'light';
+    } catch (e) { return 'light'; }
   }
   function root() {
     return document.querySelector('.tsm[data-theme]') || document.documentElement;
@@ -45,7 +52,10 @@
     } catch (e) {}
   }
   window.addEventListener('storage', function (e) {
-    if (!e.key || e.key === 'tsm-theme') sync();
+    // tsm-custom-polarity can change while tsm-theme stays 'custom' (a custom
+    // re-theme with a different ground), so an already-open map tab must re-sync
+    // on it too or it keeps a stale light/dark fallback.
+    if (!e.key || e.key === 'tsm-theme' || e.key === 'tsm-custom-polarity') sync();
   });
   window.addEventListener('pageshow', function (e) {
     if (e.persisted) sync();
