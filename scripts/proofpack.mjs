@@ -47,10 +47,15 @@ async function main() {
       ...(STORAGE_STATE ? { storageState: STORAGE_STATE } : {}),
     });
     // Seed the theme before any page script runs, and mirror it onto <html>
-    // exactly like the app's no-flash inline script does.
+    // exactly like the app's no-flash inline script does. Also mark both
+    // first-visit overlays as seen — the app's welcome (`tsm-onboarded`) and the
+    // map bundle's own coach tip (`tm-onboarded`) — otherwise a fresh Playwright
+    // profile shows them on top of every capture and the proofpack proves nothing.
     await context.addInitScript((t) => {
       try {
         localStorage.setItem('tsm-theme', t);
+        localStorage.setItem('tsm-onboarded', '1');
+        localStorage.setItem('tm-onboarded', '1');
         document.documentElement.setAttribute('data-theme', t);
       } catch {}
     }, theme);
