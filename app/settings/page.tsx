@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { profile } from '@/db/schema';
 import type { ProfileDTO, Style } from '@/src/lib/types';
 import SettingsForm from './SettingsForm';
+import ThemeEditor from './ThemeEditor';
 import { DeleteAccount } from '@/src/components/DeleteAccount';
 import { TopNav } from '@/src/components/TopNav';
 
@@ -41,6 +42,12 @@ export default async function SettingsPage() {
         <section className="tm-sec" style={{ marginTop: '26px' }}>
           <h2 className="tm-sh">Profile &amp; privacy</h2>
           <SettingsForm initial={initial} />
+        </section>
+
+        <section className="tm-sec">
+          <h2 className="tm-sh">Theme</h2>
+          <p className="tm-lead" style={{ marginTop: '-6px' }}>Pick four colours; the app checks they stay legible, then themes everything to match. Only you see it — until you share it.</p>
+          <ThemeEditor />
         </section>
 
         <div className="tm-cta-row">
