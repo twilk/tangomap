@@ -1,9 +1,10 @@
 import { test, expect } from 'vitest';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdtempSync, mkdirSync, cpSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { resolve, join, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
 import { OUTPUTS, replaceRegion } from '@/scripts/build-design.mjs';
-import { light, dark, cssVar, type ThemeTokens } from '@/design/tokens';
+import { light, dark, card, radii, cssVar, type ThemeTokens } from '@/design/tokens';
 
 const root = resolve(__dirname, '..');
 
@@ -24,6 +25,28 @@ test.each(OUTPUTS.map((o) => o.path))('generated artifact %s is not stale', (rel
   expect(current, `${rel} is stale — run: npm run design`).toBe(out.render(current));
 });
 
+// The staleness test above only proves the file on disk equals render()'s STRING — it
+// never loads the module or checks its values. This artifact is a .ts module the card
+// canvas and OG images `import`, so it must additionally (a) be valid, importable TS and
+// (b) re-export exactly the source values. A buildTs() bug that emitted broken syntax, or
+// silently dropped/renamed a token, would keep the string self-consistent and sail past
+// the staleness check while shipping an unusable module. Importing it and comparing to the
+// source is the coverage that catches that. `elev` is deliberately absent from the JS
+// export (it is a CSS box-shadow whose light value embeds var(--tm-hi), meaningless to a
+// canvas/OG renderer), so the theme comparison strips it from the source first.
+test('the generated JS token export is importable and re-exports the source values', async () => {
+  const mod = await import('@/src/lib/generated/tokens');
+  const withoutElev = ({ elev: _elev, ...rest }: ThemeTokens) => rest;
+  expect(mod.light).toEqual(withoutElev(light as ThemeTokens));
+  expect(mod.dark).toEqual(withoutElev(dark as ThemeTokens));
+  expect(mod.card).toEqual(card);
+  expect(mod.radii).toEqual(radii);
+  // The omission is a contract, not an accident: assert it explicitly so a future edit
+  // that pipes a var()-bearing value back into the canvas export fails here.
+  expect('elev' in mod.light).toBe(false);
+  expect('elev' in mod.dark).toBe(false);
+});
+
 // The entrypoint is what CI and the deploy gate actually invoke, so exercise the
 // real process rather than main() in-band. Asserts the deploy contract: exit 0 and
 // a summary on stdout, because silence must never be mistaken for success.
@@ -41,26 +64,45 @@ test('the design:check entrypoint exits 0 and reports on a clean tree', () => {
 // import makes the staleness test above unfailable, which is how this suite once read
 // green while covering nothing.
 //
-// Two subtleties, both learned by watching weaker versions of this test pass against a
-// deliberately reintroduced bug. It must run in a CHILD process, because by the time an
-// in-band assertion runs our own import has already happened. And it must DRIFT the
-// artifacts first: the bug is a conditional repair, so against an already-clean tree the
-// import writes nothing and the test passes while the bug is present.
+// Three constraints, each learned by watching a weaker version pass against a deliberately
+// reintroduced bug:
+//   • it must run in a CHILD process — by the time an in-band assertion runs, our own import
+//     of the module has already happened, so an in-band check can never observe the write;
+//   • the artifacts it inspects must be DRIFTED first — the canonical bug is a *conditional*
+//     repair, so against an already-clean tree the import writes nothing and the test passes
+//     while the bug is present;
+//   • it must NOT drift the real tracked files. A parallel Claude session shares this working
+//     directory and also runs `vitest run`; two concurrent drift/restore cycles race, and one
+//     run's restore can persist the other's DRIFTED text as the committed baseline (this
+//     actually corrupted the tree during an earlier task). So the entire drift-and-check runs
+//     inside a throwaway temp fixture — a self-contained copy of scripts/ + design/ with
+//     DRIFTED copies of every OUTPUT — created under a unique mkdtemp path per run. The real
+//     files are read only to be copied, never written, so concurrent runs cannot collide.
 test('importing the generator writes nothing', () => {
-  const targets = OUTPUTS.map((o) => ({ path: o.path, p: resolve(root, o.path) }));
-  const saved = targets.map((t) => readFileSync(t.p, 'utf8'));
+  const fixture = mkdtempSync(join(tmpdir(), 'design-purity-'));
   try {
-    targets.forEach((t) => writeFileSync(t.p, 'DRIFTED\n'));
+    // build-design.mjs resolves its root two levels up from its own file and imports
+    // ../design/tokens.ts, so copying both dirs keeps every path module-relative: any write a
+    // buggy import performs lands under `fixture`, never in the repo.
+    cpSync(resolve(root, 'scripts'), join(fixture, 'scripts'), { recursive: true });
+    cpSync(resolve(root, 'design'), join(fixture, 'design'), { recursive: true });
+    // Drift every declared OUTPUT inside the fixture. A repair-on-import would overwrite these
+    // with freshly rendered content; a pure import leaves them exactly 'DRIFTED\n'.
+    for (const out of OUTPUTS) {
+      const p = join(fixture, out.path);
+      mkdirSync(dirname(p), { recursive: true });
+      writeFileSync(p, 'DRIFTED\n');
+    }
     execFileSync(
       process.execPath,
       ['--experimental-strip-types', '-e', "import('./scripts/build-design.mjs')"],
-      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+      { cwd: fixture, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
     );
-    for (const t of targets) {
-      expect(readFileSync(t.p, 'utf8'), `${t.path} was rewritten by a bare import`).toBe('DRIFTED\n');
+    for (const out of OUTPUTS) {
+      expect(readFileSync(join(fixture, out.path), 'utf8'), `${out.path} was rewritten by a bare import`).toBe('DRIFTED\n');
     }
   } finally {
-    targets.forEach((t, k) => writeFileSync(t.p, saved[k]));
+    rmSync(fixture, { recursive: true, force: true });
   }
 }, 30_000);
 
