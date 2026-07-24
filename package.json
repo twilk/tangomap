@@ -1,13 +1,16 @@
 {
   "name": "tangomap",
   "private": true,
+  "engines": {
+    "node": ">=22.6"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
-    "design": "node --experimental-strip-types scripts/build-design.mjs",
-    "design:check": "node --experimental-strip-types scripts/build-design.mjs --check",
+    "design": "node --experimental-strip-types scripts/design.mjs",
+    "design:check": "node --experimental-strip-types scripts/design.mjs --check",
     "e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
