@@ -1,8 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import QRCode from 'qrcode';
 import { smoothPathD, type Pt } from '@/src/lib/radarPath';
+
+// qrcode is only needed after an explicit user action (badge / story export),
+// so it stays out of the card's initial bundle.
+const loadQR = () => import('qrcode').then((m) => m.default);
 
 // Max tilt in degrees — enough to sell depth, low enough to keep text readable.
 const MAX_TILT = 12;
@@ -172,19 +175,47 @@ export function DancerCard(props: DancerCardProps) {
     } catch {}
   }, [props.isOwner, props.milestonesDone]);
 
-  // Badge QR: generated on first open, points at the public profile.
+  // Badge QR: generated on first open (lazy qrcode), points at the public profile.
   useEffect(() => {
     if (!badge || qr) return;
-    QRCode.toDataURL(profileUrl, { width: 480, margin: 4, color: { dark: '#110D09', light: '#F2EADC' } })
+    loadQR()
+      .then((QRCode) => QRCode.toDataURL(profileUrl, { width: 480, margin: 4, color: { dark: '#110D09', light: '#F2EADC' } }))
       .then(setQr)
       .catch(() => {});
   }, [badge, qr, profileUrl]);
 
+  // Badge dialog a11y: focus moves to the close button on open, Tab is trapped
+  // inside the dialog, ESC closes, and focus returns to the opener on close.
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const badgeCloseRef = useRef<HTMLButtonElement>(null);
+  const badgeOpenerRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!badge) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setBadge(false);
+    badgeCloseRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setBadge(false);
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusables = badgeRef.current?.querySelectorAll<HTMLElement>('button, a[href]');
+      if (!focusables || focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      badgeOpenerRef.current?.focus();
+    };
   }, [badge]);
 
   const share = async () => {
@@ -264,14 +295,23 @@ export function DancerCard(props: DancerCardProps) {
     ctx.font = '400 40px ui-monospace, Menlo, monospace';
     ctx.fillText('/ 62', W / 2, 800);
 
+    // Ellipsize anything wider than the safe column — long display names and
+    // three-part signatures overflow 1080px otherwise.
+    const fit = (text: string, maxW: number) => {
+      if (ctx.measureText(text).width <= maxW) return text;
+      let t = text;
+      while (t.length > 1 && ctx.measureText(`${t}…`).width > maxW) t = t.slice(0, -1);
+      return `${t.trimEnd()}…`;
+    };
+    const SAFE_W = W - 120;
     ctx.fillStyle = '#F2EADC';
     ctx.font = '600 96px Iowan Old Style, Georgia, serif';
-    ctx.fillText(props.name, W / 2, 1210);
+    ctx.fillText(fit(props.name, SAFE_W), W / 2, 1210);
     ctx.fillStyle = '#9E907E';
     ctx.font = '400 40px ui-monospace, Menlo, monospace';
-    ctx.fillText(`@${props.handle}${props.style ? ` · ${props.style}` : ''}`, W / 2, 1280);
+    ctx.fillText(fit(`@${props.handle}${props.style ? ` · ${props.style}` : ''}`, SAFE_W), W / 2, 1280);
     ctx.font = 'italic 46px Iowan Old Style, Georgia, serif';
-    ctx.fillText(props.signature, W / 2, 1370);
+    ctx.fillText(fit(props.signature, SAFE_W), W / 2, 1370);
     if (props.milestonesDone > 0) {
       ctx.fillStyle = '#E58C44';
       ctx.font = '400 44px serif';
@@ -281,6 +321,7 @@ export function DancerCard(props: DancerCardProps) {
     try {
       // Standard dark-on-light with a real quiet zone — inverted QR codes fail
       // in many scanner apps, which defeats the whole point of a story image.
+      const QRCode = await loadQR();
       const qrData = await QRCode.toDataURL(profileUrl, { width: 300, margin: 4, color: { dark: '#110D09', light: '#F2EADC' } });
       const img = new Image();
       await new Promise<void>((res, rej) => {
@@ -454,7 +495,14 @@ export function DancerCard(props: DancerCardProps) {
         <button type="button" className="tm-cta ghost" onClick={downloadStory}>
           Story image
         </button>
-        <button type="button" className="tm-cta ghost" onClick={() => setBadge(true)}>
+        <button
+          type="button"
+          className="tm-cta ghost"
+          onClick={(e) => {
+            badgeOpenerRef.current = e.currentTarget;
+            setBadge(true);
+          }}
+        >
           Badge / QR
         </button>
         {needsMotionOptIn && (
@@ -465,7 +513,16 @@ export function DancerCard(props: DancerCardProps) {
       </div>
 
       {badge && (
-        <div className="tm-badge" role="dialog" aria-modal="true" aria-label={`QR badge for ${props.name}`} onClick={() => setBadge(false)}>
+        <div ref={badgeRef} className="tm-badge" role="dialog" aria-modal="true" aria-label={`QR badge for ${props.name}`} onClick={() => setBadge(false)}>
+          <button
+            ref={badgeCloseRef}
+            type="button"
+            className="tm-badge-close"
+            aria-label="Close badge"
+            onClick={() => setBadge(false)}
+          >
+            ✕
+          </button>
           <p className="tm-badge-name">{props.name}</p>
           <p className="tm-badge-meta">@{props.handle} · {props.count}/62</p>
           {qr ? <img src={qr} alt={`QR code linking to ${props.name}'s Tango Map profile`} /> : <p className="tm-badge-meta">…</p>}

@@ -556,6 +556,10 @@ body { margin: 0; }
 .tm-badge-name{font-family:var(--serif); font-weight:600; font-size:clamp(26px,7vw,40px); margin:0}
 .tm-badge-meta{font-family:var(--mono); font-size:13px; color:#9E907E; margin:0}
 .tm-badge-hint{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; color:#6C5F50; margin:6px 0 0; text-transform:uppercase}
+.tm-badge-close{position:absolute; top:max(14px,env(safe-area-inset-top)); right:max(16px,env(safe-area-inset-right)); width:40px; height:40px;
+  display:grid; place-items:center; font-size:16px; color:#9E907E; background:transparent; border:1px solid rgba(241,233,220,.18); border-radius:999px; cursor:pointer}
+.tm-badge-close:hover{color:#F2EADC; border-color:#E58C44}
+.tm-badge-close:focus-visible{outline:2px solid #E58C44; outline-offset:2px}
 /* identity + footer, centered under the radar */
 .tm-card-id{text-align:center}
 .tm-card-id h1{font-family:var(--serif); font-weight:600; font-size:clamp(21px,5.6vw,27px); line-height:1.05; letter-spacing:-.015em; margin:0; overflow-wrap:anywhere}

@@ -39,7 +39,10 @@ export default async function Image({ params }: { params: Promise<{ handle: stri
   }
 
   const mastered = sanitizeMastered(data.mastered);
-  const name = data.displayName ?? data.handle;
+  const rawName = data.displayName ?? data.handle;
+  // Satori has no ellipsis/overflow handling worth trusting at this size —
+  // clamp long display names so they never collide with the radar column.
+  const name = rawName.length > 24 ? `${rawName.slice(0, 23).trimEnd()}…` : rawName;
   const cats = perCategory(mastered);
   const N = cats.length;
   const ang = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / N;
