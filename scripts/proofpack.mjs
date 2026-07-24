@@ -17,7 +17,12 @@ import { resolve, basename } from 'node:path';
 const BASE = process.env.BASE ?? 'https://partykamap.vercel.app';
 const OUT = resolve(process.env.OUT ?? 'proofpack');
 const HANDLE = process.env.E2E_HANDLE ?? 'wilk';
-const STORAGE_STATE = process.env.STORAGE_STATE;
+// Signed-in screens (/me, /settings, /me/card) need a session. Save one with
+// `npm run proofpack:login` — it drops an auth.json here, which we pick up
+// automatically so no env var juggling is needed on any platform. STORAGE_STATE
+// still wins if you point it somewhere else.
+const STORAGE_STATE =
+  process.env.STORAGE_STATE ?? (existsSync(resolve('auth.json')) ? resolve('auth.json') : undefined);
 
 const SCREENS = [
   { id: '01-map', path: '/', label: 'The map', settle: 2500, fullPage: false },

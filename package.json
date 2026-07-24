@@ -8,7 +8,9 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "proofpack": "node scripts/proofpack.mjs",
+    "proofpack:login": "playwright open --save-storage=auth.json https://partykamap.vercel.app/signin"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "1.7.4",
