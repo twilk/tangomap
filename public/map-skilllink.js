@@ -66,10 +66,33 @@
       box.innerHTML = link + badge;
     }
 
-    // Re-apply on a light interval so it survives the panel's own re-renders.
-    setInterval(function () {
+    // Re-apply so it survives the panel's own re-renders. Idempotent (ensure()
+    // bails early when the slug/video/accent triple is unchanged), so it's safe
+    // to run on every coordinator pass.
+    function reconcile() {
       var aside = findAside();
       if (aside) ensure(aside);
-    }, 600);
+    }
+
+    // Driven by the shared coordinator (map-runtime.js) instead of a private
+    // interval. Injected script order isn't guaranteed, so queue for the
+    // coordinator if it hasn't executed yet — and if it never shows up at all,
+    // fall back to this script's original standalone polling.
+    (function registerReconcile() {
+      var FALLBACK = 600;
+      try {
+        var rt = window.__tmRuntime;
+        if (rt && typeof rt.register === 'function') { rt.register(reconcile); return; }
+        (window.__tmRuntimeQueue = window.__tmRuntimeQueue || []).push(reconcile);
+        setTimeout(function () {
+          try {
+            if (window.__tmRuntime) return; // coordinator arrived and owns it now
+            var q = window.__tmRuntimeQueue || [], i = q.indexOf(reconcile);
+            if (i >= 0) q.splice(i, 1);
+            setInterval(reconcile, FALLBACK);
+          } catch (e) {}
+        }, 3000);
+      } catch (e) { try { setInterval(reconcile, FALLBACK); } catch (e2) {} }
+    })();
   } catch (e) {}
 })();

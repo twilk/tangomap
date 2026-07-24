@@ -165,11 +165,33 @@
 
     // Light guard: only touch the DOM when not already in the mounted steady
     // state (survives the map's own re-renders without constant re-scanning).
-    setInterval(function () {
+    // Idempotent, so it's safe to run on every coordinator pass.
+    function reconcile() {
       if (!built && !build()) return;
       var steady = listRef && listRef.isConnected && listRef.style.display === 'none' && document.getElementById('tm-catnav');
       if (!steady) listRef = mount();
       if (pinned >= 0) apply(pinned);
-    }, 700);
+    }
+
+    // Driven by the shared coordinator (map-runtime.js) instead of a private
+    // interval. Injected script order isn't guaranteed, so queue for the
+    // coordinator if it hasn't executed yet — and if it never shows up at all,
+    // fall back to this script's original standalone polling.
+    (function registerReconcile() {
+      var FALLBACK = 700;
+      try {
+        var rt = window.__tmRuntime;
+        if (rt && typeof rt.register === 'function') { rt.register(reconcile); return; }
+        (window.__tmRuntimeQueue = window.__tmRuntimeQueue || []).push(reconcile);
+        setTimeout(function () {
+          try {
+            if (window.__tmRuntime) return; // coordinator arrived and owns it now
+            var q = window.__tmRuntimeQueue || [], i = q.indexOf(reconcile);
+            if (i >= 0) q.splice(i, 1);
+            setInterval(reconcile, FALLBACK);
+          } catch (e) {}
+        }, 3000);
+      } catch (e) { try { setInterval(reconcile, FALLBACK); } catch (e2) {} }
+    })();
   } catch (e) {}
 })();

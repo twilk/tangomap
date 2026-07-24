@@ -1,4 +1,14 @@
+import { Figtree } from 'next/font/google';
 import './tango.css';
+
+// The map bundle at / renders its body copy in Figtree (the "Organic" design
+// system). next/font self-hosts it at build time — no CDN link, no font files —
+// and exposes it as --font-figtree, which app/tango.css feeds into --sans.
+const figtree = Figtree({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-figtree',
+});
 
 export const metadata = {
   title: 'Tango Map',
@@ -19,7 +29,7 @@ const THEME_SCRIPT =
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang="en" data-theme="light" className={figtree.variable} suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         {children}

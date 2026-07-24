@@ -17,3 +17,6 @@ tsconfig.tsbuildinfo
 
 test-results/
 playwright-report/
+
+# scripts/proofpack.mjs output (screenshots + contact sheet)
+proofpack/

@@ -1,7 +1,9 @@
 /* ============================================================
    TANGO MAP — shared design system for all app screens.
-   "The milonga at night": ember lamplight · verdigris bronze ·
-   carmine = mastered. Everything is scoped under .tm-profile so
+   "The milonga at night": ember lamplight · sage ·
+   carmine = mastered. Palette and body type are taken from the map
+   bundle's own "Organic" design system so the app and the map read
+   as one product. Everything is scoped under .tm-profile so
    it never touches the map bundle (served statically at /).
    ============================================================ */
 
@@ -9,7 +11,7 @@ body { margin: 0; }
 
 .tm-profile {
   --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --sans: var(--font-figtree), system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
   /* Light "practica" — matched to the map bundle's own palette (#f5ead8 / #201e1d
      / #c67139 / #dcd3c4) so the app and the map read as one continuous product. */
@@ -17,10 +19,10 @@ body { margin: 0; }
   --tm-ink:#201e1d; --tm-muted:#645c50; --tm-faint:#968b79;
   --tm-line:#dcd3c4; --tm-line2:rgba(32,30,29,.07);
   --tm-ember:#c67139; --tm-ember-s:rgba(198,113,57,.15);
-  --tm-verd:#2C7869; --tm-verd-s:rgba(44,120,105,.15);
+  --tm-verd:#7a8a5e; --tm-verd-s:rgba(122,138,94,.15);
   --tm-carmine:#A6172E; --tm-chip:rgba(32,30,29,.05);
   /* hover/focus highlight on the radar — a cool "moonlight" accent, complementary
-     to the warm ember and distinct from the teal, so it never blends with data. */
+     to the warm ember and distinct from the sage, so it never blends with data. */
   --tm-focus:#3F5BB0;
   --tm-elev:0 1px 0 var(--tm-hi),0 2px 6px -2px rgba(32,30,29,.1),0 26px 52px -32px rgba(32,30,29,.45);
   color-scheme:light;
@@ -34,7 +36,7 @@ body { margin: 0; }
   --tm-ink:#F2EADC; --tm-muted:#9E907E; --tm-faint:#6C5F50;
   --tm-line:rgba(241,233,220,.11); --tm-line2:rgba(241,233,220,.05);
   --tm-ember:#E58C44; --tm-ember-s:rgba(229,140,68,.14);
-  --tm-verd:#61AB95; --tm-verd-s:rgba(97,171,149,.15);
+  --tm-verd:#A8BA8A; --tm-verd-s:rgba(168,186,138,.15);
   --tm-carmine:#E6415C; --tm-chip:rgba(241,233,220,.05);
   --tm-focus:#8EA6FF;
   --tm-elev:0 0 0 1px rgba(241,233,220,.04),0 34px 66px -34px rgba(0,0,0,.9);
@@ -508,7 +510,7 @@ body { margin: 0; }
 .tm-card-top{display:flex; align-items:center; justify-content:space-between}
 .tm-card-brand{font-family:var(--mono); font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:#9E907E; display:flex; align-items:center; gap:8px}
 .tm-card-brand i{width:8px; height:8px; border-radius:50%; background:#E58C44; box-shadow:0 0 0 3px rgba(229,140,68,.14)}
-.tm-card-tier{font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#61AB95; background:rgba(97,171,149,.15); border-radius:999px; padding:3px 9px}
+.tm-card-tier{font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--tm-verd); background:var(--tm-verd-s); border-radius:999px; padding:3px 9px}
 /* radar hero — SVG twin of the profile radar, count in its core, slow halo */
 .tm-card-radar{position:relative; width:min(256px,78%); margin:auto}
 .tm-card-radar svg{display:block; width:100%; height:auto}
