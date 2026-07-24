@@ -14,6 +14,7 @@ export function TopNav({ children }: { children?: ReactNode }) {
       <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
       <span className="tm-nav">
         <a className="tm-link" href="/">← The map</a>
+        <a className="tm-link" href="/skills">Learn</a>
         {children}
         <ThemeToggle />
       </span>
