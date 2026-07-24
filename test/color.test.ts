@@ -89,3 +89,15 @@ test('contrastRatio is ~21 for black/white, symmetric, and 1 for a colour on its
   const x = { r: 120, g: 90, b: 60 };
   expect(contrastRatio(x, x)).toBeCloseTo(1, 5);
 });
+
+// --- parseHex trust-boundary safety ----------------------------------------
+
+test('parseHex returns null for non-string input instead of throwing', () => {
+  // A direct `as any` caller (or JSON that decoded a number/null) must not crash
+  // the "never throws" contract on the .trim() call.
+  expect(parseHex(42 as unknown as string)).toBeNull();
+  expect(parseHex(null as unknown as string)).toBeNull();
+  expect(parseHex(undefined as unknown as string)).toBeNull();
+  expect(parseHex({} as unknown as string)).toBeNull();
+  expect(parseHex(['#fff'] as unknown as string)).toBeNull();
+});

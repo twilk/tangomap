@@ -7,9 +7,11 @@ export type RGB = { r: number; g: number; b: number };
 const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 /** Parse `#rgb` or `#rrggbb` (leading/trailing whitespace tolerated) into an RGB.
- *  Returns null for anything else — no hash, wrong length, non-hex digits, or a
- *  functional form like `rgb(…)`. */
-export function parseHex(s: string): RGB | null {
+ *  Returns null for anything else — a non-string, no hash, wrong length, non-hex
+ *  digits, or a functional form like `rgb(…)`. Takes `unknown` so a direct
+ *  `as any` caller cannot break the never-throws contract on `.trim()`. */
+export function parseHex(s: unknown): RGB | null {
+  if (typeof s !== 'string') return null;
   const t = s.trim();
   const m = HEX.exec(t);
   if (!m) return null;
@@ -45,7 +47,9 @@ export function mix(a: RGB, b: RGB, t: number): RGB {
 }
 
 /** Format an `rgba(r,g,b,a)` string in the token style: no spaces, and no leading
- *  zero on the alpha (0.15 → `.15`), matching the values in design/tokens.ts. */
+ *  zero on the alpha (0.15 → `.15`), matching the values in design/tokens.ts.
+ *  Trust-boundary invariant: `alpha` must be a numeric literal chosen by this
+ *  module (0.15/0.07/0.05) — never a value threaded in from untrusted input. */
 export function rgba(rgb: RGB, alpha: number): string {
   const a = String(alpha).replace(/^0(?=\.)/, '');
   return `rgba(${Math.round(rgb.r)},${Math.round(rgb.g)},${Math.round(rgb.b)},${a})`;
