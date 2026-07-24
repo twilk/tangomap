@@ -1,0 +1,5 @@
+design/tokens.ts       text eol=lf
+src/styles/generated/** text eol=lf
+src/lib/generated/**   text eol=lf
+DESIGN.md              text eol=lf
+DESIGN.md.tmpl         text eol=lf

@@ -1,4 +1,14 @@
 import { Figtree } from 'next/font/google';
+// The generated token sheet SETS the .tm-profile custom properties (--tm-* light/
+// dark, --serif/--sans/--mono); tango.css only CONSUMES them via var(). The two
+// touch disjoint properties, so they never collide and source order is not load-
+// bearing for correctness — custom-property resolution is independent of another
+// property's source order, so tango's `background:var(--tm-ground)…` reads the
+// tokens no matter which sheet webpack emits first. Kept first defensively: the
+// parity test forbids tango re-declaring a token, and were that guard ever bypassed,
+// source order would decide the winner. Single source of truth is design/tokens.ts →
+// src/styles/generated/tokens.css.
+import '@/src/styles/generated/tokens.css';
 import './tango.css';
 
 // The map bundle at / renders its body copy in Figtree (the "Organic" design
