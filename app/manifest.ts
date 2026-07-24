@@ -20,5 +20,21 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: '/icon-512', sizes: '512x512', type: 'image/png', purpose: 'any' },
       { src: '/icon-512', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
+    shortcuts: [
+      {
+        name: 'My card',
+        short_name: 'My card',
+        description: 'Your shareable dancer card',
+        url: '/me/card',
+        icons: [{ src: '/icon-192', sizes: '192x192', type: 'image/png' }],
+      },
+      {
+        name: 'My profile',
+        short_name: 'Profile',
+        description: 'Your progress and Tango DNA',
+        url: '/me',
+        icons: [{ src: '/icon-192', sizes: '192x192', type: 'image/png' }],
+      },
+    ],
   };
 }

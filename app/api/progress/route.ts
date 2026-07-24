@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { db } from '@/db';
-import { progress } from '@/db/schema';
+import { progress, progressHistory } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { sanitizeMastered } from '@/src/lib/progress';
 import type { Progress, ProgressInput } from '@/src/lib/types';
@@ -34,5 +34,15 @@ export async function PUT(req: Request) {
   const now = new Date();
   await db.insert(progress).values({ userId: session.user.id, mastered, theme, sel, updatedAt: now })
     .onConflictDoUpdate({ target: progress.userId, set: { mastered, theme, sel, updatedAt: now } });
+  // Daily history snapshot (one row per UTC day) — powers growth views like the
+  // card's ghost blob. Best-effort: a failed snapshot must not fail the save,
+  // but it must leave a trace (silent loss here silently kills the ghost).
+  try {
+    const day = now.toISOString().slice(0, 10);
+    await db.insert(progressHistory).values({ userId: session.user.id, day, mastered })
+      .onConflictDoUpdate({ target: [progressHistory.userId, progressHistory.day], set: { mastered } });
+  } catch (e) {
+    console.error('progress_history snapshot failed', e);
+  }
   return Response.json({ mastered, theme, sel, updatedAt: now.toISOString() } satisfies Progress);
 }

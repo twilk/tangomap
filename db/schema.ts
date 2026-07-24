@@ -46,6 +46,14 @@ export const progress = pgTable('progress', {
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 });
 
+// Daily snapshots of the mastered set (one row per user per day, upserted on
+// progress writes). Powers "growth" views like the card's ghost blob.
+export const progressHistory = pgTable('progress_history', {
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  day: text('day').notNull(), // YYYY-MM-DD (UTC)
+  mastered: jsonb('mastered').$type<string[]>().notNull().default([]),
+}, (h) => ({ pk: primaryKey({ columns: [h.userId, h.day] }) }));
+
 export const profile = pgTable('profile', {
   userId: text('userId').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
   handle: text('handle').unique(),
@@ -53,4 +61,7 @@ export const profile = pgTable('profile', {
   displayName: text('displayName'),
   style: text('style'),   // 'salon' | 'milonguero' | 'nuevo' | null
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  // Minted once (DB sequence default; see migration 0002), never recomputed —
+  // deleting other accounts must not renumber anyone's card.
+  cardSerial: integer('cardSerial').unique(),
 });
