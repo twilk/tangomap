@@ -34,7 +34,7 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <TopNav />
+        <TopNav back="/skills" />
 
         <header className="tm-skhero">
           <span className="tm-skico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(cat?.icon ?? '', 26) }} />
@@ -104,6 +104,12 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
         <div className="tm-skcta">
           <a className="tm-cta ghost" href="/skills">
             <span className="tm-ar" aria-hidden="true">←</span> All skills
+          </a>
+          {/* Reading about a skill should lead somewhere personal. /me redirects
+              a signed-out visitor to sign-in, so the label promises the DNA
+              rather than assuming they already have one. */}
+          <a className="tm-cta ghost" href="/me">
+            See it in your Tango DNA <span className="tm-ar" aria-hidden="true">→</span>
           </a>
           <a className="tm-cta" href="/">
             Open the map <span className="tm-ar" aria-hidden="true">→</span>

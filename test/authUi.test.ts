@@ -27,18 +27,28 @@ describe('auth-ui.js', () => {
     document.body.innerHTML = '';
   });
 
-  test('signed out → a single Sign in link pointing at the branded /signin', async () => {
+  // The map header and the app's own TopNav are two separate navigations that
+  // must offer the same destinations, or the product tells two different stories
+  // about where things live. These assert the converged menu: Learn is offered to
+  // everyone, and a signed-in dancer can reach their card in one click from the
+  // map. Changing either nav without the other should fail here.
+  test('signed out → Learn + a Sign in link pointing at the branded /signin', async () => {
     await run({});
     const a = links();
-    expect(a).toHaveLength(1);
-    expect(a[0].getAttribute('href')).toBe('/signin');
-    expect(a[0].textContent).toMatch(/sign in/i);
+    const byHref = Object.fromEntries(a.map((x) => [x.getAttribute('href'), x.textContent ?? '']));
+    expect(a).toHaveLength(2);
+    expect(byHref['/skills']).toMatch(/learn/i);
+    expect(byHref['/signin']).toMatch(/sign in/i);
   });
 
-  test('signed in → Settings + Sign out links (branded routes)', async () => {
+  test('signed in → the full converged menu (branded routes)', async () => {
     await run({ user: { name: 'Wilk', email: 'wilczyy@gmail.com' } });
     const a = links();
     const byHref = Object.fromEntries(a.map((x) => [x.getAttribute('href'), x.textContent ?? '']));
+    expect(byHref['/skills']).toMatch(/learn/i);
+    expect(byHref['/me']).toMatch(/profile/i);
+    // the dancer card is a destination, reachable in one click from the map
+    expect(byHref['/me/card']).toMatch(/card/i);
     expect(byHref['/settings']).toMatch(/settings/i);
     expect(byHref['/signout']).toMatch(/sign out/i);
     // no legacy /api/auth/* links leak into the map pill

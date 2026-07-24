@@ -15,7 +15,7 @@ export default function SkillsIndex() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap wide">
-        <TopNav />
+        <TopNav back="/" />
         <VideoMarkers />
 
         <h1 className="tm-h1">Learn the dance</h1>

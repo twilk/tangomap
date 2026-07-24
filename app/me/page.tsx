@@ -40,10 +40,7 @@ export default async function MePage() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <TopNav>
-          <a className="tm-link" href="/settings">Settings</a>
-          <a className="tm-link" href="/signout">Sign out</a>
-        </TopNav>
+        <TopNav back="/" />
 
         <header className="tm-hero">
           <div className="tm-ava" aria-hidden="true">{initial}</div>
@@ -73,7 +70,11 @@ export default async function MePage() {
           </div>
         ) : isPublic && handle ? (
           <section className="tm-share" aria-label="Share your profile">
-            <a className="tm-ogthumb" href={`/u/${handle}`}>
+            {/* Both the thumbnail and the primary action go straight to the
+                card (/me/card resolves the handle) — the card *is* the thing
+                being shared, and routing through the public profile first made
+                it three clicks from the map. */}
+            <a className="tm-ogthumb" href="/me/card">
               {/* eslint-disable-next-line @next/next/no-img-element -- dynamic OG route, not a static asset */}
               <img src={`/u/${handle}/opengraph-image`} alt={`Share card for @${handle}`} loading="lazy" width={1200} height={630} />
             </a>
@@ -82,7 +83,8 @@ export default async function MePage() {
               <div className="tm-share-url num">partykamap.vercel.app/u/{handle}</div>
               <div className="tm-share-actions">
                 <CopyButton text={`https://partykamap.vercel.app/u/${handle}`} label="Copy link" />
-                <a className="tm-cta ghost" href={`/u/${handle}`}>Open <span className="tm-ar" aria-hidden="true">→</span></a>
+                <a className="tm-cta ghost" href="/me/card">Open your card <span className="tm-ar" aria-hidden="true">→</span></a>
+                <a className="tm-link-inline" href={`/u/${handle}`}>See how others see it →</a>
                 <a className="tm-link-inline" href="/settings">Manage visibility →</a>
               </div>
             </div>

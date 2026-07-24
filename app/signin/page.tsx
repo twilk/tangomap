@@ -19,7 +19,7 @@ export default function SignIn() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <TopNav />
+        <TopNav back="/" />
 
         <div className="tm-nf">
           <p className="code">Your Tango DNA, saved</p>

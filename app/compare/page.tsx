@@ -76,7 +76,7 @@ export default async function Compare({
   return (
     <div className="tm-profile">
       <main className="tm-wrap wide">
-        <TopNav />
+        <TopNav back="/me" />
 
         <h1 className="tm-h1">Compare dancers</h1>
         <p className="tm-lead">Two dancers, one radar — see who’s stronger in each of the 13 categories at a glance.</p>

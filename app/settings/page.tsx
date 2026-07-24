@@ -33,10 +33,7 @@ export default async function SettingsPage() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <TopNav>
-          <a className="tm-link" href="/me">Profile</a>
-          <a className="tm-link" href="/signout">Sign out</a>
-        </TopNav>
+        <TopNav back="/me" />
 
         <h1 className="tm-h1">Settings</h1>
         <p className="tm-lead">Your handle, display name and style — and whether your profile is public. Publishing is off until you switch it on.</p>

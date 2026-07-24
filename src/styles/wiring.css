@@ -1,6 +1,7 @@
-/* Deep-links from the profile surfaces (What's next + DNA) into the knowledge
-   base. Imported directly by the components that use it so it stays out of the
-   shared tango.css. Uses the .tm-profile design tokens (loaded globally). */
+/* Navigation wiring: the deep-links from the profile surfaces (What's next +
+   DNA) into the knowledge base, plus the top-bar back control. Imported
+   directly by the components that use it so it stays out of the shared
+   tango.css. Uses the .tm-profile design tokens (loaded globally). */
 
 /* "What's next" recommendation row → /skill/[slug] (the whole row is the link) */
 a.tm-rec {
@@ -35,6 +36,29 @@ a.tm-brow:hover .tm-blab {
 a.tm-brow:focus-visible {
   outline: 2px solid var(--tm-ember);
   outline-offset: 1px;
+}
+
+/* Back control in the top bar (BackLink). It carries .tm-link too, so this only
+   re-shapes the pill around a single glyph — square-ish, optically centred, no
+   mono letter-spacing dragging the arrow off-centre. Hover/focus are restated
+   so the control keeps the .tm-link affordances regardless of sheet order. */
+a.tm-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 7px 11px;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+a.tm-back:hover {
+  border-color: var(--tm-ember);
+  color: var(--tm-ink);
+}
+a.tm-back:focus-visible {
+  outline: 2px solid var(--tm-ember);
+  outline-offset: 2px;
 }
 
 /* DnaGenome category column → /skills#[tag] */

@@ -21,14 +21,17 @@ import { dirname, resolve } from 'node:path';
 // runtime coordinator is order-independent by design, see public/map-runtime.js):
 //   sync           — progress persistence to /api/progress
 //   map-runtime    — shared reconcile coordinator (one debounced observer + backstop)
-//                    driving map-categories / map-skilllink; must be available to both
+//                    driving map-categories / map-skilllink / map-home; must precede none
+//                    of them in particular — registration is order-independent
 //   map-categories — "Browse by category" sidebar navigator (+ Learn links)
 //   map-skilllink  — "Read the guide →" (+ teacher video badge) in the Skill Details panel
-//   auth-ui        — Profile/Settings/Sign-in-out controls in the map header
+//   map-home       — progress / "next up" home card in the Skill Details panel while
+//                    nothing is selected (data from /api/next); removes itself on select
+//   auth-ui        — Learn/Profile/Card/Settings/Sign-in-out controls in the map header
 //   theme-sync     — cross-tab / bfcache theme sync + meta[theme-color] for the map
 //   onboarding     — first-visit welcome overlay
 //   sw-register    — service-worker registration (installable/offline PWA)
-const SCRIPTS = ['/sync.js', '/map-runtime.js', '/map-categories.js', '/map-skilllink.js', '/auth-ui.js', '/theme-sync.js', '/onboarding.js', '/sw-register.js'];
+const SCRIPTS = ['/sync.js', '/map-runtime.js', '/map-categories.js', '/map-skilllink.js', '/map-home.js', '/auth-ui.js', '/theme-sync.js', '/onboarding.js', '/sw-register.js'];
 const OPEN = '<script type="__bundler/template">';
 
 // Insert `<script src defer>` before </head> inside the bundle's JSON-encoded
