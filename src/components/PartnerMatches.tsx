@@ -55,7 +55,9 @@ export function PartnerMatches({ mastered, meHandle, dancers }: { mastered: stri
                 @{d.handle} · {s.shared} shared{s.reachGap > 0 ? ` · ${s.reachGap} level${s.reachGap === 1 ? '' : 's'} apart` : ' · same level'}
               </span>
             </span>
-            <span className="tm-match-score" title="Dance match">{Math.round(s.score * 100)}%</span>
+            <span className="tm-match-score" title="Dance match" aria-label={`${Math.round(s.score * 100)}% dance match`}>
+              {Math.round(s.score * 100)}%
+            </span>
             <a className="tm-cbtn" href={compareHref(d.handle)} aria-label={`Compare with ${nameOf(d)}`}>
               <CompareIcon />
               Compare

@@ -1,5 +1,9 @@
 import { TopNav } from '@/src/components/TopNav';
 
+// The global 404 boundary (also what /u/[handle] renders via notFound()), so the
+// browser tab reads sensibly instead of the generic app title.
+export const metadata = { title: 'Not found — Tango Map' };
+
 export default function NotFound() {
   return (
     <div className="tm-profile">

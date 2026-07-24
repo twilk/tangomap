@@ -177,9 +177,15 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
     if (!cv) return;
     const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
     let raf = 0;
-    if (reduce) {
+    let fallback = 0;
+    const finish = () => {
       progRef.current = 1;
       draw();
+    };
+    if (reduce || document.hidden) {
+      // Reduced motion, or mounted in a hidden/background tab (rAF is paused there):
+      // render the final shape at once so the radar is never left collapsed.
+      finish();
     } else {
       const start = performance.now();
       const step = (ts: number) => {
@@ -187,9 +193,21 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
         progRef.current = 1 - Math.pow(1 - k, 3);
         draw();
         if (k < 1) raf = requestAnimationFrame(step);
+        else clearTimeout(fallback);
       };
       raf = requestAnimationFrame(step);
+      // Hard-guarantee the final state even if rAF is throttled (occluded window) and never ticks to completion.
+      fallback = window.setTimeout(finish, 1100);
     }
+    // Going hidden mid-animation: snap to the final shape so returning never flashes a collapsed radar.
+    const onVis = () => {
+      if (document.hidden && progRef.current < 1) {
+        cancelAnimationFrame(raf);
+        clearTimeout(fallback);
+        finish();
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
     const ro = new ResizeObserver(() => {
       if (progRef.current === 0) progRef.current = reduce ? 1 : progRef.current;
       draw();
@@ -200,6 +218,8 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
     mq.addEventListener('change', onTheme);
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(fallback);
+      document.removeEventListener('visibilitychange', onVis);
       ro.disconnect();
       mq.removeEventListener('change', onTheme);
     };
