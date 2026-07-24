@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { db } from '@/db';
-import { profile, progress } from '@/db/schema';
-import { and, eq, isNotNull } from 'drizzle-orm';
+import { profile, progress, progressHistory } from '@/db/schema';
+import { and, eq, isNotNull, lte } from 'drizzle-orm';
 import { normalizeHandle } from '@/src/lib/handle';
 import type { PublicProfile } from '@/src/lib/types';
 
@@ -25,6 +25,48 @@ export const getPublicProfile = cache(async (handle: string): Promise<PublicProf
     displayName: row.displayName,
     style: row.style as PublicProfile['style'],
     mastered: progressRow?.mastered ?? [],
+  };
+});
+
+export type CardData = PublicProfile & {
+  /** Mint number: assigned once at profile creation (DB sequence), never recomputed. */
+  serial: number;
+  /** Year the profile was minted (season stamp). */
+  mintedYear: number;
+  /** Mastered set from the newest snapshot ≥30 days old, or null when no history reaches back that far. */
+  ghostMastered: string[] | null;
+};
+
+/**
+ * Everything the dancer-card page needs beyond the public profile: the minted
+ * serial, the minted year, and the ≥30-day-old progress snapshot for the
+ * growth "ghost" blob. Same privacy rule as getPublicProfile: null for missing
+ * or private handles, no private fields out.
+ */
+export const getCardData = cache(async (handle: string): Promise<CardData | null> => {
+  const h = normalizeHandle(handle);
+  const row = await db.query.profile.findFirst({ where: eq(profile.handle, h) });
+  if (!row || !row.isPublic) return null;
+
+  const cutoff = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const [progressRow, ghostRow] = await Promise.all([
+    db.query.progress.findFirst({ where: eq(progress.userId, row.userId) }),
+    db.query.progressHistory.findFirst({
+      where: and(eq(progressHistory.userId, row.userId), lte(progressHistory.day, cutoff)),
+      orderBy: (t, { desc }) => desc(t.day),
+    }),
+  ]);
+
+  return {
+    handle: row.handle!,
+    displayName: row.displayName,
+    style: row.style as PublicProfile['style'],
+    mastered: progressRow?.mastered ?? [],
+    // 0 only for rows minted before migration 0002 that somehow missed the
+    // backfill — rendered as Nº 0000 rather than lying with a live count.
+    serial: row.cardSerial ?? 0,
+    mintedYear: row.createdAt.getUTCFullYear(),
+    ghostMastered: ghostRow?.mastered ?? null,
   };
 });
 

@@ -98,11 +98,14 @@ describe('PUT /api/progress', () => {
     expect(body.mastered).not.toContain('not-a-skill');
     expect(body.theme).toBe('dark');
     expect(body.sel).toBe(null);
-    // upsert chain was invoked
-    expect(mockInsert).toHaveBeenCalledTimes(1);
-    expect(mockValues).toHaveBeenCalledTimes(1);
-    expect(mockOnConflict).toHaveBeenCalledTimes(1);
-    // persisted value is sanitized too
+    // upsert chain was invoked twice: progress row + daily history snapshot
+    expect(mockInsert).toHaveBeenCalledTimes(2);
+    expect(mockValues).toHaveBeenCalledTimes(2);
+    expect(mockOnConflict).toHaveBeenCalledTimes(2);
+    // persisted values are sanitized too (both the row and the snapshot)
     expect(mockValues.mock.calls[0][0].mastered).toEqual(['mirada-cabeceo']);
+    expect(mockValues.mock.calls[1][0].mastered).toEqual(['mirada-cabeceo']);
+    // snapshot rows carry a YYYY-MM-DD day key
+    expect((mockValues.mock.calls[1][0] as unknown as { day: string }).day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
