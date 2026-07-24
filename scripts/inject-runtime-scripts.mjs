@@ -17,12 +17,13 @@ import { dirname, resolve } from 'node:path';
 
 // The complete startup chain, in load order (all defer, so order is cosmetic):
 //   sync           — progress persistence to /api/progress
-//   map-categories — "Browse by category" sidebar navigator
+//   map-categories — "Browse by category" sidebar navigator (+ Learn links)
+//   map-skilllink  — "Read the guide →" (+ teacher video badge) in the Skill Details panel
 //   auth-ui        — Profile/Settings/Sign-in-out controls in the map header
 //   theme-sync     — cross-tab / bfcache theme sync + meta[theme-color] for the map
 //   onboarding     — first-visit welcome overlay
 //   sw-register    — service-worker registration (installable/offline PWA)
-const SCRIPTS = ['/sync.js', '/map-categories.js', '/auth-ui.js', '/theme-sync.js', '/onboarding.js', '/sw-register.js'];
+const SCRIPTS = ['/sync.js', '/map-categories.js', '/map-skilllink.js', '/auth-ui.js', '/theme-sync.js', '/onboarding.js', '/sw-register.js'];
 const OPEN = '<script type="__bundler/template">';
 
 // Insert `<script src defer>` before </head> inside the bundle's JSON-encoded

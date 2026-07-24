@@ -22,6 +22,8 @@
       { label: 'Styles', icon: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2Z"/>', names: ['Tango Salón', 'Estilo Milonguero', 'Tango Nuevo'] },
       { label: 'Mastery', icon: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>', names: ['Improvisation', 'Stops & Endings'] }
     ];
+    // /skills#anchor for each category, in CATS order (mirrors catAnchor() in src/lib/dna.ts).
+    var ANCHORS = ['partner', 'body', 'step', 'rhythm', 'rotation', 'space', 'contact', 'free-leg', 'off-axis', 'dynamics', 'genre', 'style', 'mastery'];
     function iconSvg(inner) { return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>'; }
     var norm = function (s) { try { return String(s).normalize('NFC'); } catch (e) { return String(s); } };
     var nameToCat = {};
@@ -119,9 +121,13 @@
       var clear = pinned >= 0
         ? '<button class="tm-cat-row" data-i="-1" style="display:flex;align-items:center;gap:8px;width:calc(100% - 12px);margin:6px 6px 2px;padding:6px 10px;border:0;border-radius:9px;cursor:pointer;text-align:left;font:600 12px Figtree,system-ui,sans-serif;color:' + muted + ';background:transparent">✕ Clear filter</button>'
         : '';
+      // Contextual link into the knowledge base: the pinned category, or the whole guide.
+      var learnHref = pinned >= 0 ? '/skills#' + ANCHORS[pinned] : '/skills';
+      var learnLabel = pinned >= 0 ? 'Learn ' + CATS[pinned].label + ' →' : 'Open the Learn guide →';
+      var learn = '<a href="' + learnHref + '" style="display:flex;align-items:center;gap:8px;width:calc(100% - 12px);margin:8px 6px 4px;padding:8px 10px;border-radius:9px;text-decoration:none;font:600 12.5px Figtree,system-ui,sans-serif;color:' + accent + '">' + learnLabel + '</a>';
       cont.innerHTML =
         '<div style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:' + muted + ';padding:8px 16px 8px">Browse by category</div>' +
-        rows + clear;
+        rows + clear + learn;
 
       Array.prototype.forEach.call(cont.querySelectorAll('.tm-cat-row'), function (el) {
         var i = parseInt(el.getAttribute('data-i'), 10);
