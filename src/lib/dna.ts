@@ -43,6 +43,11 @@ export function iconSvg(inner: string, size = 16): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
 }
 
+/** Slugify a category tag for use as a URL fragment / element id. Tags can
+ * contain spaces ("FREE LEG", "OFF AXIS"), which are invalid in `#anchors`, so
+ * both the /skills section ids and every link to them must run through this. */
+export const catAnchor = (tag: string): string => tag.toLowerCase().replace(/\s+/g, '-');
+
 export type CategoryStat = { tag: string; label: string; icon: string; done: number; total: number; pct: number };
 export type CategorySkill = { name: string; slug: string; on: boolean; level: number };
 export type CategoryDetail = CategoryStat & { skills: CategorySkill[] };

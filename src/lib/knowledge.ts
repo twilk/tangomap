@@ -8,7 +8,7 @@ export type SkillContent = {
   leaderCues: string[];
   followerCues: string[];
   commonMistakes: string[];
-  video?: string; // captured from the source lesson; not surfaced yet (text-only for now)
+  video?: string; // lesson video (Drive); teacher-gated — see src/lib/teachers.ts + /api/skill-video
   lessonRefs?: string[];
 };
 
@@ -19,6 +19,14 @@ export function getSkillContent(slug: string): SkillContent | null {
 }
 export function hasSkillContent(slug: string): boolean {
   return Object.prototype.hasOwnProperty.call(CONTENT, slug);
+}
+
+/** Slugs of skills that have a lesson video. Teacher-gated — only ever sent to a
+ * verified teacher (via /api/teacher-videos), never baked into a static page. */
+export function slugsWithVideo(): string[] {
+  return Object.entries(CONTENT)
+    .filter(([, c]) => typeof c.video === 'string' && c.video.length > 0)
+    .map(([slug]) => slug);
 }
 
 /** Short overviews for the 13 categories (shown on the /skills index and skill pages). */

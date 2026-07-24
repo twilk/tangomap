@@ -1,4 +1,4 @@
-import { iconSvg } from '@/src/lib/dna';
+import { iconSvg, catAnchor } from '@/src/lib/dna';
 import type { Series } from '@/src/components/DnaGenome';
 import '@/src/styles/wiring.css';
 
@@ -19,7 +19,7 @@ export function DnaBars({ series }: { series: Series[] }) {
         {order.map((i) => {
           const c = base[i];
           return (
-            <a className="tm-brow" href={`/skills#${c.tag}`} key={c.tag} title={`Learn ${c.label} →`}>
+            <a className="tm-brow" href={`/skills#${catAnchor(c.tag)}`} key={c.tag} title={`Learn ${c.label} →`}>
               <span className="tm-bico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(c.icon, 15) }} />
               <span className="tm-blab">{c.label}</span>
               <span className="tm-btrack">

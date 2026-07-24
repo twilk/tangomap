@@ -36,3 +36,22 @@ a.tm-brow:focus-visible {
   outline: 2px solid var(--tm-ember);
   outline-offset: 1px;
 }
+
+/* DnaGenome category column → /skills#[tag] */
+a.tm-gcol {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  padding: 4px 4px 2px;
+  transition: background 0.15s;
+}
+a.tm-gcol:hover {
+  background: var(--tm-panel2);
+}
+a.tm-gcol:hover .tm-gaxc {
+  color: var(--tm-ember);
+}
+a.tm-gcol:focus-visible {
+  outline: 2px solid var(--tm-ember);
+  outline-offset: 1px;
+}

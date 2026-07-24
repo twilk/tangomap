@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import '@/src/styles/knowledge.css';
 import { SKILLS } from '@/src/data/skills';
-import { CATEGORIES, iconSvg } from '@/src/lib/dna';
+import { CATEGORIES, iconSvg, catAnchor } from '@/src/lib/dna';
 import { getSkillContent } from '@/src/lib/knowledge';
 import { TopNav } from '@/src/components/TopNav';
 import { SkillVideo } from '@/src/components/SkillVideo';
@@ -40,7 +40,7 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
           <span className="tm-skico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(cat?.icon ?? '', 26) }} />
           <div>
             <p className="tm-skcat">
-              <a className="tm-skcat-link" href={`/skills#${skill.tag}`}>{cat?.label ?? skill.tag}</a> · Level {skill.level}
+              <a className="tm-skcat-link" href={`/skills#${catAnchor(skill.tag)}`}>{cat?.label ?? skill.tag}</a> · Level {skill.level}
             </p>
             <h1 className="tm-h1">{skill.name}</h1>
             {c?.tagline && <p className="tm-sksub">{c.tagline}</p>}
