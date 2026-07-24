@@ -83,6 +83,7 @@ export function DancerCard(props: DancerCardProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [flipped, setFlipped] = useState(false);
   const [badge, setBadge] = useState(false);
+  const [immersive, setImmersive] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
   const [confetti, setConfetti] = useState<{ dx: number; dy: number; rot: number; delay: number }[]>([]);
   // iOS 13+ gates deviceorientation behind a user-gesture permission prompt.
@@ -232,6 +233,34 @@ export function DancerCard(props: DancerCardProps) {
       badgeOpenerRef.current?.focus();
     };
   }, [badge]);
+
+  // Immersive ("AR") fullscreen mode: the card takes over the viewport on a dark
+  // scrim and keeps tilting to the pointer/gyro. Mirrors the badge dialog for
+  // focus + Escape; also locks body scroll. Single focusable (close), so Tab is
+  // pinned to it rather than escaping to the controls behind the scrim.
+  const arRef = useRef<HTMLDivElement>(null);
+  const arCloseRef = useRef<HTMLButtonElement>(null);
+  const arOpenerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!immersive) return;
+    arCloseRef.current?.focus();
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setImmersive(false);
+      else if (e.key === 'Tab') {
+        e.preventDefault();
+        arCloseRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+      arOpenerRef.current?.focus();
+    };
+  }, [immersive]);
 
   const share = async () => {
     const data = { title: `${props.name} — Tango Map`, text: `${props.name}: ${props.count}/62 · ${props.signature}`, url: cardUrl };
@@ -405,7 +434,7 @@ export function DancerCard(props: DancerCardProps) {
         {props.recs.length > 0 && ` Next up: ${props.recs.map((r) => r.name).join(', ')}.`}
       </p>
 
-      <div ref={wrapRef} className="tm-card3d" onPointerMove={onPointerMove} onPointerLeave={onPointerLeave}>
+      <div ref={wrapRef} className={`tm-card3d${immersive ? ' immersive' : ''}`} onPointerMove={onPointerMove} onPointerLeave={onPointerLeave}>
         <div className={`tm-cardflip${flipped ? ' flipped' : ''}`}>
           {/* FRONT */}
           <article
@@ -557,6 +586,17 @@ export function DancerCard(props: DancerCardProps) {
         >
           Badge / QR
         </button>
+        <button
+          type="button"
+          className="tm-cta ghost"
+          aria-haspopup="dialog"
+          onClick={(e) => {
+            arOpenerRef.current = e.currentTarget;
+            setImmersive(true);
+          }}
+        >
+          View in AR
+        </button>
         {needsMotionOptIn && (
           <button type="button" className="tm-cta ghost" onClick={requestMotion}>
             Enable motion
@@ -580,6 +620,30 @@ export function DancerCard(props: DancerCardProps) {
           {qr ? <img src={qr} alt={`QR code linking to ${props.name}'s Tango Map profile`} /> : <p className="tm-badge-meta">…</p>}
           <p className="tm-badge-hint">Scan to see my Tango DNA — tap anywhere to close</p>
         </div>
+      )}
+
+      {immersive && (
+        <>
+          <div
+            className="tm-card-ar-scrim"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${props.name}'s card, immersive view`}
+            onClick={() => setImmersive(false)}
+          />
+          <button
+            ref={arCloseRef}
+            type="button"
+            className="tm-card-ar-close"
+            aria-label="Exit immersive view"
+            onClick={() => setImmersive(false)}
+          >
+            ✕
+          </button>
+          <p className="tm-card-ar-hint" aria-hidden="true">
+            {motionOn ? 'Move your phone to look around' : 'Drag to look around'} · tap to close
+          </p>
+        </>
       )}
     </div>
   );
