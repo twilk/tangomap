@@ -20,7 +20,14 @@ export async function GET() {
 export async function PUT(req: Request) {
   const session = await auth();
   if (!session?.user?.id) return Response.json({ error: 'unauthorized' }, { status: 401 });
-  const input = (await req.json()) as ProgressInput;
+  let input: ProgressInput;
+  try {
+    const parsed = await req.json();
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('bad body');
+    input = parsed as ProgressInput;
+  } catch {
+    return Response.json({ error: 'invalid_body' }, { status: 400 });
+  }
   const mastered = sanitizeMastered(input.mastered);
   const theme = input.theme === 'dark' || input.theme === 'light' ? input.theme : null;
   const sel = typeof input.sel === 'string' ? input.sel : null;

@@ -72,6 +72,18 @@ describe('PUT /api/progress', () => {
     expect(await res.json()).toEqual({ error: 'unauthorized' });
   });
 
+  test('rejects a non-object / malformed body with 400 invalid_body', async () => {
+    mockedAuth.mockResolvedValue({ user: { id: 'u1' } } as never);
+    const { PUT } = await loadRoute();
+    for (const body of ['null', '"a string"', '[1,2]', 'not json']) {
+      const req = new Request('http://test/api/progress', { method: 'PUT', body });
+      const res = await PUT(req);
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ error: 'invalid_body' });
+    }
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+
   test('sanitizes mastered and persists for an authenticated user', async () => {
     mockedAuth.mockResolvedValue({ user: { id: 'u1' } } as never);
     const { PUT } = await loadRoute();

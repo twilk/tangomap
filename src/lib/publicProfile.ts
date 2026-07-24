@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { db } from '@/db';
 import { profile, progress } from '@/db/schema';
 import { and, eq, isNotNull } from 'drizzle-orm';
@@ -8,8 +9,9 @@ import type { PublicProfile } from '@/src/lib/types';
  * Look up a public profile by handle.
  * Returns null when no profile matches the (normalized) handle or the profile
  * is not public. Never exposes private fields (dates, `sel`, isPublic, userId).
+ * Wrapped in React `cache` so a page and its `generateMetadata` share one query.
  */
-export async function getPublicProfile(handle: string): Promise<PublicProfile | null> {
+export const getPublicProfile = cache(async (handle: string): Promise<PublicProfile | null> => {
   const h = normalizeHandle(handle);
   const row = await db.query.profile.findFirst({ where: eq(profile.handle, h) });
   if (!row || !row.isPublic) return null;
@@ -24,7 +26,7 @@ export async function getPublicProfile(handle: string): Promise<PublicProfile | 
     style: row.style as PublicProfile['style'],
     mastered: progressRow?.mastered ?? [],
   };
-}
+});
 
 /**
  * Every public dancer, for the compare directory. Only ever the allow-listed

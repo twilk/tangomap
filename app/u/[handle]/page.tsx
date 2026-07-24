@@ -1,10 +1,11 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile } from '@/db/schema';
 import { getPublicProfile } from '@/src/lib/publicProfile';
-import { sanitizeMastered } from '@/src/lib/progress';
+import { sanitizeMastered, masteredCount } from '@/src/lib/progress';
 import { dnaSignature } from '@/src/lib/dna';
 import { ProfileSections } from '@/src/components/ProfileSections';
 import { TopNav } from '@/src/components/TopNav';
@@ -12,6 +13,23 @@ import { TopNav } from '@/src/components/TopNav';
 // Live DB read: never statically cache, or a profile flipped to private would
 // stay visible from the cache (a privacy leak) and progress would go stale.
 export const dynamic = 'force-dynamic';
+
+// Per-dancer title + description so shared /u/[handle] links read as the dancer,
+// not the generic app. (getPublicProfile is cached, so this shares the page's query.)
+export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
+  const { handle } = await params;
+  const data = await getPublicProfile(handle);
+  if (!data) return { title: 'Dancer not found — Tango Map' };
+  const name = data.displayName ?? data.handle;
+  const title = `${name} — Tango Map`;
+  const description = `${name}'s Tango DNA: ${masteredCount(data.mastered)}/62 mastered · ${dnaSignature(data.mastered)}.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: 'profile' },
+    twitter: { card: 'summary_large_image', title, description },
+  };
+}
 
 export default async function Page({ params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
