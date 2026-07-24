@@ -12,7 +12,14 @@
 // data-theme covers every source (the map's own toggle included).
 (function () {
   function want() {
-    try { return localStorage.getItem('tsm-theme') === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; }
+    try {
+      // The map can't render the custom palette, so it falls back to the custom
+      // ground's polarity (dark|light) — the closest built-in the map does have.
+      if (localStorage.getItem('tsm-theme') === 'custom') {
+        return localStorage.getItem('tsm-custom-polarity') === 'dark' ? 'dark' : 'light';
+      }
+      return localStorage.getItem('tsm-theme') === 'dark' ? 'dark' : 'light';
+    } catch (e) { return 'light'; }
   }
   function root() {
     return document.querySelector('.tsm[data-theme]') || document.documentElement;
