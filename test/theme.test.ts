@@ -1,5 +1,7 @@
 import { test, expect } from 'vitest';
-import { parseTheme, AA_CONTRAST, type Theme } from '@/src/lib/theme';
+import { parseTheme, deriveTokens, AA_CONTRAST, type Theme } from '@/src/lib/theme';
+import { light, dark } from '@/design/tokens';
+import { parseHex, contrastRatio } from '@/src/lib/color';
 
 // A legible light seed set: dark ink on a pale ground clears AA comfortably.
 const validLight = { v: 1, ground: '#f5ead8', ink: '#201e1d', accent: '#c67139', accent2: '#7a8a5e' };
@@ -55,4 +57,54 @@ test('a parsed theme satisfies the Theme type', () => {
   const out = parseTheme(validLight);
   const t: Theme | null = out;
   expect(t).not.toBeNull();
+});
+
+// --- deriveTokens ----------------------------------------------------------
+
+const lightSeed: Theme = { v: 1, ground: '#f5ead8', ink: '#201e1d', accent: '#c67139', accent2: '#7a8a5e' };
+const darkSeed: Theme = { v: 1, ground: '#110d09', ink: '#f2eadc', accent: '#e58c44', accent2: '#a8ba8a' };
+
+test('deriveTokens returns exactly the 17 ThemeTokens keys', () => {
+  expect(Object.keys(deriveTokens(lightSeed)).sort()).toEqual(Object.keys(light).sort());
+});
+
+test('deriveTokens plants the four seeds verbatim', () => {
+  const d = deriveTokens(lightSeed);
+  expect(d.ground).toBe(lightSeed.ground);
+  expect(d.ink).toBe(lightSeed.ink);
+  expect(d.ember).toBe(lightSeed.accent);
+  expect(d.verd).toBe(lightSeed.accent2);
+});
+
+test('deriveTokens pulls preset-only tokens from the nearest base (light vs dark)', () => {
+  const d = deriveTokens(lightSeed);
+  expect(d.carmine).toBe(light.carmine);
+  expect(d.elev).toBe(light.elev);
+  expect(d.focus).toBe(light.focus);
+  expect(d.hi).toBe(light.hi);
+
+  const dk = deriveTokens(darkSeed);
+  expect(dk.carmine).toBe(dark.carmine);
+  expect(dk.elev).toBe(dark.elev);
+  expect(dk.focus).toBe(dark.focus);
+});
+
+test('deriveTokens keeps derived ink/ground at or above WCAG-AA', () => {
+  for (const seed of [lightSeed, darkSeed]) {
+    const d = deriveTokens(seed);
+    expect(contrastRatio(parseHex(d.ink)!, parseHex(d.ground)!)).toBeGreaterThanOrEqual(AA_CONTRAST);
+  }
+});
+
+test('deriveTokens builds the soft accents in the token rgba style', () => {
+  const d = deriveTokens(lightSeed);
+  expect(d.emberSoft).toBe('rgba(198,113,57,.15)');
+  expect(d.verdSoft).toBe('rgba(122,138,94,.15)');
+  // and the ink-derived translucent tokens
+  expect(d.line2).toBe('rgba(32,30,29,.07)');
+  expect(d.chip).toBe('rgba(32,30,29,.05)');
+});
+
+test('deriveTokens is deterministic', () => {
+  expect(deriveTokens(lightSeed)).toEqual(deriveTokens(lightSeed));
 });
