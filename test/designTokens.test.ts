@@ -230,39 +230,55 @@ function parseDecls(body: string): Record<string, string> {
   return out;
 }
 
-/** Every declaration of the one rule whose selector is `selector`.
+/** Every declaration of the one TOP-LEVEL rule whose selector is `selector`.
  *
  *  Brace-matched from the rule's own `{`, never "the next `}`": app/tango.css has ~90
  *  other blocks, including nested `@media`, so a regex would end the block in the
  *  wrong place. Selectors are compared on normalised whitespace against the exact
  *  prelude, so `.tm-profile *` and `.tm-profile h1,.tm-profile h2` are not `.tm-profile`.
  *
- *  Throws rather than returning `{}` when the selector matches zero rules (or more
- *  than one): an empty result would make every assertion below vacuously true, which
- *  is exactly how a renamed selector would turn this proof into a green no-op. */
+ *  Nesting is part of the match, not just the selector. A `.tm-profile` block is only
+ *  the block the app paints from if it sits at the top level: wrapped in `@media print`
+ *  it paints nowhere on screen, wrapped in `@layer base` it loses the cascade to every
+ *  unlayered rule, and swallowed by an unclosed `{` earlier in the file browsers drop
+ *  it entirely. All three change what the app paints without changing one declared
+ *  value, so a prelude-only match would report parity while the tokens paint nothing.
+ *
+ *  Throws rather than returning `{}` when the selector matches zero top-level rules
+ *  (or more than one): an empty or wrong result would make every assertion below
+ *  vacuously true, which is how a renamed or re-nested selector would turn this proof
+ *  into a green no-op. */
 function declsIn(css: string, selector: string): Record<string, string> {
   const src = blankComments(css);
   const want = norm(selector);
-  const open: { prelude: string; from: number }[] = [];
+  const open: { prelude: string; from: number; depth: number }[] = [];
   const found: string[] = [];
+  let nested = 0;
   let mark = 0;
   for (let i = 0; i < src.length; i++) {
     const c = src[i];
     if (c === '"' || c === "'") i = endOfString(src, i);
     else if (c === '{') {
-      open.push({ prelude: src.slice(mark, i), from: i + 1 });
+      open.push({ prelude: src.slice(mark, i), from: i + 1, depth: open.length });
       mark = i + 1;
     } else if (c === '}') {
       const rule = open.pop();
-      if (rule && norm(rule.prelude) === want) found.push(src.slice(rule.from, i));
+      if (rule && norm(rule.prelude) === want) {
+        if (rule.depth === 0) found.push(src.slice(rule.from, i));
+        else nested++;
+      }
       mark = i + 1;
     } else if (c === ';') mark = i + 1;
   }
   if (found.length !== 1) {
+    const why = nested
+      ? ` (${nested} matched only inside another block — an at-rule wrapper or an unclosed rule ` +
+        `earlier in the file changes what the app paints without changing a declared value)`
+      : '';
     throw new Error(
-      `selector "${selector}": expected exactly one matching rule, found ${found.length}. ` +
-        `Refusing to return declarations — an empty result would let the token parity ` +
-        `assertions pass vacuously.`,
+      `selector "${selector}": expected exactly one matching rule at the top level, found ` +
+        `${found.length}${why}. Refusing to return declarations — an empty or wrong result would ` +
+        `let the token parity assertions pass vacuously.`,
     );
   }
   return parseDecls(found[0]);
@@ -339,4 +355,23 @@ test('a selector that matches nothing throws instead of passing vacuously', () =
   expect(() => declsIn(css, '.tm-profile')).not.toThrow();
   // Two rules with the same selector are ambiguous: which one does the app paint from?
   expect(() => declsIn(`${css}\n${css}`, '.tm-profile')).toThrow(/found 2/);
+});
+
+// The nastiest false green available to this test: the block still exists, still has
+// the right selector, and still declares all 17 correct values — but is no longer the
+// block the app paints from. Matching on the selector alone would report parity.
+test('a token block nested inside another rule is not adopted as the top-level one', () => {
+  const block = '.tm-profile{--tm-ground:#f5ead8}';
+  const wrapped = [
+    ['@media print', `@media print{${block}}`], // paints nowhere on screen
+    ['@layer base', `@layer base{${block}}`], // loses the cascade to every unlayered rule
+    ['an unclosed rule', `.stray{color:red;\n${block}}`], // browsers drop the lot
+  ] as const;
+  for (const [what, css] of wrapped) {
+    expect(() => declsIn(css, '.tm-profile'), `${what} must not be adopted`).toThrow(/found 0/);
+    expect(() => declsIn(css, '.tm-profile'), `${what} should say why`).toThrow(/only inside another block/);
+  }
+  // …while the unwrapped baseline still parses, so this is a nesting check and not a
+  // parser that simply refuses everything.
+  expect(declsIn(block, '.tm-profile')).toEqual({ '--tm-ground': '#f5ead8' });
 });
