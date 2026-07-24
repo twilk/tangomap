@@ -46,11 +46,14 @@ body { margin: 0; }
 .tm-themebtn{display:inline-flex; align-items:center; justify-content:center; width:34px; height:31px; padding:0; color:var(--tm-muted); background:transparent; border:1px solid var(--tm-line); border-radius:999px; cursor:pointer; transition:border-color .15s,color .15s}
 .tm-themebtn:hover{border-color:var(--tm-ember); color:var(--tm-ink)}
 .tm-themebtn:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
-.tm-themebtn .tm-sun,.tm-themebtn .tm-moon{align-items:center; justify-content:center; line-height:0}
+.tm-themebtn .tm-sun,.tm-themebtn .tm-moon,.tm-themebtn .tm-swatch{align-items:center; justify-content:center; line-height:0}
 .tm-themebtn .tm-sun{display:none}
 .tm-themebtn .tm-moon{display:inline-flex}
 :root[data-theme="dark"] .tm-themebtn .tm-sun{display:inline-flex}
 :root[data-theme="dark"] .tm-themebtn .tm-moon{display:none}
+.tm-themebtn .tm-swatch{display:none}
+:root[data-theme="custom"] .tm-themebtn .tm-swatch{display:inline-flex}
+:root[data-theme="custom"] .tm-themebtn .tm-sun,:root[data-theme="custom"] .tm-themebtn .tm-moon{display:none}
 
 /* page heading */
 .tm-h1{font-family:var(--serif); font-weight:600; font-size:clamp(28px,6vw,46px); line-height:1; letter-spacing:-.02em; margin:0}
