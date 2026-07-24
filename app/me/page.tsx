@@ -5,8 +5,10 @@ import { db } from '@/db';
 import { profile, progress } from '@/db/schema';
 import { sanitizeMastered } from '@/src/lib/progress';
 import { dnaSignature } from '@/src/lib/dna';
+import { listPublicProfiles } from '@/src/lib/publicProfile';
 import { ProfileSections } from '@/src/components/ProfileSections';
 import { Recommendations } from '@/src/components/Recommendations';
+import { PartnerMatches } from '@/src/components/PartnerMatches';
 import { CopyButton } from '@/src/components/CopyButton';
 import { TopNav } from '@/src/components/TopNav';
 
@@ -19,9 +21,10 @@ export default async function MePage() {
   if (!session?.user?.id) redirect('/signin');
   const uid = session.user.id;
 
-  const [prof, prog] = await Promise.all([
+  const [prof, prog, dancers] = await Promise.all([
     db.query.profile.findFirst({ where: eq(profile.userId, uid) }),
     db.query.progress.findFirst({ where: eq(progress.userId, uid) }),
+    listPublicProfiles(60),
   ]);
 
   const mastered = sanitizeMastered(prog?.mastered ?? []);
@@ -30,6 +33,9 @@ export default async function MePage() {
   const initial = (name.trim()[0] ?? '·').toUpperCase();
   const isPublic = prof?.isPublic ?? false;
   const handle = prof?.handle ?? null;
+  // Prefill compare with the viewer only when their profile is public (a private
+  // handle wouldn't resolve on /compare); also excludes the viewer from candidates.
+  const meHandle = isPublic && handle ? handle : null;
 
   return (
     <div className="tm-profile">
@@ -90,6 +96,8 @@ export default async function MePage() {
         {mastered.length > 0 && <Recommendations mastered={mastered} />}
 
         <ProfileSections mastered={mastered} />
+
+        {mastered.length > 0 && <PartnerMatches mastered={mastered} meHandle={meHandle} dancers={dancers} />}
 
         {handle && (
           <div className="tm-cta-row">
