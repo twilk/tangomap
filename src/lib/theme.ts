@@ -10,28 +10,41 @@ import { light, dark, type ThemeTokens } from '@/design/tokens';
  *  (all `#rrggbb`). Everything else in the palette is derived from these. */
 export type Theme = { v: 1; ground: string; ink: string; accent: string; accent2: string };
 
-/** WCAG-AA minimum contrast for body text. A theme whose ink fails this against
- *  its ground is rejected at the boundary — the app never renders illegible text. */
+/** WCAG-AA minimum contrast for body text (ink and derived `muted`). */
 export const AA_CONTRAST = 4.5;
+
+/** WCAG minimum contrast for UI components / large text — the floor the two accent
+ *  seeds (links, fills, chips) must clear against the ground to be visible. */
+export const AA_UI_CONTRAST = 3;
 
 /** The single trust boundary. Turns arbitrary untrusted input (a parsed JSON blob,
  *  a query param, localStorage) into a Theme or null — never throws.
  *
- *  Rejects non-objects, arrays and null; requires all four seeds to be hex strings;
- *  canonicalises each to lowercase `#rrggbb`; drops every other key; and rejects a
- *  theme whose ink/ground contrast is below WCAG-AA. */
+ *  The legibility contract a returned Theme guarantees (with deriveTokens):
+ *    • ink vs ground ≥ 4.5  (body text; enforced here)
+ *    • derived muted vs ground ≥ 4.5  (secondary text; deriveTokens self-corrects)
+ *    • accent & accent2 vs ground ≥ 3  (UI/links; enforced here — seeds can't self-correct)
+ *    • faint is intentionally decorative (tertiary, sub-AA by design, like the presets)
+ *
+ *  Also: rejects non-objects, arrays and null; rejects a version tag other than 1;
+ *  requires all four seeds to be hex strings; canonicalises each to lowercase
+ *  `#rrggbb`; and drops every other key. */
 export function parseTheme(input: unknown): Theme | null {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) return null;
   const o = input as Record<string, unknown>;
 
-  const seed = (k: string): RGB | null => (typeof o[k] === 'string' ? parseHex(o[k] as string) : null);
-  const ground = seed('ground');
-  const ink = seed('ink');
-  const accent = seed('accent');
-  const accent2 = seed('accent2');
+  // A future v2 must be distinguishable, not silently read as v1.
+  if (o.v !== undefined && o.v !== 1) return null;
+
+  const ground = parseHex(o.ground);
+  const ink = parseHex(o.ink);
+  const accent = parseHex(o.accent);
+  const accent2 = parseHex(o.accent2);
   if (!ground || !ink || !accent || !accent2) return null;
 
   if (contrastRatio(ink, ground) < AA_CONTRAST) return null;
+  if (contrastRatio(accent, ground) < AA_UI_CONTRAST) return null;
+  if (contrastRatio(accent2, ground) < AA_UI_CONTRAST) return null;
 
   return {
     v: 1,

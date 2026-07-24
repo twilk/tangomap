@@ -52,6 +52,29 @@ test('parseTheme accepts a legible dark theme', () => {
   expect(out).toEqual({ v: 1, ground: '#110d09', ink: '#f2eadc', accent: '#e58c44', accent2: '#a8ba8a' });
 });
 
+test('parseTheme rejects a washed-out accent (an invisible link/chip)', () => {
+  // Legible ink/ground, but an accent barely off the ground fails the 3:1 UI floor.
+  // Accents are seeds, so the only safe move is rejection — they cannot self-correct.
+  expect(parseTheme({ v: 1, ground: '#ffffff', ink: '#000000', accent: '#fdfdfd', accent2: '#333333' })).toBeNull();
+  // …and the guard covers accent2 too.
+  expect(parseTheme({ v: 1, ground: '#ffffff', ink: '#000000', accent: '#333333', accent2: '#f6f6f6' })).toBeNull();
+});
+
+test('parseTheme accepts accents that clear the 3:1 UI-contrast floor', () => {
+  expect(parseTheme({ v: 1, ground: '#ffffff', ink: '#000000', accent: '#767676', accent2: '#595959' })).not.toBeNull();
+  // the canonical presets sit right at the floor and must still pass
+  expect(parseTheme(validLight)).not.toBeNull();
+});
+
+test('parseTheme validates the version tag — absent or 1 only', () => {
+  const { v: _v, ...noVersion } = validLight;
+  expect(parseTheme(noVersion)).not.toBeNull(); // absent is fine
+  expect(parseTheme(validLight)).not.toBeNull(); // v: 1 is fine
+  expect(parseTheme({ ...validLight, v: 2 })).toBeNull(); // a future format is not silently mislabelled
+  expect(parseTheme({ ...validLight, v: '1' })).toBeNull(); // wrong type
+  expect(parseTheme({ ...validLight, v: null })).toBeNull();
+});
+
 // Type-level sanity: a parsed theme is assignable to Theme.
 test('a parsed theme satisfies the Theme type', () => {
   const out = parseTheme(validLight);
@@ -130,8 +153,10 @@ test('every random theme parseTheme accepts derives to an AA-legible palette', (
     const ratio = contrastRatio(parseHex(d.ink)!, parseHex(d.ground)!);
     expect(ratio, `theme #${i} derived below AA: ${ratio}`).toBeGreaterThanOrEqual(AA_CONTRAST);
   }
-  // Non-vacuity: a healthy share of the 2000 random themes must clear the gate,
-  // or the guarantee above would hold trivially over an empty set. This seed
-  // accepts 231 — well clear of the floor.
-  expect(accepted).toBeGreaterThan(100);
+  // Non-vacuity: a real share of the 2000 random themes must clear the boundary,
+  // or the guarantee above would hold trivially over an empty set. The accent 3:1
+  // gate (both accents, independently, vs a ground that already sits far from ink)
+  // drops acceptance from 231 to 46 for this seed — still a substantial sample.
+  // The floor sits well below 46 so incidental rounding shifts don't flake it.
+  expect(accepted).toBeGreaterThan(30);
 });
