@@ -81,7 +81,7 @@ describe('ThemeEditor', () => {
     await render();
 
     await act(async () => {
-      setInputValue(q<HTMLInputElement>('[aria-label="ink-hex"]'), '#3a3020');
+      setInputValue(q<HTMLInputElement>('[aria-label="Text hex"]'), '#3a3020');
     });
 
     expect(buttonByText(/^Apply$/).disabled).toBe(true);
@@ -130,6 +130,6 @@ describe('ThemeEditor', () => {
 
     await render();
 
-    expect(q<HTMLInputElement>('[aria-label="ground"]').value).toBe('#1b1327');
+    expect(q<HTMLInputElement>('[aria-label="Background"]').value).toBe('#1b1327');
   });
 });

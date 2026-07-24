@@ -45,12 +45,11 @@ export default function ThemeEditor(): React.JSX.Element {
   const [seeds, setSeeds] = useState<Seeds>(DEFAULT);
   const [applied, setApplied] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  // Effect-backed so SSR/first render never diverge from the server markup.
-  const [mounted, setMounted] = useState(false);
+  // Effect-backed so SSR/first render never diverge from the server markup:
+  // false on the server and on first client paint, then set once mounted.
   const [hasCustom, setHasCustom] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const t = currentCustomTheme();
     if (t) {
       setSeeds({ ground: t.ground, ink: t.ink, accent: t.accent, accent2: t.accent2 });
@@ -100,6 +99,7 @@ export default function ThemeEditor(): React.JSX.Element {
   function onSeed(key: keyof Seeds, value: string): void {
     setSeeds((s) => ({ ...s, [key]: value }));
     setApplied(false);
+    setConfirming(false);
   }
 
   function onApply(): void {
@@ -132,6 +132,7 @@ export default function ThemeEditor(): React.JSX.Element {
             onClick={() => {
               setSeeds(p.seeds);
               setApplied(false);
+              setConfirming(false);
             }}
           >
             {p.name}
@@ -149,13 +150,13 @@ export default function ThemeEditor(): React.JSX.Element {
               <div className="row">
                 <input
                   type="color"
-                  aria-label={key}
+                  aria-label={SEED_LABELS[key]}
                   value={colorValue}
                   onChange={(e) => onSeed(key, e.target.value)}
                 />
                 <input
                   type="text"
-                  aria-label={`${key}-hex`}
+                  aria-label={`${SEED_LABELS[key]} hex`}
                   spellCheck={false}
                   autoCapitalize="none"
                   value={raw}
@@ -204,7 +205,7 @@ export default function ThemeEditor(): React.JSX.Element {
         )}
       </div>
 
-      {mounted && hasCustom && (
+      {hasCustom && (
         <div className="tm-reset-row">
           <button
             type="button"
