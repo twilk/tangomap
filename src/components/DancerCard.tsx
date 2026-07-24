@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { smoothPathD, type Pt } from '@/src/lib/radarPath';
+import { CATEGORIES, iconSvg } from '@/src/lib/dna';
 
 // qrcode is only needed after an explicit user action (badge / story export),
 // so it stays out of the card's initial bundle.
@@ -40,6 +41,18 @@ export type DancerCardProps = {
 // and the same "never fully collapsed" floor so beginners still get a shape.
 const C = 100;
 const R = 76;
+// Category icons ring the radar just outside the outer grid ring, so each spike
+// is legible as a category — the same 13 icons the app's DNA radar shows.
+const ICON_R = 90;
+// Muted parchment: frames the blob without competing with the ember stroke.
+const AXICON = 'rgba(241,233,220,.5)';
+// The card's `dna` arrives in CATEGORIES order, but match by label so the icon
+// can never end up on the wrong spike if that ever changes.
+const ICON_BY_LABEL: Record<string, string> = Object.fromEntries(CATEGORIES.map((c) => [c.label, c.icon]));
+// Icon as a colour-baked data URL for the canvas story export (canvas can't read
+// currentColor). Mirrors the app DNA radar's approach.
+const axIconUrl = (inner: string) =>
+  'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(inner, 24).replace(/currentColor/g, AXICON));
 
 function radarPoints(dna: { pct: number }[], r = R): Pt[] {
   const N = dna.length;
@@ -288,6 +301,29 @@ export function DancerCard(props: DancerCardProps) {
     ctx.lineJoin = 'round';
     ctx.stroke(blob);
 
+    // Category icons around the perimeter, matching the on-screen card. Loaded as
+    // colour-baked SVG images (canvas has no currentColor); a failed load is
+    // skipped so the export never blocks on one bad icon.
+    const iconPx = 12 * scale;
+    const axImgs = await Promise.all(
+      props.dna.map(
+        (d) =>
+          new Promise<HTMLImageElement | null>((res) => {
+            const inner = ICON_BY_LABEL[d.label];
+            if (!inner) return res(null);
+            const im = new Image();
+            im.onload = () => res(im);
+            im.onerror = () => res(null);
+            im.src = axIconUrl(inner);
+          }),
+      ),
+    );
+    axImgs.forEach((im, i) => {
+      if (!im) return;
+      const v = vertexAt(i, props.dna.length, ICON_R);
+      ctx.drawImage(im, ox + v.x * scale - iconPx / 2, oy + v.y * scale - iconPx / 2, iconPx, iconPx);
+    });
+
     ctx.fillStyle = '#F2EADC';
     ctx.font = '600 130px ui-monospace, Menlo, monospace';
     ctx.fillText(String(props.count), W / 2, 745);
@@ -412,6 +448,20 @@ export function DancerCard(props: DancerCardProps) {
                       </g>
                     ),
                 )}
+                {props.dna.map((d, i) => {
+                  const inner = ICON_BY_LABEL[d.label];
+                  if (!inner) return null;
+                  const p = vertexAt(i, N, ICON_R);
+                  const s = 12;
+                  return (
+                    <g
+                      key={`ax-${i}`}
+                      transform={`translate(${p.x - s / 2} ${p.y - s / 2})`}
+                      style={{ color: AXICON }}
+                      dangerouslySetInnerHTML={{ __html: iconSvg(inner, s) }}
+                    />
+                  );
+                })}
               </svg>
               <div className="tm-card-core">
                 <b className="tm-num">{props.count}</b>
