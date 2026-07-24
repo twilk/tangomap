@@ -3,8 +3,8 @@ import { readFileSync, writeFileSync, existsSync, mkdtempSync, mkdirSync, cpSync
 import { execFileSync } from 'node:child_process';
 import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { OUTPUTS, replaceRegion } from '@/scripts/build-design.mjs';
-import { light, dark, card, radii, cssVar, type ThemeTokens } from '@/design/tokens';
+import { OUTPUTS, replaceRegion, buildDesign } from '@/scripts/build-design.mjs';
+import { light, dark, card, rounded, semantic, cssVar, type ThemeTokens } from '@/design/tokens';
 
 const root = resolve(__dirname, '..');
 
@@ -40,7 +40,7 @@ test('the generated JS token export is importable and re-exports the source valu
   expect(mod.light).toEqual(withoutElev(light as ThemeTokens));
   expect(mod.dark).toEqual(withoutElev(dark as ThemeTokens));
   expect(mod.card).toEqual(card);
-  expect(mod.radii).toEqual(radii);
+  expect(mod.rounded).toEqual(rounded);
   // The omission is a contract, not an accident: assert it explicitly so a future edit
   // that pipes a var()-bearing value back into the canvas export fails here.
   expect('elev' in mod.light).toBe(false);
@@ -184,6 +184,69 @@ test('a region replaces only the marked body and keeps surrounding prose', () =>
   expect(next).toContain('hand-written tail');
   expect(next).toContain('NEW');
   expect(next).not.toContain('OLD');
+});
+
+// ---------------------------------------------------------------------------
+// DESIGN.md is a whole-file generated output: the prose AND the front matter live in
+// DESIGN.md.tmpl and the token VALUES are substituted in by buildDesign. The test.each
+// staleness case above already covers drift of the file on disk; these prove the
+// substitution is COMPLETE (no brace-token survives), CORRECT (colours resolve to the real
+// light token), and that the front matter is single-sourced (it cannot contradict the body).
+// ---------------------------------------------------------------------------
+
+// Loose on purpose — the same pattern the generator's guard uses. A strict
+// `\{[a-z]+\.[a-zA-Z0-9]+\}` would let a near-miss ({Colors.primary}, {spacing.page-padding})
+// through unnoticed; this catches ANY leftover brace-token.
+const BRACE_TOKEN = /\{[A-Za-z][\w.-]*\}/g;
+
+test('the generated DESIGN.md ships no literal brace-token', () => {
+  const md = readFileSync(resolve(root, 'DESIGN.md'), 'utf8');
+  const survivors = md.match(BRACE_TOKEN);
+  expect(survivors, `unresolved brace-tokens in DESIGN.md: ${survivors?.join(', ')}`).toBeNull();
+});
+
+// The banner must be a YAML comment on line 2 — an HTML comment on line 1 would push the
+// opening `---` down and break every front-matter parser.
+test('the generated DESIGN.md keeps `---` on line 1 so the front matter stays valid', () => {
+  const lines = readFileSync(resolve(root, 'DESIGN.md'), 'utf8').split('\n');
+  expect(lines[0]).toBe('---');
+  expect(lines[1]).toBe('# GENERATED from DESIGN.md.tmpl by npm run design — DO NOT EDIT');
+});
+
+// The completeness guard is load-bearing: an unknown or malformed placeholder must abort
+// generation (naming the offender) rather than silently ship a broken doc. A known group
+// with a bad key throws during substitution; an unknown group and a near-miss that the
+// strict substitution grammar ignores are both caught by the loose survivor check.
+test('buildDesign throws, naming the offender, on an unknown or malformed placeholder', () => {
+  expect(() => buildDesign('accent is `{colors.bogus}`')).toThrow(/colors\.bogus/);
+  expect(() => buildDesign('gap is `{nope.x}`')).toThrow(/nope\.x/);
+  // near-miss the strict substitution regex skips but the loose guard still catches:
+  expect(() => buildDesign('accent is `{Colors.primary}`')).toThrow(/Colors\.primary/);
+  expect(() => buildDesign('pad is `{spacing.page-padding}`')).toThrow(/spacing\.page-padding/);
+  expect(() => buildDesign('ember is `{colors.primary}`')).not.toThrow();
+});
+
+test('every {colors.X} resolves to the matching light token value', () => {
+  // end-to-end spot check: {colors.primary} is the light ember value, via the semantic map
+  expect(light[semantic.primary]).toBe(light.ember);
+  expect(buildDesign('ember is `{colors.primary}`')).toContain(`ember is \`${light.ember}\``);
+  // and the whole doc colour vocabulary resolves to a real light token — never "undefined"
+  for (const name of Object.keys(semantic) as (keyof typeof semantic)[]) {
+    const out = buildDesign(`{colors.${name}}`);
+    expect(out, `{colors.${name}}`).toContain(light[semantic[name]]);
+    expect(out, `{colors.${name}} must not resolve to undefined`).not.toContain('undefined');
+  }
+});
+
+// The whole point of generating the doc: a token's value appears once, from source, so the
+// front-matter header and the prose body can never disagree. secondary is the canary — its
+// header literal used to be the stale teal #2C7869 while the body rendered #7a8a5e.
+test('the front matter no longer contradicts the body (colours are single-sourced)', () => {
+  const md = readFileSync(resolve(root, 'DESIGN.md'), 'utf8');
+  const secondary = light[semantic.secondary];
+  expect(md).toContain(`secondary: "${secondary}"`); // front-matter YAML map
+  expect(md).toContain(`**Verdigris \`${secondary}\`**`); // Colors prose
+  expect(md).not.toContain('#2C7869'); // the stale teal is gone everywhere
 });
 
 // ---------------------------------------------------------------------------

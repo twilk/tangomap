@@ -1,5 +1,5 @@
+<!-- Source template for DESIGN.md. Edit THIS file, then run `npm run design` to regenerate DESIGN.md (token values are substituted from design/tokens.ts). -->
 ---
-# GENERATED from DESIGN.md.tmpl by npm run design — DO NOT EDIT
 name: Tango Map — "The Milonga at Night"
 # NOTE: front-matter values that have an exact design/tokens.ts equivalent are written as
 # placeholders and generated from source, so they can never contradict the body. Values
@@ -7,25 +7,25 @@ name: Tango Map — "The Milonga at Night"
 # role font-sizes other than h1/navLink) and the component padding specs below — stay as
 # hand-literals and are NOT yet single-sourced.
 colors:
-  primary: "#c67139"
-  secondary: "#7a8a5e"
-  tertiary: "#A6172E"
-  ground: "#f5ead8"
-  panel: "#f9f4ed"
-  panelRaised: "#fdfbf5"
-  ink: "#201e1d"
-  muted: "#645c50"
-  faint: "#968b79"
-  line: "#dcd3c4"
-  lineSubtle: "rgba(32,30,29,.07)"
-  emberSoft: "rgba(198,113,57,.15)"
-  verdigrisSoft: "rgba(122,138,94,.15)"
-  chip: "rgba(32,30,29,.05)"
-  focus: "#3F5BB0"
+  primary: "{colors.primary}"
+  secondary: "{colors.secondary}"
+  tertiary: "{colors.tertiary}"
+  ground: "{colors.ground}"
+  panel: "{colors.panel}"
+  panelRaised: "{colors.panelRaised}"
+  ink: "{colors.ink}"
+  muted: "{colors.muted}"
+  faint: "{colors.faint}"
+  line: "{colors.line}"
+  lineSubtle: "{colors.lineSubtle}"
+  emberSoft: "{colors.emberSoft}"
+  verdigrisSoft: "{colors.verdigrisSoft}"
+  chip: "{colors.chip}"
+  focus: "{colors.focus}"
 typography:
   h1:
     fontFamily: "Iowan Old Style, Georgia, Times New Roman, serif"
-    fontSize: "clamp(28px,6vw,46px)"
+    fontSize: "{typography.h1}"
     fontWeight: 600
     lineHeight: 1
     letterSpacing: "-0.02em"
@@ -46,7 +46,7 @@ typography:
     letterSpacing: "0.22em"
   navLink:
     fontFamily: "ui-monospace, SF Mono, Cascadia Mono, Menlo, Consolas, monospace"
-    fontSize: "11px"
+    fontSize: "{typography.navLink}"
     fontWeight: 400
     letterSpacing: "0.06em"
   statValue:
@@ -59,61 +59,61 @@ typography:
     fontSize: "clamp(15px, 2.2vw, 18px)"
     fontWeight: 400
 rounded:
-  sm: "4px"
-  md: "8px"
-  input: "10px"
-  card: "12px"
-  panel: "14px"
-  pill: "999px"
+  sm: "{rounded.sm}"
+  md: "{rounded.md}"
+  input: "{rounded.input}"
+  card: "{rounded.card}"
+  panel: "{rounded.panel}"
+  pill: "{rounded.pill}"
 spacing:
-  xs: "6px"
+  xs: "{spacing.xs}"
   sm: "8px"
   md: "12px"
   lg: "16px"
-  xl: "26px"
-  section: "34px"
-  pagePadding: "clamp(16px,4vw,32px)"
-  contentWidth: "760px"
-  contentWidthWide: "880px"
+  xl: "{spacing.xl}"
+  section: "{spacing.section}"
+  pagePadding: "{spacing.pagePadding}"
+  contentWidth: "{spacing.contentWidth}"
+  contentWidthWide: "{spacing.contentWidthWide}"
 components:
   navPill:
-    textColor: "#645c50"
-    typography: "11px"
-    rounded: "999px"
+    textColor: "{colors.muted}"
+    typography: "{typography.navLink}"
+    rounded: "{rounded.pill}"
     padding: "7px 12px"
   primaryButton:
-    backgroundColor: "#c67139"
+    backgroundColor: "{colors.primary}"
     textColor: "#ffffff"
-    rounded: "10px"
+    rounded: "{rounded.input}"
     padding: "11px 22px"
   dangerButton:
-    backgroundColor: "#A6172E"
+    backgroundColor: "{colors.tertiary}"
     textColor: "#ffffff"
-    rounded: "10px"
+    rounded: "{rounded.input}"
     padding: "11px 20px"
   ctaButton:
     backgroundColor: "transparent"
-    textColor: "#201e1d"
+    textColor: "{colors.ink}"
     rounded: "11px"
     padding: "12px 18px"
   card:
-    backgroundColor: "#f9f4ed"
-    textColor: "#201e1d"
-    rounded: "12px"
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.card}"
     padding: "11px 14px"
   statStrip:
-    backgroundColor: "#fdfbf5"
-    textColor: "#201e1d"
-    rounded: "14px"
+    backgroundColor: "{colors.panelRaised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.panel}"
     padding: "15px 16px"
   input:
-    backgroundColor: "#fdfbf5"
-    textColor: "#201e1d"
-    rounded: "10px"
+    backgroundColor: "{colors.panelRaised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.input}"
     padding: "11px 13px"
   tag:
-    textColor: "#968b79"
-    rounded: "999px"
+    textColor: "{colors.faint}"
+    rounded: "{rounded.pill}"
     padding: "3px 8px"
 ---
 
@@ -154,30 +154,30 @@ practice journal.
 The palette has three voices, each with a fixed meaning. Meanings are semantic,
 not decorative — do not swap them.
 
-- **Ember `#c67139`** — the lamplight. The default accent: links on
+- **Ember `{colors.primary}`** — the lamplight. The default accent: links on
   hover, focus rings, primary buttons, progress fills, the brand dot, "beginner"
   tier, side A in comparisons. If something is interactive or in progress, it
   glows ember.
-- **Verdigris `#7a8a5e`** — the bronze. The counterpart voice:
+- **Verdigris `{colors.secondary}`** — the bronze. The counterpart voice:
   "intermediate" tier, side B in comparisons, success/"public" states, the
   teach-role avatar. It exists so two datasets can sit side by side without
   competing.
-- **Carmine `#A6172E`** — the deepest red. Dual meaning by context:
+- **Carmine `{colors.tertiary}`** — the deepest red. Dual meaning by context:
   **mastery** (maxed-out dimensions, "advanced" tier, the hot end of the
   ember→carmine gradient) and **danger** (delete account, destructive
   confirmation). These never appear on the same screen region, so the dual role
   stays unambiguous.
-- **Focus `#3F5BB0`** — a cool "moonlight" blue used only for
+- **Focus `{colors.focus}`** — a cool "moonlight" blue used only for
   hover/focus highlighting on the radar chart, chosen to be complementary to
   ember and distinct from verdigris so it never blends with data.
 
-Neutrals are a warm paper ramp: `#f5ead8` (page) → `#f9f4ed` →
-`#fdfbf5` (raised surfaces), with ink at `#201e1d` and two
-levels of de-emphasis, `#645c50` then `#968b79`. Hairlines use
-`#dcd3c4`; sub-hairlines (row separators) use `rgba(32,30,29,.07)`.
+Neutrals are a warm paper ramp: `{colors.ground}` (page) → `{colors.panel}` →
+`{colors.panelRaised}` (raised surfaces), with ink at `{colors.ink}` and two
+levels of de-emphasis, `{colors.muted}` then `{colors.faint}`. Hairlines use
+`{colors.line}`; sub-hairlines (row separators) use `{colors.lineSubtle}`.
 
-Each accent has a soft companion (`rgba(198,113,57,.15)`,
-`rgba(122,138,94,.15)`, and `color-mix` at ~15% for carmine) used for chip
+Each accent has a soft companion (`{colors.emberSoft}`,
+`{colors.verdigrisSoft}`, and `color-mix` at ~15% for carmine) used for chip
 backgrounds, halos, and selected states — tint with the soft variant, never
 with the full-strength accent.
 
@@ -187,23 +187,7 @@ Dark is not an inversion; it is the same milonga after the lamps are lowered.
 Warmth is preserved (near-black brown ground, parchment ink) and accents are
 lifted for contrast on dark:
 
-| Token | Light | Dark |
-|---|---|---|
-| primary | `#c67139` | `#E58C44` |
-| secondary | `#7a8a5e` | `#A8BA8A` |
-| tertiary | `#A6172E` | `#E6415C` |
-| focus | `#3F5BB0` | `#8EA6FF` |
-| ground | `#f5ead8` | `#110D09` |
-| panel | `#f9f4ed` | `#1A1510` |
-| panelRaised | `#fdfbf5` | `#221B14` |
-| ink | `#201e1d` | `#F2EADC` |
-| muted | `#645c50` | `#9E907E` |
-| faint | `#968b79` | `#6C5F50` |
-| line | `#dcd3c4` | `rgba(241,233,220,.11)` |
-| lineSubtle | `rgba(32,30,29,.07)` | `rgba(241,233,220,.05)` |
-| emberSoft | `rgba(198,113,57,.15)` | `rgba(229,140,68,.14)` |
-| verdigrisSoft | `rgba(122,138,94,.15)` | `rgba(168,186,138,.15)` |
-| chip | `rgba(32,30,29,.05)` | `rgba(241,233,220,.05)` |
+{tables.colors}
 
 Always define both themes when adding a color: add the light value inside
 `.tm-profile` and the dark value inside `:root[data-theme="dark"] .tm-profile`,
@@ -219,7 +203,7 @@ themes. Accent-on-soft-tint combinations are reserved for large text, labels
 Three families, three jobs — never mixed within a role:
 
 - **Serif** (`Iowan Old Style, Georgia, serif`) — the editorial voice. Page
-  headlines (`clamp(28px,6vw,46px)`), the profile name, avatar initials, italic
+  headlines (`{typography.h1}`), the profile name, avatar initials, italic
   signature lines, and the comparison verdict. Weight 600, tight leading
   (1–1.18), slightly negative tracking. Italic `<em>` inside an h1 takes the
   ember color.
@@ -239,17 +223,17 @@ fast and offline-capable as a PWA).
 
 ## Layout
 
-Single centered column: `760px` max-width
-(`880px` for wide views like compare), fluid page padding
-`clamp(16px,4vw,32px)` horizontally clamped with `env(safe-area-inset-*)`
+Single centered column: `{spacing.contentWidth}` max-width
+(`{spacing.contentWidthWide}` for wide views like compare), fluid page padding
+`{spacing.pagePadding}` horizontally clamped with `env(safe-area-inset-*)`
 for notched devices, and a 72px bottom reserve.
 
-Rhythm comes from a small step scale — `6px` through `26px`
-for intra-component gaps, `34px` between sections. Sections open
+Rhythm comes from a small step scale — `{spacing.xs}` through `{spacing.xl}`
+for intra-component gaps, `{spacing.section}` between sections. Sections open
 with a mono uppercase eyebrow (`.tm-sh`) sitting on a sub-hairline.
 
-Structure is drawn with hairlines, not boxes: full-strength `#dcd3c4`
-for container borders, `rgba(32,30,29,.07)` for row separators inside lists.
+Structure is drawn with hairlines, not boxes: full-strength `{colors.line}`
+for container borders, `{colors.lineSubtle}` for row separators inside lists.
 Rows in data lists (legend, spine, compare tape) are CSS grids with fixed
 gutter columns for indices and values, so numbers align down the page.
 
@@ -286,18 +270,18 @@ in-place via accordions.
 
 Roundness communicates role:
 
-- **Pills (`999px`)** — anything small and label-like or chip-like:
+- **Pills (`{rounded.pill}`)** — anything small and label-like or chip-like:
   nav links, tags, tier badges, milestones, segmented controls, view switcher,
   progress tracks.
-- **Soft rectangles (`8px`–`14px`)** — surfaces. 8px for
+- **Soft rectangles (`{rounded.md}`–`{rounded.panel}`)** — surfaces. 8px for
   hoverable rows, 10px inputs and buttons, 12px cards and callouts, 13–14px
   large panels. Radius grows with the size of the surface.
 - **Circles** — identity and state: avatars (radial ember→carmine gradient),
   status dots, the brand dot, toggle knobs.
-- **Tiny squares (`4px`)** — data cells in the 62-skill grid and
+- **Tiny squares (`{rounded.sm}`)** — data cells in the 62-skill grid and
   legend keys.
 
-Progress bars are fully rounded tracks in `rgba(32,30,29,.05)` with accent fills;
+Progress bars are fully rounded tracks in `{colors.chip}` with accent fills;
 maxed-out fills graduate ember→carmine and earn a `✦`.
 
 ## Components
@@ -331,7 +315,7 @@ All components live in `app/tango.css` with the `tm-` prefix, scoped under
   the `on` state drops its border for a verdigris soft tint.
 - **Data viz (radar, genome, ranked bars, diverging bars, 62-grid)** — side A
   is always ember, side B always verdigris, tiers ember→verdigris→carmine;
-  tracks are `rgba(32,30,29,.05)`; values are mono tabular.
+  tracks are `{colors.chip}`; values are mono tabular.
 - **Accordions (`.tm-acc`)** — in-place disclosure with explicit pixel-height
   animation (260ms, `cubic-bezier(.2,.7,.2,1)`) — grid-fr/auto-height
   animation collapses when nested, so keep the measured-height approach.
@@ -356,7 +340,7 @@ summary.
   verdigris = counterpart/success/side B, carmine = mastery or danger.
 - Use mono + uppercase + wide tracking for labels, serif for headlines, sans
   for body — and `tabular-nums` on every number.
-- Use soft tints (`*-s` variables, `rgba(32,30,29,.05)`) for fills and selected
+- Use soft tints (`*-s` variables, `{colors.chip}`) for fills and selected
   states; full-strength accents for text, borders, fills of bars, and glows.
 - Draw structure with hairlines and whitespace; reserve `--tm-elev` for the
   few genuinely raised surfaces.
@@ -370,7 +354,7 @@ summary.
 - Don't use `prefers-color-scheme` for theming — the theme follows the map's
   `localStorage` toggle via `data-theme`, not the OS.
 - Don't hard-code hex values in component rules or introduce new accent hues;
-  the moonlight blue `#3F5BB0` is radar-only.
+  the moonlight blue `{colors.focus}` is radar-only.
 - Don't load web fonts — system stacks only.
 - Don't use modals, popovers, or overlays; disclose in place with accordions.
 - Don't put carmine "mastery" styling and carmine "danger" styling in the same

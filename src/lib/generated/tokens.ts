@@ -48,11 +48,12 @@ export const card = {
   "ember": "#E58C44",
   "carmine": "#E6415C"
 } as const;
-export const radii = {
+export const rounded = {
   "pill": "999px",
   "circle": "50%",
-  "lg": "18px",
-  "md": "12px",
-  "sm": "9px",
-  "xs": "4px"
+  "panel": "14px",
+  "card": "12px",
+  "input": "10px",
+  "md": "8px",
+  "sm": "4px"
 } as const;

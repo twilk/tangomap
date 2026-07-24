@@ -60,6 +60,39 @@ export const fonts = {
   mono: 'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace',
 } as const;
 
-/** Today the repo uses 16 distinct radii. This is the intended scale; a later task
- *  maps the strays onto it. Not yet consumed — declared so DESIGN.md documents it. */
-export const radii = { pill: '999px', circle: '50%', lg: '18px', md: '12px', sm: '9px', xs: '4px' } as const;
+/** Doc-facing colour name → ThemeTokens key. DESIGN.md names colours by their role
+ *  (primary/secondary/…); this is the single place that vocabulary is mapped onto the
+ *  theme tokens, so `npm run design` can substitute a `{colors.X}` placeholder with
+ *  `light[semantic[X]]` (and the dark column of the colour table with `dark[semantic[X]]`).
+ *  Verified against the prose in DESIGN.md. */
+export const semantic = {
+  primary: 'ember', secondary: 'verd', tertiary: 'carmine', focus: 'focus',
+  ground: 'ground', panel: 'panel', panelRaised: 'panel2',
+  ink: 'ink', muted: 'muted', faint: 'faint',
+  line: 'line', lineSubtle: 'line2',
+  emberSoft: 'emberSoft', verdigrisSoft: 'verdSoft', chip: 'chip',
+} as const satisfies Record<string, keyof ThemeTokens>;
+
+/** The layout scale the doc quotes, sourced from app/tango.css so DESIGN.md cannot drift
+ *  from what the app paints: `.tm-wrap` max-width 760px (`.wide` 880px) and horizontal
+ *  padding clamp(16px,4vw,32px); `.tm-sec` margin-top 34px. `xs`/`xl` are chosen
+ *  representatives of the intra-component gap range (small step scale), not pulled from a
+ *  single declaration — the doc uses them only to say gaps run "from xs through xl". */
+export const space = {
+  contentWidth: '760px', contentWidthWide: '880px',
+  pagePadding: 'clamp(16px,4vw,32px)', section: '34px', xs: '6px', xl: '26px',
+} as const;
+
+/** The two type sizes the doc names inline, from app/tango.css: `.tm-h1` font-size and
+ *  `.tm-link` (the nav pill) font-size. */
+export const type = { h1: 'clamp(28px,6vw,46px)', navLink: '11px' } as const;
+
+/** The doc-facing radius set — the canonical roundness scale, values matched to the app.
+ *  From the Shapes prose and app/tango.css: pill 999px, circle 50%, panels 14px
+ *  (`.tm-strip`/`.tm-share`), cards 12px (`.tm-rec`/`.tm-callout`), inputs & buttons 10px
+ *  (`.tm-inp`/`.tm-save`), hoverable rows 8px (`.tm-lrow`), and `sm` 4px — the 62-skill
+ *  grid cell (`.tm-cell`) and legend keys (`.tm-key i`). Replaces the earlier `radii`
+ *  scale, which was aspirational and never matched the app. */
+export const rounded = {
+  pill: '999px', circle: '50%', panel: '14px', card: '12px', input: '10px', md: '8px', sm: '4px',
+} as const;
