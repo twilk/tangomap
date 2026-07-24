@@ -23,7 +23,7 @@ export default function SkillsIndex() {
           const skills = SKILLS.filter((s) => s.tag === cat.tag).sort((a, b) => a.level - b.level);
           if (skills.length === 0) return null;
           return (
-            <section className="tm-sec" key={cat.tag}>
+            <section className="tm-sec" id={cat.tag} key={cat.tag}>
               <h2 className="tm-catsh">
                 <span className="tm-catico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(cat.icon, 18) }} />
                 {cat.label}

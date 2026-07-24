@@ -5,6 +5,7 @@ import { SKILLS } from '@/src/data/skills';
 import { CATEGORIES, iconSvg } from '@/src/lib/dna';
 import { getSkillContent } from '@/src/lib/knowledge';
 import { TopNav } from '@/src/components/TopNav';
+import { SkillVideo } from '@/src/components/SkillVideo';
 
 const skillOf = (slug: string) => SKILLS.find((s) => s.slug === slug);
 const catOf = (tag: string) => CATEGORIES.find((c) => c.tag === tag);
@@ -39,7 +40,7 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
           <span className="tm-skico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(cat?.icon ?? '', 26) }} />
           <div>
             <p className="tm-skcat">
-              {cat?.label ?? skill.tag} · Level {skill.level}
+              <a className="tm-skcat-link" href={`/skills#${skill.tag}`}>{cat?.label ?? skill.tag}</a> · Level {skill.level}
             </p>
             <h1 className="tm-h1">{skill.name}</h1>
             {c?.tagline && <p className="tm-sksub">{c.tagline}</p>}
@@ -93,6 +94,8 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
                 </ul>
               </section>
             )}
+
+            <SkillVideo slug={slug} />
           </>
         ) : (
           <p className="tm-callout">Detailed notes for this skill are coming soon.</p>

@@ -1,0 +1,38 @@
+/* Deep-links from the profile surfaces (What's next + DNA) into the knowledge
+   base. Imported directly by the components that use it so it stays out of the
+   shared tango.css. Uses the .tm-profile design tokens (loaded globally). */
+
+/* "What's next" recommendation row → /skill/[slug] (the whole row is the link) */
+a.tm-rec {
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+a.tm-rec:hover {
+  border-color: var(--tm-ember);
+  background: var(--tm-panel2);
+}
+a.tm-rec:focus-visible {
+  outline: 2px solid var(--tm-ember);
+  outline-offset: 2px;
+}
+
+/* DnaBars strength row (single series) → /skills#[tag] */
+a.tm-brow {
+  text-decoration: none;
+  color: inherit;
+  padding: 3px 6px;
+  margin: -3px -6px;
+  border-radius: 9px;
+  transition: background 0.15s;
+}
+a.tm-brow:hover {
+  background: var(--tm-panel2);
+}
+a.tm-brow:hover .tm-blab {
+  color: var(--tm-ember);
+}
+a.tm-brow:focus-visible {
+  outline: 2px solid var(--tm-ember);
+  outline-offset: 1px;
+}
