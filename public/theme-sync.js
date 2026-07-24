@@ -52,7 +52,10 @@
     } catch (e) {}
   }
   window.addEventListener('storage', function (e) {
-    if (!e.key || e.key === 'tsm-theme') sync();
+    // tsm-custom-polarity can change while tsm-theme stays 'custom' (a custom
+    // re-theme with a different ground), so an already-open map tab must re-sync
+    // on it too or it keeps a stale light/dark fallback.
+    if (!e.key || e.key === 'tsm-theme' || e.key === 'tsm-custom-polarity') sync();
   });
   window.addEventListener('pageshow', function (e) {
     if (e.persisted) sync();

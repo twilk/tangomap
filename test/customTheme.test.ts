@@ -45,6 +45,17 @@ test('customStyleText builds the :root[data-theme="custom"] .tm-profile block wi
   expect(css).toContain('--tm-ink:#000000');
 });
 
+test('customStyleText emits exactly one declaration per derived token key', () => {
+  const tokens = deriveTokens(LIGHT_THEME);
+  const css = customStyleText(tokens);
+  // strip the selector + braces, then split the ;-joined body into declarations
+  const body = css.slice(css.indexOf('{') + 1, css.lastIndexOf('}'));
+  const decls = body.split(';');
+  expect(decls).toHaveLength(Object.keys(tokens).length);
+  // and each is a real `--tm-…:value` pair (no empty fragment from a stray ;)
+  for (const d of decls) expect(d).toMatch(/^--tm-[\w-]+:.+$/);
+});
+
 // --- customPolarity ----------------------------------------------------------
 
 test('customPolarity maps a light ground to light and a dark ground to dark', () => {

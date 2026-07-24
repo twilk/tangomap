@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { cycleMode, hasCustomTheme, type Mode } from '@/src/lib/customTheme';
+import { cycleMode, hasCustomTheme, readMode, type Mode } from '@/src/lib/customTheme';
 
 // Lucide sun / moon / droplet (same 24-grid, 2px stroke as the category icons). The
 // droplet stands in for the custom "swatch" — a hand-mixed palette.
@@ -15,7 +15,7 @@ const svg = (inner: string) =>
 /** The next theme the toggle would move to from `cur`, mirroring cycleMode's order:
  *  dark → light → (custom, if configured) → dark. Kept in lock-step with cycleMode so
  *  the label always names the button's actual destination. */
-function nextOf(cur: string | null, hasCustom: boolean): Mode {
+function nextOf(cur: Mode, hasCustom: boolean): Mode {
   if (cur === 'dark') return 'light';
   if (cur === 'custom') return 'dark';
   return hasCustom ? 'custom' : 'dark';
@@ -35,11 +35,12 @@ export function ThemeToggle() {
   const ref = useRef<HTMLButtonElement>(null);
 
   // Post-mount only: name the NEXT theme in the cycle (server can't know the mode).
+  // Read the mode from readMode() — the same localStorage source cycleMode acts on —
+  // so the label and the click can never disagree.
   const relabel = () => {
     const el = ref.current;
     if (!el) return;
-    const cur = document.documentElement.getAttribute('data-theme');
-    const label = `Switch to ${nextOf(cur, hasCustomTheme())} theme`;
+    const label = `Switch to ${nextOf(readMode(), hasCustomTheme())} theme`;
     el.setAttribute('aria-label', label);
     el.setAttribute('title', label);
   };
