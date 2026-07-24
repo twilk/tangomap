@@ -34,7 +34,9 @@ const SCREENS = [
   { id: '07-signin', path: '/signin', label: 'Sign in' },
   { id: '08-me', path: '/me', label: 'My profile', auth: true },
   { id: '09-settings', path: '/settings', label: 'Settings', auth: true },
-  { id: '10-mycard', path: '/me/card', label: 'My card', auth: true },
+  // /me/card renders no UI of its own — app/me/card/page.tsx is a pure redirect
+  // to /u/<handle>/card, which is already captured as 05-card. Listing it as a
+  // separate screen would pad the proofpack with a duplicate, so it is not one.
 ];
 
 const THEMES = ['light', 'dark'];
