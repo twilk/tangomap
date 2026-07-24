@@ -39,12 +39,19 @@ export function buildCss() {
   ].join('\n');
 }
 
+const count = (haystack, needle) => haystack.split(needle).length - 1;
+
 /** Replace the body between two markers in a hand-written file.
  *
- *  Region outputs edit a file that is mostly hand-written prose, so both failure
- *  modes throw rather than guess: a missing FILE is never created, and missing or
- *  malformed MARKERS never fall back to appending or overwriting. Either fallback
- *  would silently destroy prose that is not reproducible from design/tokens.ts. */
+ *  Region outputs edit a file that is mostly hand-written prose, so every ambiguity
+ *  throws rather than guessing: a missing FILE is never created, and absent, inverted
+ *  or DUPLICATED markers never fall back to appending or overwriting. Any of those
+ *  would silently destroy prose that is not reproducible from design/tokens.ts.
+ *
+ *  Duplicates matter more than they look: the target is a document *about* the design
+ *  system, so a maintainer mentioning the marker convention in prose — or showing it
+ *  in a fenced example — is the expected case, not a freak one. indexOf would then
+ *  splice from their mention to the real region and delete everything between. */
 export function replaceRegion(current, marker, body) {
   const start = `<!-- generated:${marker}:start -->`;
   const end = `<!-- generated:${marker}:end -->`;
@@ -56,7 +63,22 @@ export function replaceRegion(current, marker, body) {
   }
   const i = current.indexOf(start);
   const j = current.indexOf(end);
-  if (i === -1 || j === -1 || j < i) {
+  if (i === -1 || j === -1) {
+    throw new Error(
+      `region "${marker}": missing or malformed markers. Expected ${start} before ${end}. ` +
+        `Refusing to write — a region output never appends to or overwrites hand-written prose.`,
+    );
+  }
+  const starts = count(current, start);
+  const ends = count(current, end);
+  if (starts !== 1 || ends !== 1) {
+    throw new Error(
+      `region "${marker}": expected exactly one ${start} and one ${end}, found ${starts} and ` +
+        `${ends}. Refusing to write — an ambiguous marker pair would splice generated output ` +
+        `into hand-written prose.`,
+    );
+  }
+  if (j < i) {
     throw new Error(
       `region "${marker}": missing or malformed markers. Expected ${start} before ${end}. ` +
         `Refusing to write — a region output never appends to or overwrites hand-written prose.`,
