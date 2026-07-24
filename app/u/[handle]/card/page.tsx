@@ -55,7 +55,7 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <TopNav />
+        <TopNav back={`/u/${encodeURIComponent(data.handle)}`} />
         <DancerCard
           name={name}
           handle={data.handle}

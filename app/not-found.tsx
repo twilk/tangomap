@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <TopNav />
+        <TopNav back="/" />
         <div className="tm-nf">
           <p className="code">404 · off the floor</p>
           <h1>This dancer stepped away</h1>

@@ -30,9 +30,14 @@
           'border:1px solid ' + (primary ? accent : line) + ';' +
           (primary ? 'background:' + accent + ';color:#fff' : 'background:' + panel + ';color:' + ink) + '">' + label + '</a>';
       }
+      // Same destinations as the React app's TopNav, so the map header and the
+      // rest of the site offer one menu: Map · Learn · Profile · Card · Settings.
+      // (The map itself is "/", i.e. the page these pills live on, so it isn't
+      // repeated here.) Learn is public; Profile/Card/Settings need a session.
       el.innerHTML = signedIn
-        ? pill('/me', 'Profile', true) + pill('/settings', 'Settings', false) + pill('/signout', 'Sign out', false)
-        : pill('/signin', 'Sign in', true);
+        ? pill('/skills', 'Learn', false) + pill('/me', 'Profile', true) + pill('/me/card', 'Card', false) +
+          pill('/settings', 'Settings', false) + pill('/signout', 'Sign out', false)
+        : pill('/skills', 'Learn', false) + pill('/signin', 'Sign in', true);
     }
 
     // Mount inside the map's <header> so the controls flow within it (the

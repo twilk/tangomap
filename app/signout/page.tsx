@@ -7,7 +7,7 @@ export default function SignOutPage() {
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <TopNav />
+        <TopNav back="/" />
 
         <div className="tm-nf">
           <p className="code">See you on the floor</p>

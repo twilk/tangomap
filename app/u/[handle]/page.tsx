@@ -52,7 +52,7 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
-        <TopNav />
+        <TopNav back="/" />
 
         {isOwner && (
           <div className="tm-owner">
