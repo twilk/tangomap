@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { resolve, join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { OUTPUTS, replaceRegion, buildDesign } from '@/scripts/build-design.mjs';
-import { light, dark, card, rounded, semantic, cssVar, type ThemeTokens } from '@/design/tokens';
+import { light, dark, card, rounded, semantic, type ThemeTokens } from '@/design/tokens';
 
 const root = resolve(__dirname, '..');
 
@@ -250,20 +250,22 @@ test('the front matter no longer contradicts the body (colours are single-source
 });
 
 // ---------------------------------------------------------------------------
-// Parity with the stylesheet the app actually paints from.
+// The swap has landed. app/tango.css no longer declares the design tokens — the
+// generated sheet (src/styles/generated/tokens.css) does, and tango only *consumes*
+// them through var(). This test guards that direction: nothing in tango hand-
+// overrides the generated source.
 //
-// design/tokens.ts is only a safe source of truth if its values are the values
-// already shipping. The next task deletes the hand-written --tm-* declarations and
-// lets the generated sheet supply them; this test is the proof that the swap is a
-// no-op for every pixel. Until then it compares the source against the LIVE sheet,
-// so any hand-edit to app/tango.css that bypasses design/tokens.ts fails here
-// instead of silently making the source a lie.
+// It deliberately does NOT re-compare values against src/styles/generated/tokens.css.
+// That file is generated from design/tokens.ts, so a value comparison against it would
+// be a tautology the staleness test.each above already covers. The honest post-swap
+// invariant is the opposite one: the two .tm-profile blocks in tango declare ZERO token
+// properties, so a stray hand-edit reintroducing one fails here.
 // ---------------------------------------------------------------------------
 
-/** The sheet the app paints from today. After the swap this becomes
- *  'src/styles/generated/tokens.css' — that is the whole repoint. Nothing else here
- *  changes: selectors are matched on normalised whitespace, so `.tm-profile {` and
- *  the generator's `.tm-profile{` are the same rule to this parser. */
+/** The live sheet the app loads. It used to hand-declare every --tm-, --serif,
+ *  --sans and --mono token; post-swap it must declare none — it only reads them via
+ *  var(). Selectors are matched on normalised whitespace, so `.tm-profile {` here and
+ *  the generator's `.tm-profile{` are the same rule to declsIn. */
 const LIVE_STYLESHEET = 'app/tango.css';
 
 const norm = (s: string) => s.trim().replace(/\s+/g, ' ');
@@ -389,40 +391,43 @@ function declsIn(css: string, selector: string): Record<string, string> {
   return parseDecls(found[0]);
 }
 
-const KEYS = Object.keys(light) as (keyof ThemeTokens)[];
+/** A property that belongs to the token source, not to a consuming rule: any
+ *  --tm-* custom property, or one of the three font-family tokens. */
+const isTokenDecl = (prop: string) =>
+  prop.startsWith('--tm-') || prop === '--serif' || prop === '--sans' || prop === '--mono';
 
-test('every token in design/tokens.ts equals the value the live stylesheet declares', () => {
+test('app/tango.css declares no design tokens — the generated sheet is the only source', () => {
   const css = readFileSync(resolve(root, LIVE_STYLESHEET), 'utf8');
-  const themes = [
-    { theme: 'light', selector: '.tm-profile', tokens: light as ThemeTokens },
-    { theme: 'dark', selector: ':root[data-theme="dark"] .tm-profile', tokens: dark as ThemeTokens },
+  const blocks = [
+    { theme: 'light', selector: '.tm-profile' },
+    { theme: 'dark', selector: ':root[data-theme="dark"] .tm-profile' },
   ];
 
-  for (const { theme, selector, tokens } of themes) {
-    const declared = Object.entries(declsIn(css, selector)).filter(([prop]) => prop.startsWith('--tm-'));
-    const props = declared.map(([prop]) => prop);
+  for (const { theme, selector } of blocks) {
+    // declsIn still requires exactly one top-level rule with this selector, so a
+    // renamed or re-nested block throws rather than passing vacuously. The blocks are
+    // NOT empty of declarations post-swap (light keeps background/color/font-family/…,
+    // dark keeps color-scheme), so the "exactly one" count guard does not false-trip.
+    const decls = declsIn(css, selector);
 
-    // Non-vacuity guard: a parser that silently returned nothing would make every
-    // comparison below trivially true.
+    // Non-vacuity: prove the parser read a populated block before trusting its
+    // "no tokens" verdict. Were declsIn to return {}, the filter below would pass
+    // trivially — this is the guard against that.
     expect(
-      props.length,
-      `${theme}: expected ${KEYS.length} --tm-* declarations in "${selector}" of ${LIVE_STYLESHEET}, ` +
-        `found ${props.length}`,
-    ).toBe(KEYS.length);
+      Object.keys(decls).length,
+      `${theme}: expected declsIn to read a populated "${selector}" block`,
+    ).toBeGreaterThan(0);
 
-    // Both directions. A --tm-* the stylesheet declares but ThemeTokens has no key
-    // for would fall out of the design system the moment the swap lands.
-    const expected = KEYS.map(cssVar);
+    // The real assertion, and the reason this is not a tautology: the block must
+    // hand-declare NO design token. Filtering the parsed set (rather than asserting
+    // the block has zero declarations total) is what keeps it honest — the light block
+    // legitimately still holds background/color/font-family/line-height/etc.
+    const tokenDecls = Object.keys(decls).filter(isTokenDecl);
     expect(
-      { extra: props.filter((p) => !expected.includes(p)).sort(), missing: expected.filter((p) => !props.includes(p)).sort() },
-      `${theme}: the token set has drifted from ThemeTokens — "extra" is declared in ` +
-        `${LIVE_STYLESHEET} with no key in design/tokens.ts, "missing" is the reverse`,
-    ).toEqual({ extra: [], missing: [] });
-
-    const values = Object.fromEntries(declared);
-    for (const key of KEYS) {
-      expect(values[cssVar(key)], `${theme} ${key} (${cssVar(key)})`).toBe(tokens[key]);
-    }
+      tokenDecls,
+      `${theme}: "${selector}" in ${LIVE_STYLESHEET} must declare no --tm-*, --serif, --sans or ` +
+        `--mono token — those now come from src/styles/generated/tokens.css. Found: ${tokenDecls.join(', ')}`,
+    ).toEqual([]);
   }
 });
 

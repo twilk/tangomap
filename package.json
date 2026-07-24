@@ -6,7 +6,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run design:check && next build",
     "start": "next start",
     "test": "vitest run",
     "design": "node --experimental-strip-types scripts/design.mjs",

@@ -10,21 +10,12 @@
 body { margin: 0; }
 
 .tm-profile {
-  --serif: "Iowan Old Style", Georgia, "Times New Roman", serif;
-  --sans: var(--font-figtree), system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
-  /* Light "practica" — matched to the map bundle's own palette (#f5ead8 / #201e1d
-     / #c67139 / #dcd3c4) so the app and the map read as one continuous product. */
-  --tm-ground:#f5ead8; --tm-panel:#f9f4ed; --tm-panel2:#fdfbf5; --tm-hi:rgba(255,255,255,.6);
-  --tm-ink:#201e1d; --tm-muted:#645c50; --tm-faint:#968b79;
-  --tm-line:#dcd3c4; --tm-line2:rgba(32,30,29,.07);
-  --tm-ember:#c67139; --tm-ember-s:rgba(198,113,57,.15);
-  --tm-verd:#7a8a5e; --tm-verd-s:rgba(122,138,94,.15);
-  --tm-carmine:#A6172E; --tm-chip:rgba(32,30,29,.05);
+  /* Light "practica" — matched to the map bundle's own palette (defined in
+     design/tokens.ts) so the app and the map read as one continuous product. */
   /* hover/focus highlight on the radar — a cool "moonlight" accent, complementary
-     to the warm ember and distinct from the sage, so it never blends with data. */
-  --tm-focus:#3F5BB0;
-  --tm-elev:0 1px 0 var(--tm-hi),0 2px 6px -2px rgba(32,30,29,.1),0 26px 52px -32px rgba(32,30,29,.45);
+     to the warm ember and distinct from the sage, so it never blends with data.
+     The --tm-*, --serif/--sans/--mono tokens are now supplied by the generated
+     sheet (src/styles/generated/tokens.css); this block only consumes them. */
   color-scheme:light;
   background:var(--tm-ground); color:var(--tm-ink); font-family:var(--sans); line-height:1.5; min-height:100vh;
 }
@@ -32,14 +23,8 @@ body { margin: 0; }
    toggle (localStorage tsm-theme). A no-flash script in the layout mirrors that
    into data-theme, so the app tracks the map rather than the OS. */
 :root[data-theme="dark"] .tm-profile{
-  --tm-ground:#110D09; --tm-panel:#1A1510; --tm-panel2:#221B14; --tm-hi:rgba(241,233,220,.045);
-  --tm-ink:#F2EADC; --tm-muted:#9E907E; --tm-faint:#6C5F50;
-  --tm-line:rgba(241,233,220,.11); --tm-line2:rgba(241,233,220,.05);
-  --tm-ember:#E58C44; --tm-ember-s:rgba(229,140,68,.14);
-  --tm-verd:#A8BA8A; --tm-verd-s:rgba(168,186,138,.15);
-  --tm-carmine:#E6415C; --tm-chip:rgba(241,233,220,.05);
-  --tm-focus:#8EA6FF;
-  --tm-elev:0 0 0 1px rgba(241,233,220,.04),0 34px 66px -34px rgba(0,0,0,.9);
+  /* The dark --tm-* tokens are supplied by the generated sheet
+     (src/styles/generated/tokens.css); only the color-scheme flip lives here. */
   color-scheme:dark;
 }
 .tm-profile *{box-sizing:border-box}
