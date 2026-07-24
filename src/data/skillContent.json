@@ -1,0 +1,1652 @@
+{
+ "mirada-cabeceo": {
+  "tagline": "Inviting With Your Eyes",
+  "summary": "The mirada (the look) and cabeceo (the nod) are how you invite and accept a dance across the room, before a single word is spoken. It lets you choose partners with mutual consent and grace, and spares everyone the awkwardness of a spoken 'no'. Mastering it is your first step into milonga etiquette.",
+  "howItWorks": "During the cortina, when the lights come up and sightlines open, catch and hold someone's gaze across the floor; that held look is the mirada. If they meet and hold your eyes back, a small nod or tilt of the head, the cabeceo, offers the tanda, and a returned nod accepts it. Only then do you walk to meet them; a glance away is a polite decline no one ever has to name out loud.",
+  "leaderCues": [
+   "Wait for the cortina and clear sightlines before seeking eyes",
+   "Hold the gaze a beat, then offer a small, unmistakable nod",
+   "Walk over only after you get a nod back, never approach uninvited",
+   "Keep your face soft and relaxed, an invitation rather than a demand"
+  ],
+  "followerCues": [
+   "Scan the room actively, you invite too, not just wait to be chosen",
+   "Hold a returned gaze to signal that you are open to dancing",
+   "A clear nod accepts; simply look away to decline without a word",
+   "Once you accept, keep eye contact until your partner arrives"
+  ],
+  "commonMistakes": [
+   "Walking up and asking out loud, cornering someone into saying yes",
+   "Staring so intently that the look reads as pressure",
+   "Accepting with your eyes, then looking away and leaving them unsure",
+   "Reading a stray glance as a cabeceo and approaching too soon"
+  ]
+ },
+ "posture": {
+  "tagline": "Stand Tall Without Stiffness",
+  "summary": "Posture is how you organize your body over your own axis so you can move, connect, and be led without wobbling. A tall, relaxed spine lets your partner feel exactly where you are and frees your legs to step cleanly. It is the quiet foundation every other tango skill sits on.",
+  "howItWorks": "Stack your head over your ribs over your hips over your feet, so your weight drops straight down into the floor, and lengthen up through the crown while letting your shoulders and hips stay heavy and low. Keep the chest available toward your partner without arching your lower back to get there. When you change level or transfer weight, keep this vertical line intact rather than breaking at the waist.",
+  "leaderCues": [
+   "Grow tall through the crown while keeping the shoulders low and heavy",
+   "Chest present toward the follower, ribs stacked over hips",
+   "Bend from the knees and ankles, not by collapsing the torso",
+   "Hold the vertical line as you transfer weight, don't lead with the head"
+  ],
+  "followerCues": [
+   "Keep the upper body vertical and the hips settled down",
+   "Stay over your own axis so you are never hanging on the leader",
+   "Lengthen up rather than gripping or bracing the shoulders",
+   "Going down for a step should never break your posture or add stiffness"
+  ],
+  "commonMistakes": [
+   "Pushing the hips back or arching the lower back to reach the chest forward",
+   "Collapsing the torso the moment you bend your knees",
+   "Leading each step with the head or chin instead of the center",
+   "Tensing the shoulders up toward the ears to feel 'tall'"
+  ],
+  "lessonRefs": [
+   "Lesson 25 BEG - Change the Embrace from Close to Open (posture exercise)",
+   "Partyka Workshop - How to Practice"
+  ]
+ },
+ "embrace": {
+  "tagline": "A Living, Round Frame",
+  "summary": "The embrace (abrazo) is the physical connection that holds you and your partner together: a round frame made of both arms and the meeting of your chests. It must be firm enough to carry information yet soft enough to breathe, because everything you dance travels through it. Get the embrace right and the rest of tango has somewhere to live.",
+  "howItWorks": "Form a rounded circle with both arms as if hugging a large ball, chests offered toward each other and the open side kept full rather than caved in. Your hands rest relaxed but present, active contact that never grips. Keep the whole frame elastic so it can absorb and adapt to movement instead of going stiff or collapsing.",
+  "leaderCues": [
+   "Make the embrace round, both arms forming one continuous circle",
+   "Keep the hands relaxed but active and present, never gripping",
+   "Offer the chest and carry the lead through the frame, not the arms",
+   "Let the frame breathe and adapt instead of locking it rigid"
+  ],
+  "followerCues": [
+   "Keep your open-side arm full and structured, not draped or heavy",
+   "Meet the chest with presence while staying on your own axis",
+   "Relax the hands but keep them alive to the contact",
+   "Let the embrace stay elastic so it can absorb the lead"
+  ],
+  "commonMistakes": [
+   "Gripping with the hands or hanging weight on the leader's arm",
+   "Letting the open side collapse so the frame loses its shape",
+   "Squeezing the embrace stiff and killing its adaptability",
+   "Pushing the chest forward from the arms instead of the torso"
+  ],
+  "lessonRefs": [
+   "Lesson 25 BEG - Change the Embrace from Close to Open",
+   "Partyka Workshop - How to Practice"
+  ]
+ },
+ "roles": {
+  "tagline": "Two Roles, One Conversation",
+  "summary": "In tango one dancer leads and one follows, but both are active partners in a shared conversation, not a boss and a puppet. The leader proposes movement and shapes the space; the follower interprets and completes it with their own balance and musicality. Learning a role well means listening at least as much as speaking.",
+  "howItWorks": "The leader offers an intention through the chest and the embrace, then waits for the follower to arrive; the follower receives that intention, transfers their own weight, and finishes each step on their own axis. Follow the energy of the lead rather than the hands, and trust the movement instead of guessing the 'right' step. Either role can also invite pauses or playfulness, so the roles are defined but the dialogue always runs both ways.",
+  "leaderCues": [
+   "Propose with the chest, then wait for the follower to complete the step",
+   "Give clear intention and leave room, don't shove or rush",
+   "Lead the energy and direction, not the individual feet",
+   "Listen for the follower's arrival before offering the next thing"
+  ],
+  "followerCues": [
+   "Follow the energy through the body, not the hands",
+   "Complete each step fully on your own axis before the next",
+   "Trust the lead instead of anticipating the 'right' move",
+   "You can propose too, offering a pause or a bounce when invited"
+  ],
+  "commonMistakes": [
+   "Leading with the arms or muscling the follower into position",
+   "Following by guessing ahead and stepping before being led",
+   "Treating the follower as passive rather than an equal partner",
+   "Rushing the next step before the current one is finished"
+  ],
+  "lessonRefs": [
+   "Beginners Program - Lesson 1 (Leader & Follower Role)",
+   "Lesson 26 BEG - Change of Role"
+  ]
+ },
+ "dissociation": {
+  "tagline": "Twist Between Chest And Hips",
+  "summary": "Dissociation is the counter-rotation between your upper body and your hips: your chest stays turned toward your partner while your hips and legs face where you are stepping. It is the engine behind ochos, giros, and every turn, letting you stay connected while your feet travel a different path. Without it, turns go stiff and the connection breaks.",
+  "howItWorks": "Keep your chest and the embrace facing your partner while allowing your hips to rotate independently toward the direction of the step, creating a gentle spiral through the spine. That separation winds up and releases the energy that powers pivots and ochos. Keep the 'stick' of connection between your chests intact the whole time, so the twist never pulls the two of you apart.",
+  "leaderCues": [
+   "Keep your chest to the follower while the hips turn to the step",
+   "Dissociate over the hips, not by twisting the shoulders alone",
+   "Use the wind-up of the spiral to lead ochos and turns",
+   "Maintain chest connection so the dissociation stays shared"
+  ],
+  "followerCues": [
+   "Face the leader with your chest while your hips open to the step",
+   "Let the spiral rise from the hips, with the upper body following last",
+   "Keep the free leg and knees collected as you twist",
+   "Don't break the connection to get the turn, keep the 'stick' between you"
+  ],
+  "commonMistakes": [
+   "Turning the whole body as one block instead of separating it",
+   "Twisting only the shoulders while the hips stay locked",
+   "Losing chest connection the moment the hips rotate",
+   "Forcing the pivot from the feet instead of the hip dissociation"
+  ],
+  "lessonRefs": [
+   "Lesson 3 BEG - Change of Weight, Bounce, Outside",
+   "Vilnius Seminar 1 - Deep Conversation About Ocho"
+  ]
+ },
+ "floor-energy": {
+  "tagline": "Push The Floor, Not Arms",
+  "summary": "Energy from the ground means your movement is powered by pushing into the floor with your legs and feet, not by pulling or pushing with your arms. This gives your walk weight and intention and lets you lead or follow with the whole body. It is the difference between gliding with purpose and shuffling along.",
+  "howItWorks": "Press down and back into the floor through your standing leg to send yourself into the next step, so you arrive grounded rather than falling into it. That push travels up through a stable posture and out through the chest, so the lead is felt as body energy, never arm pressure. Followers generate the same power by pushing the floor to complete every weight transfer fully.",
+  "leaderCues": [
+   "Push the floor with the standing leg to send the step, don't fall into it",
+   "Lead direction with ground energy through the chest, not the arms",
+   "Move the follower with energy from the ground, never by pulling",
+   "Stay grounded so every step arrives with clear intention"
+  ],
+  "followerCues": [
+   "Push the floor to fully transfer your weight onto each step",
+   "Draw power from the ground, not from holding the leader's arms",
+   "Stay grounded and heavy through the feet, light in the upper body",
+   "Arrive on a solid standing leg before releasing the free one"
+  ],
+  "commonMistakes": [
+   "Leading or following with arm pressure instead of leg power",
+   "Falling into steps rather than pushing off the standing leg",
+   "Floating or bouncing up off the floor and losing groundedness",
+   "Transferring weight only halfway, so you are never truly grounded"
+  ],
+  "lessonRefs": [
+   "Lesson 4 BEG - Cross (energy from the ground)",
+   "Vilnius Seminar 2 - Synchronized Giro + Lapis"
+  ]
+ },
+ "close-embrace": {
+  "tagline": "Chest To Chest, Own Axis",
+  "summary": "Close embrace (abrazo cerrado) is tango danced chest to chest, with a shared upper-body contact that stays constant while you move. You lean lightly toward your partner without ever dumping your weight on them, so the intimacy comes from contact, not collapse. It is the heart of social, milonguero-style dancing.",
+  "howItWorks": "Bring the chests together at an even level so the contact is shared front and back, tilting slightly toward your partner while each of you keeps your own axis and no pressure builds in the toes. Relax the hips so the chest can arrive close without your full weight following it. Keep the round embrace and present hands, and let the contact point stay continuous as you walk.",
+  "leaderCues": [
+   "Lean in slightly from the axis: chest closer, but not your full weight",
+   "Keep the contact at an even level, the front and back the same",
+   "Relax the hips to close the gap instead of arching forward",
+   "Give steady, constant energy so the follower can rely on the contact"
+  ],
+  "followerCues": [
+   "Meet the chest while keeping your own axis, never hang on the leader",
+   "Match the lean without leaning on the sides of the embrace",
+   "Keep contact continuous rather than pulling away between steps",
+   "You can shade the distance too: a fuller frame invites, a softer one relaxes"
+  ],
+  "commonMistakes": [
+   "Dumping full weight forward until pressure builds in the toes",
+   "Losing your own axis and hanging on your partner",
+   "Uneven contact, close on top but gapping at the hips, or the reverse",
+   "Breaking the chest contact every time you take a step"
+  ],
+  "lessonRefs": [
+   "Lesson 25 BEG - Change the Embrace from Close to Open"
+  ]
+ },
+ "connection": {
+  "tagline": "The Living Thread Between You",
+  "summary": "Connection is the continuous, two-way communication running through the embrace: the felt sense of your partner's weight, intention, and breath. It is what turns two people executing steps into one dancing unit. Strong connection is relaxed and constant at once, present enough to carry information yet soft enough to stay comfortable.",
+  "howItWorks": "Keep a steady point of contact through the chest and embrace so information flows both ways without interruption, like a 'stick' between your chests that never drops. Follow and lead the energy of the body rather than the hands, staying relaxed and connected at the same time. As you move, dissociate and adapt so the connection is maintained through every step rather than lost and rebuilt.",
+  "leaderCues": [
+   "Keep constant chest contact, a 'stick' between you that never drops",
+   "Communicate energy through the body, not by pushing with the hands",
+   "Stay relaxed and connected at once: presence without tension",
+   "Dissociate through steps so the connection survives every turn"
+  ],
+  "followerCues": [
+   "Listen to the leader's energy through the chest, not the hands",
+   "Keep the connection continuous, don't let it break between steps",
+   "Stay soft but present so information keeps flowing",
+   "Adapt your body flexibly to preserve the contact as you move"
+  ],
+  "commonMistakes": [
+   "Gripping with the hands to feel 'connected' and adding tension",
+   "Letting the connection drop the moment a step or turn begins",
+   "Being either limp or rigid instead of relaxed and present",
+   "Communicating with the arms instead of the whole body"
+  ],
+  "lessonRefs": [
+   "Lesson 25 BEG - Change the Embrace from Close to Open",
+   "Lesson 3 BEG - Change of Weight, Bounce, Outside"
+  ]
+ },
+ "cross-system": {
+  "tagline": "Same Foot, New Pathways",
+  "summary": "Normally you and your partner walk on opposite feet, a mirror image of each other. Cross system is when the leader shifts weight so you both travel on the same-side foot instead, opening a whole new set of steps, crosses, and rhythmic play. Switching fluidly between the two systems is a hallmark of a versatile dancer.",
+  "howItWorks": "The leader changes their own weight, often with an extra shift after a side step, without leading the follower to change, which lands the couple on matching feet (both right or both left). From there the same walking mechanics apply, but the geometry between the bodies is different, making crosses and cross-footed figures available. Return to parallel system whenever you like with another single weight change.",
+  "leaderCues": [
+   "Enter cross system with a quiet extra weight change, often after a side step",
+   "Change your own weight without leading the follower to change hers",
+   "Keep the walk's quality identical, only the system has changed",
+   "Track which system you're in so you can return to parallel cleanly"
+  ],
+  "followerCues": [
+   "Keep walking your normal, clear steps, don't add a weight change on your own",
+   "Stay grounded and let the leader's weight change reshape the geometry",
+   "Make tight, clean crosses and stay close to the leader",
+   "Trust the lead rather than trying to 'fix' the unfamiliar footing"
+  ],
+  "commonMistakes": [
+   "Follower adding an uninvited weight change and cancelling the system shift",
+   "Leader signalling the shift with an obvious dip or arm movement",
+   "Losing walk quality once the feet no longer mirror each other",
+   "Forgetting which system you're in and tangling legs"
+  ],
+  "lessonRefs": [
+   "Beginners Program - Lesson 13 (Vals, Cross System)",
+   "Intermediate - Cross 1: crosses the follower might expect"
+  ]
+ },
+ "embrace-transitions": {
+  "tagline": "Open And Close On The Move",
+  "summary": "Embrace transitions are the art of smoothly opening and closing the distance of the embrace, from close to open and back, without a jolt or a break in the connection. It lets you match the music and the movement, opening for big turns and closing for intimate walks. Done well, the change is felt as one continuous breath.",
+  "howItWorks": "The embrace slides to change distance rather than releasing and re-gripping, and the leader keeps giving the follower the same steady energy throughout, so nothing lurches. Timing the change to a side step or the follower's forward step gives leverage and makes the shift effortless. The follower can shape the distance too: a firmer frame or a softer, more inviting one suggests how close to be.",
+  "leaderCues": [
+   "Slide the embrace to change distance, don't release and re-grab",
+   "Keep giving the same energy through the whole transition",
+   "Time the change to a side step so it flows with the movement",
+   "Close the gap with the body, not by pulling with the arm"
+  ],
+  "followerCues": [
+   "Let the frame slide without leaning on the sides of the embrace",
+   "Use a side or forward step's leverage to help change the distance",
+   "Shape the distance yourself: a stiffer frame opens, a relaxed one invites close",
+   "Keep the connection continuous as the distance changes"
+  ],
+  "commonMistakes": [
+   "Popping open or snapping closed instead of sliding smoothly",
+   "Losing energy mid-transition so the follower feels dropped",
+   "Changing distance with arm pressure rather than the whole frame",
+   "Leaning on the open side as the embrace opens"
+  ],
+  "lessonRefs": [
+   "Lesson 25 BEG - Change the Embrace from Close to Open"
+  ]
+ },
+ "role-change": {
+  "tagline": "Trade Lead For Follow",
+  "summary": "Change of role is swapping who leads and who follows, either fully or for a single stolen moment mid-dance. It deepens your dancing by teaching you the other side of every movement, and it opens playful exchanges where the follower can propose and the leader can receive. Understanding both roles makes you far better at your own.",
+  "howItWorks": "Start by analyzing a plain forward or backward step from the opposite role, the projection, the weight transfer, and the timing, so the mechanics feel familiar from both sides. Then let the follower lead single steps, and later propose small ideas within the dance, like a bounce, that the leader receives. A full role change hands over the lead cleanly; a momentary one borrows it and gives it right back.",
+  "leaderCues": [
+   "Practice forward and back steps as a follower to feel the projection",
+   "When receiving, soften and genuinely follow the offered energy",
+   "Hand the lead over clearly rather than half-holding it",
+   "Stay open to the follower proposing a step or a bounce"
+  ],
+  "followerCues": [
+   "Learn the leader's step mechanics, projection and weight change first",
+   "Propose single steps with clear body energy, not with the hands",
+   "Offer a small idea like a bounce, then return the lead",
+   "Commit to leading fully when it's your turn, no tentative half-leads"
+  ],
+  "commonMistakes": [
+   "Trying to lead or receive with the arms instead of the body",
+   "Both partners half-leading so no one is really in charge",
+   "Proposing so abruptly the partner cannot receive it",
+   "Skipping the basic opposite-role step study before improvising swaps"
+  ],
+  "lessonRefs": [
+   "Lesson 26 BEG - Change of Role"
+  ]
+ },
+ "emb-comm": {
+  "tagline": "The Embrace As Language",
+  "summary": "At this level the embrace becomes a precise communication channel: you learn exactly where to make contact and how to send and receive detailed information through it. Great partners seem to finish each other's sentences because the embrace carries clear, subtle messages both ways. This is the refinement of connection into genuine fluency.",
+  "howItWorks": "Pay attention to the specific points of contact in the embrace, because where and how you touch changes what you can say. Lead in a rhythm of intention and release, propose then relax then propose, so messages arrive clearly and the follower has room to answer. Communicate through body energy rather than hands, and listen as actively as you speak so the dialogue becomes anticipatory and shared.",
+  "leaderCues": [
+   "Be precise about where you make contact, each point carries different information",
+   "Lead in pulses: propose, relax, propose, so messages stay clear",
+   "Send with body energy, never with grabbing hands",
+   "Listen for the follower's reply and build on it"
+  ],
+  "followerCues": [
+   "Feel exactly where the leader is communicating from and answer there",
+   "Respond to the energy, not to the arms",
+   "Keep the frame present so subtle information can pass",
+   "Offer your own phrases back, the conversation goes both ways"
+  ],
+  "commonMistakes": [
+   "Broadcasting everything through arm tension instead of contact points",
+   "Leading continuously with no release, so nothing reads clearly",
+   "Listening passively and never contributing to the dialogue",
+   "Sending vague, whole-body signals when a precise point of contact is needed"
+  ],
+  "lessonRefs": [
+   "Intermediate - Embrace & Communication 1: where to touch",
+   "Intermediate - Embrace & Communication 2: information technology",
+   "Intermediate - Embrace & Communication 3: finishing each other's sentences"
+  ]
+ },
+ "posture-walking": {
+  "tagline": "Walk From The Core",
+  "summary": "This is posture and walking refined into something beautiful and effortless, moving from your center so cleanly it can look like you 'walk without legs'. Your upper body stays serene and grounded while your legs do the traveling, and every weight transfer happens without disturbing your line. It is where technique becomes personal elegance.",
+  "howItWorks": "Keep the upper body vertical and quiet over the lower body, and begin each step by projecting from the center before the foot moves: projection first, then travel. Stay grounded and let yourself float smoothly across the floor, transferring weight even in long steps without breaking the posture. The stillness on top is exactly what makes the walk look controlled and expressive rather than busy.",
+  "leaderCues": [
+   "Keep the upper body still and tall while the legs do the walking",
+   "Project from the center first, then let the step travel",
+   "Transfer weight fully in long steps without breaking your line",
+   "Stay grounded and smooth, float rather than march"
+  ],
+  "followerCues": [
+   "Move from the core so the walk looks effortless, almost 'without legs'",
+   "Project before you step: intention leads, the foot follows",
+   "Keep the posture unbroken through every weight change",
+   "Stay serene on top while staying grounded through the feet"
+  ],
+  "commonMistakes": [
+   "Letting the upper body bob or twist with each step",
+   "Moving the foot before projecting from the center",
+   "Breaking the posture to reach into a long step",
+   "Marching stiffly instead of floating grounded across the floor"
+  ],
+  "lessonRefs": [
+   "Intermediate - Posture & Walking 1: be beautiful but still",
+   "Intermediate - Posture & Walking 3: walk without legs"
+  ]
+ },
+ "walking": {
+  "tagline": "The Heart Of Tango",
+  "summary": "Walking (la caminata) is the foundation of everything in tango, because nearly every figure is a walk in disguise. You share one axis with your partner and travel the floor as a single unit, so the quality of your walk is the quality of your dance.",
+  "howItWorks": "Project the free leg before you transfer weight, let the movement begin from the floor by pushing up through the standing leg, and roll through the whole foot instead of dropping onto the heel. Keep your torso tall and level so you glide without bobbing, collect the feet as they pass each other, and only complete a step once the weight has fully arrived over the new standing leg.",
+  "leaderCues": [
+   "Push from the floor through the standing leg; the step starts underneath you, not out in front.",
+   "Keep your chest level and steady so the follower reads a smooth, unbroken invitation.",
+   "Take a slightly larger step than the follower and stay on the line of dance.",
+   "Collect your feet on every pass so the walk stays connected, not stretched."
+  ],
+  "followerCues": [
+   "Project the leg first, then let the weight arrive; never reach with the foot ahead of the body.",
+   "Roll through the whole foot and keep the knees brushing as they pass.",
+   "Stay over your own axis and match the leader's length rather than anticipating.",
+   "Keep the height constant, with no bobbing up and down between steps."
+  ],
+  "commonMistakes": [
+   "Falling onto the heel instead of rolling through the whole foot.",
+   "Bobbing up and down by bending and straightening the knees.",
+   "Reaching with the free leg so the weight lags behind the foot.",
+   "Marching flat-footed instead of pushing from the floor."
+  ],
+  "lessonRefs": [
+   "Lesson 3 BEG - Change of weight, bounce, outside",
+   "Partyka Workshop - How to Practice",
+   "Lesson 41 - Great in simple"
+  ]
+ },
+ "square": {
+  "tagline": "Four Sides, One Box",
+  "summary": "The square (el cuadrado) is a closed box of four weight changes that returns you to where you began. It is the first self-contained figure most dancers learn, a safe home base for practicing weight transfer, timing, and staying compact on a crowded floor.",
+  "howItWorks": "Trace the four sides of a small box: open to the side, step forward or back, close to the other side, and collect. Because the pattern loops in place, it is the perfect laboratory for rhythm, so you can walk each side on the beat or slip a double-time step into one side without travelling across the floor.",
+  "leaderCues": [
+   "Keep the box small and your axis quiet; the square should travel almost nowhere.",
+   "Lead each side as a clear, complete change of weight, not a shuffle.",
+   "Once the shape is comfortable, try inserting a double-time step on one side.",
+   "Mark each corner with the chest so the follower feels the change of direction."
+  ],
+  "followerCues": [
+   "Complete each weight change fully before the next side begins.",
+   "Keep the steps compact and stay under your own axis through all four corners.",
+   "Wait for the lead into each side rather than tracing the box from memory.",
+   "Collect the feet at each corner so the shape stays clean."
+  ],
+  "commonMistakes": [
+   "Letting the box drift and grow so you travel instead of staying in place.",
+   "Anticipating the pattern and running through it on autopilot.",
+   "Rushing the corners so the weight changes stay incomplete.",
+   "Bending at the hips instead of moving level across the floor."
+  ],
+  "lessonRefs": [
+   "Lesson 46 - Musicality 5 - Canaro",
+   "Partyka Workshop - How to Practice"
+  ]
+ },
+ "weight-change": {
+  "tagline": "Move The Axis Sideways",
+  "summary": "A change of weight (cambio de peso) is transferring your axis from one foot to the other without travelling, the quiet mechanism behind starting on the right foot, changing systems, and syncopating the rhythm. Master it and you can redirect the whole dance in an instant; neglect it and your partner never knows which foot is free.",
+  "howItWorks": "Project toward the new foot and slide the weight horizontally across, keeping your height level, with no dipping, no bending the knees or hips, and no help from the arms. Partyka's image is a rubber band between the knees: the legs stay close and the transfer stays pure and horizontal, so it reads clearly even in a tiny space.",
+  "leaderCues": [
+   "Move the weight horizontally; don't sink or bob as you cross over.",
+   "Lead it from the chest and the change of axis, never with the hands or arms.",
+   "Keep the knees close, as if a rubber band joined them.",
+   "Make the transfer complete so the follower's free leg is unmistakably free."
+  ],
+  "followerCues": [
+   "Let the weight travel sideways without changing your height.",
+   "Keep the legs together through the transfer; don't take a step to change weight.",
+   "Wait for the chest to signal the change rather than guessing.",
+   "Arrive fully on the new axis so your free leg can respond."
+  ],
+  "commonMistakes": [
+   "Bending the knees or hips and dropping in height during the transfer.",
+   "Using the arms to muscle the partner across instead of leading with the body.",
+   "Leaving the legs apart so the change looks like a small step.",
+   "Only half-transferring, so neither dancer is sure which leg is free."
+  ],
+  "lessonRefs": [
+   "Lesson 3 BEG - Change of weight, bounce, outside",
+   "Lesson 27 - The short step was born long",
+   "Partyka Workshop - How to Practice"
+  ]
+ },
+ "outside-walking": {
+  "tagline": "Step Onto The Outer Track",
+  "summary": "Walking outside the follower means stepping on a parallel track to one side of them, your right foot outside their right or your left outside their left, instead of straight into the corridor between you. It opens the door to the cross, ochos, and most of the figures that follow, and it teaches you to keep the embrace facing while the feet travel offset.",
+  "howItWorks": "Picture two lines under each partner and shift your track so your feet pass alongside theirs rather than between them. Dissociate, keeping your chest square to your partner while the hips carry you onto the outside line, and take a slightly larger step than the follower. You can walk outside on either side and exit with a bounce or a side step back to the shared track.",
+  "leaderCues": [
+   "Shift onto the outside line while keeping your chest square to the follower.",
+   "Take a bigger step than the follower and keep the two tracks parallel.",
+   "Dissociate so the offset lives in the feet, not in a twisted embrace.",
+   "Exit the outside with a bounce or a side step back onto the shared track."
+  ],
+  "followerCues": [
+   "Keep walking your own straight line and let the leader do the offsetting.",
+   "Maintain the chest connection even though the feet are no longer between you.",
+   "Match the leader's step rhythm without shortening under pressure.",
+   "Stay dissociated so the embrace stays intact as the tracks separate."
+  ],
+  "commonMistakes": [
+   "Twisting the whole torso to the outside instead of dissociating.",
+   "Losing the chest connection as the feet move onto the outer track.",
+   "Stepping between the follower's feet instead of truly outside them.",
+   "Collapsing the step length so the offset never really happens."
+  ],
+  "lessonRefs": [
+   "Lesson 3 BEG - Change of weight, bounce, outside",
+   "Lesson 11 ADV - Beautiful Young Steps"
+  ]
+ },
+ "cross": {
+  "tagline": "The Follower's Signature Cross",
+  "summary": "The cross (la cruzada) is the moment the follower's free foot draws across in front of the standing foot, pulling the legs together into tango's most recognizable shape. It usually arrives out of walking in the outside track, and it is the hinge that leads into ochos, giros, and countless exits.",
+  "howItWorks": "The cross grows out of the outside walk and a change of system: as the tracks realign and the leader collects, the follower's weighted leg draws across and the weight settles. Partyka teaches leading it from the ground and from clear intention toward the follower, and it can be drawn from a large pushing step, from a mini-ocho, or repeated as several crosses in a row.",
+  "leaderCues": [
+   "Lead the cross from the ground and from clear intention toward the follower.",
+   "Let the follower's heavy, weighted leg be the one that crosses.",
+   "Collect your own feet as the tracks realign so the cross has somewhere to close.",
+   "Vary the entry: from a big step, a mini-ocho, or several crosses in sequence."
+  ],
+  "followerCues": [
+   "Let the crossing leg draw across cleanly and settle the weight.",
+   "Collect through the ankles; the cross is legs together, not legs apart.",
+   "Raising the heel of the crossing foot is optional styling, not the mechanism.",
+   "Wait to feel the cross led rather than crossing on habit at a fixed spot."
+  ],
+  "commonMistakes": [
+   "Crossing automatically at a memorized moment instead of when it is led.",
+   "Leaving a gap between the ankles instead of truly closing the cross.",
+   "Forcing a stylized high heel and losing the actual weight transfer.",
+   "The leader pulling the cross with the arms instead of leading from body and floor."
+  ],
+  "lessonRefs": [
+   "Lesson 4 BEG - Cross",
+   "Lesson 50 - Musicality 3 - Biagi"
+  ]
+ },
+ "cross-exits": {
+  "tagline": "Out Of The Knot",
+  "summary": "Once you land in the cross you need clean ways out of it, whether stepping back, stepping forward, or pausing through a parada. Knowing several exits turns the cross from a dead end into a crossroads, so the figure connects smoothly into whatever comes next.",
+  "howItWorks": "From the crossed position the simplest exit is a back step that resolves the walk, but you can also lead the follower forward, often through a parada (a stop) and then a step over, or open directly into a forward ocho. Each exit is just a clear new intention led at the instant the cross resolves.",
+  "leaderCues": [
+   "Lead the exit the moment the cross settles, before it stalls.",
+   "For the back exit, step back cleanly and let the walk resume.",
+   "For a forward exit, mark a parada first, then invite the step over.",
+   "Choose the exit with your chest so the follower reads one clear direction."
+  ],
+  "followerCues": [
+   "Resolve the cross and wait for the next intention rather than unwinding on your own.",
+   "On the parada, keep contact between the feet and hold until led over.",
+   "Keep the axis quiet so any exit direction stays available.",
+   "Let the exit direction come from the lead, not from expectation."
+  ],
+  "commonMistakes": [
+   "Unwinding the cross automatically before an exit is led.",
+   "Collapsing the posture at the parada instead of staying poised.",
+   "Rushing out of the cross before the weight has settled.",
+   "Defaulting to the same back step every time and never exploring forward exits."
+  ],
+  "lessonRefs": [
+   "Lesson 4 BEG - Cross"
+  ]
+ },
+ "americana": {
+  "tagline": "The Promenade Opening",
+  "summary": "The americana (also called the corte americano) opens both partners to the same side so you briefly walk forward together, hip to hip, like a promenade, before folding back into the embrace. It is a bright, travelling accent that eats space elegantly and sets up sacadas, ganchos, and playful exits.",
+  "howItWorks": "The leader rotates to open the embrace so both dancers face the same direction, then steps deep and travels alongside the follower, pivoting on his own axis without leaning on her. Come out of it by drawing the next step closer to re-establish upper-body contact, and from there you can fold into a gancho, a cross, or a simple resolution.",
+  "leaderCues": [
+   "Open by rotating your axis and step deep to arrive truly beside the follower.",
+   "Pivot on your own axis; don't lay your weight onto the follower.",
+   "After the americana, bring the next step closer to rebuild chest contact.",
+   "Keep your upper body level and equal to both sides through the opening."
+  ],
+  "followerCues": [
+   "Open the feet and travel beside the leader with your hips facing the direction of travel.",
+   "Stay grounded on the standing leg with a straight back knee.",
+   "Keep your distance from the leader; don't collapse into him as you open.",
+   "Wait until the rotation finishes before placing the foot."
+  ],
+  "commonMistakes": [
+   "Leaning on the partner instead of pivoting on your own axis.",
+   "Falling forward out of the opening instead of staying over your feet.",
+   "Opening too shallow so you never truly arrive side by side.",
+   "Losing the connection because the next step never closes the distance again."
+  ],
+  "lessonRefs": [
+   "Lesson 26 - American Set"
+  ]
+ },
+ "music-timing": {
+  "tagline": "Find The Pulse",
+  "summary": "Music and timing is learning to hear tango's steady pulse (the compas) and place your steps on it, so the dance breathes with the orchestra instead of against it. Before any fancy figure, this is the skill that makes you feel musical: walking on the beat, and knowing when to pause.",
+  "howItWorks": "Find the strong, regular beat and walk one step per beat, staying grounded so each footfall lands with the pulse. Partyka's advice for a clear orchestra like Canaro is to walk every beat, then try stepping only on beats one and three, and to take pauses so the walk sings rather than marches.",
+  "leaderCues": [
+   "Find the strong beat first and put your walk exactly on it.",
+   "Step every beat, then try only beats one and three to open up space.",
+   "Use pauses deliberately so the dance breathes instead of marching.",
+   "Stay grounded so each step lands cleanly on the pulse."
+  ],
+  "followerCues": [
+   "Feel the pulse through the floor and let each step arrive on the beat.",
+   "Enjoy the pauses; a held beat is music too, not a mistake.",
+   "Fill longer pauses with small embellishments if the music invites it.",
+   "Stay grounded and let the timing come from the leader and the compas."
+  ],
+  "commonMistakes": [
+   "Marching mechanically on every beat with no pauses or phrasing.",
+   "Rushing ahead of the beat instead of arriving on it.",
+   "Ignoring the compas and stepping to a rhythm only you can hear.",
+   "Treating pauses as dead time instead of musical space."
+  ],
+  "lessonRefs": [
+   "Lesson 46 - Musicality 5 - Canaro",
+   "Partyka Workshop - How to Practice"
+  ]
+ },
+ "double-timing": {
+  "tagline": "Two Steps, One Beat",
+  "summary": "Double timing fits two quick steps into the space of a single beat, the quick-quick that answers the music's faster figures and rhythmic accents. It is what lets you catch a run in the melody or drive a rhythmic passage, and it is led and followed entirely through the feet.",
+  "howItWorks": "The quick change happens on the front of the feet with straight knees, small and compact, so you can switch weight fast without disturbing the body's height. Partyka stresses leading it from the feet rather than the arms and giving the follower a clear signal that the double time is coming, often by pressing the floor and keeping the steps tiny so speed comes from efficiency, not effort.",
+  "leaderCues": [
+   "Lead the double time from the feet and the change of weight, never the arms.",
+   "Telegraph it early so the follower feels the quick-quick coming.",
+   "Keep the steps tiny; speed comes from small, efficient changes.",
+   "Press the floor to stay fast and keep your axis in the middle."
+  ],
+  "followerCues": [
+   "Make the quick change on the front of the feet with straight knees.",
+   "Keep it compact, with small feet and no bobbing in the body.",
+   "Push the floor so you're ready for the fast weight change.",
+   "Listen to the rhythm of the lead and let the body react in time."
+  ],
+  "commonMistakes": [
+   "Bending the knees to go fast, which sinks the body and kills the speed.",
+   "Taking big steps that can't keep up with the doubled rhythm.",
+   "Leading it with the arms instead of the feet.",
+   "Surprising the follower with no preparation for the quick-quick."
+  ],
+  "lessonRefs": [
+   "Lesson 19 ADV - Over Here, Over There",
+   "Lesson 27 - The short step was born long",
+   "Lesson 47 - Cat's games with a Moon"
+  ]
+ },
+ "traspie": {
+  "tagline": "The Syncopated Stumble",
+  "summary": "The traspie is a syncopated contra-tempo step, a quick weight change slipped into the 'and' between beats, like a playful stumble that never loses balance. It is the signature spice of milonga, letting you accent the off-beat and double the rhythmic texture without travelling any further.",
+  "howItWorks": "Slide a fast extra weight change onto the front of the feet in the gap between two beats, changing and changing back, so three quick contacts fill the space of one pulse. Keep the knees straight and the steps small, push the floor for speed, and keep your axis centred so the syncopation reads as crisp rhythm rather than a loss of balance.",
+  "leaderCues": [
+   "Place the extra change on the 'and', between the main beats.",
+   "Keep it compact and led from the feet so it stays crisp.",
+   "Push the floor to make the syncopated step quick and clean.",
+   "Keep your axis centred so the traspie reads as rhythm, not a wobble."
+  ],
+  "followerCues": [
+   "Take the quick change on the front of the feet with straight knees.",
+   "Stay compact and let the off-beat step be small and light.",
+   "Push the floor so you're ready for the syncopation.",
+   "Keep your weight centred so you can change and change back in time."
+  ],
+  "commonMistakes": [
+   "Bending the knees and sinking, which slows the syncopation.",
+   "Making the steps too big to fit into the off-beat.",
+   "Losing the axis so the 'stumble' becomes a real loss of balance.",
+   "Placing the extra step on the beat instead of on the 'and'."
+  ],
+  "lessonRefs": [
+   "Lesson 27 - The short step was born long",
+   "Lesson 23 - The Corner"
+  ]
+ },
+ "musicality": {
+  "tagline": "Dance What You Hear",
+  "summary": "Musicality is the art of translating what you hear into how you move, matching the dynamics, phrasing, and mood of the music instead of running steps on top of it. It is the difference between executing figures and telling the song's story, and it is what makes a dance feel inevitable rather than rehearsed.",
+  "howItWorks": "Listen for the layers, the steady beat underneath and the melody floating over it, and choose which one to dance in each phrase, sharpening a movement to a staccato accent or stretching it long and smooth to a legato line. Partyka frames it as making a movement sharp or frozen to match the orchestra, dancing the beat in one phrase and the melody in the next, and always ending your idea where the phrase ends.",
+  "leaderCues": [
+   "Decide each phrase whether you're dancing the beat or the melody.",
+   "Sharpen a movement for a staccato accent; stretch it long for a legato line.",
+   "Use stops and pauses to mark the ends of phrases.",
+   "Let the music choose the figure, not the other way around."
+  ],
+  "followerCues": [
+   "Colour your steps to match the music: sharp when it bites, smooth when it sings.",
+   "Use pauses and slow moments for embellishments that fit the phrase.",
+   "Feel the phrasing so your movements resolve where the music does.",
+   "Stay open to the leader's changing dynamics from phrase to phrase."
+  ],
+  "commonMistakes": [
+   "Dancing the same texture regardless of what the orchestra is doing.",
+   "Filling every beat and leaving no room for the music to breathe.",
+   "Ending movements in the middle of a phrase instead of at its close.",
+   "Treating musicality as decoration rather than the source of the movement."
+  ],
+  "lessonRefs": [
+   "Lesson 50 - Musicality 3 - Biagi",
+   "Lesson 46 - Musicality 5 - Canaro",
+   "Lesson 47 - Cat's games with a Moon"
+  ]
+ },
+ "orchestras": {
+  "tagline": "Know Who's Playing",
+  "summary": "The golden-age orchestras each have a fingerprint, from d'Arienzo's driving beat and Di Sarli's elegant sweep to Pugliese's dramatic swells, Biagi's sharp attack, and Canaro's steady romance, and learning to recognize them tells you how to dance. Knowing the orquesta before the first step lets you meet the music's character instead of guessing.",
+  "howItWorks": "Listen for the tell-tale signature: is this a rhythm-driven orchestra you answer with crisp, grounded steps, or a melodic one you answer with long, flowing lines? Partyka has students name the orchestra and its style first, since Biagi wants sharp, frozen accents while Canaro offers steady tempo, a simple melody, and a grounded, elegant walk, then dance the qualities that music asks for.",
+  "leaderCues": [
+   "Identify the orchestra and its character before you choose how to move.",
+   "Answer a rhythmic orquesta like d'Arienzo or Biagi with crisp, grounded steps.",
+   "Answer a melodic orquesta like Di Sarli or Pugliese with long, flowing lines.",
+   "Match Biagi's sharp accents by making movements sharp or frozen."
+  ],
+  "followerCues": [
+   "Tune your styling to the orchestra: sharp for Biagi, smooth for Di Sarli.",
+   "Ground your walk for the rhythmic orchestras and float it for the melodic ones.",
+   "Let the orchestra's mood colour your embellishments.",
+   "Recognize the phrasing so you resolve with the music's character."
+  ],
+  "commonMistakes": [
+   "Dancing every tanda the same way regardless of the orchestra.",
+   "Matching a driving d'Arienzo with soft, melodic movement, or the reverse.",
+   "Ignoring the orchestra's phrasing and dynamics entirely.",
+   "Learning steps but never learning to name what you're hearing."
+  ],
+  "lessonRefs": [
+   "Lesson 50 - Musicality 3 - Biagi",
+   "Lesson 46 - Musicality 5 - Canaro"
+  ]
+ },
+ "switch-instrument": {
+  "tagline": "Follow A Different Instrument",
+  "summary": "Switching the instrument means choosing which voice in the music you embody, the bandoneon's rhythm, the violin's melody, the piano's accents, the singer's line, and deliberately changing from one to another as the arrangement shifts. It is an advanced musicality tool that lets a single dance hold several conversations with the same song.",
+  "howItWorks": "Pick one instrument and let it drive your movement for a phrase, dancing the violin's long melodic sweep, then switch to the staccato bite of the bandoneon or piano when it steps forward. The skill is hearing the layers separately, committing your body to one at a time, and making the hand-off between them clean so the change of texture is a deliberate statement rather than an accident.",
+  "leaderCues": [
+   "Commit to one instrument's voice for a full phrase before switching.",
+   "Dance the melody long and smooth; dance the rhythm sharp and grounded.",
+   "Make the hand-off between instruments a clear, intentional change of texture.",
+   "Let a new instrument entering the arrangement cue your switch."
+  ],
+  "followerCues": [
+   "Feel which instrument the leader is embodying and colour your steps to match.",
+   "Shift your dynamics cleanly when the driving instrument changes.",
+   "Use embellishments that echo the instrument currently in front.",
+   "Stay attentive across phrases so switches don't catch you flat."
+  ],
+  "commonMistakes": [
+   "Dancing to the whole wall of sound instead of one clear voice.",
+   "Switching so often that no instrument is ever really expressed.",
+   "Blurring the hand-off so the change of texture is lost.",
+   "Choosing an instrument the music isn't actually foregrounding."
+  ],
+  "lessonRefs": [
+   "Lesson 16 ADV - Play the Violin with the Partner",
+   "Lesson 46 - Musicality 5 - Canaro"
+  ]
+ },
+ "ocho-adelante": {
+  "tagline": "The Figure-Eight Forward",
+  "summary": "Ocho adelante is the follower's forward figure-eight: you pivot on one foot and step forward across your body, tracing an '8' on the floor. It is your first real taste of dissociation under a partner, and it becomes the building block for turns, sacadas, and much of tango's vocabulary.",
+  "howItWorks": "The leader leads the ocho with the chest and feet, not the arms, timing each pivot so the follower isn't rushed. The follower pivots on the standing foot, then projects the free leg forward across the body, keeping the chest toward the leader while the hips rotate underneath (dissociation). Collect and point the foot past the standing ankle before each new step, staying at a constant height.",
+  "leaderCues": [
+   "Lead with your chest and feet, keep the arms quiet",
+   "Give the pivot time — lead direction before she changes weight",
+   "Face the follower and let your torso choose the direction",
+   "Adapt your hands to keep contact without pushing"
+  ],
+  "followerCues": [
+   "Dissociate: keep your chest to the leader while the hips pivot",
+   "Project the free leg first, then transfer weight fully",
+   "Keep the feet open and pointed, brushing past your standing ankle",
+   "Stay at the same height — don't bob up and down"
+  ],
+  "commonMistakes": [
+   "Turning with the arms instead of the torso",
+   "Stepping before the pivot finishes, so the ocho collapses",
+   "Bending the knees to reach instead of pivoting",
+   "Facing away from your partner and losing the frame"
+  ],
+  "lessonRefs": [
+   "Vilnius Seminar 1 - Deep conversation about Ocho",
+   "Lesson 5 BEG - Ocho Adelante",
+   "Lesson 7 ADV - Anti Ocho, how to fool the technique"
+  ]
+ },
+ "ocho-atras": {
+  "tagline": "The Figure-Eight Back",
+  "summary": "Ocho atrás is the mirror of the forward ocho: the follower pivots and steps backward across her body, tracing the eight behind her. It reads as the more elegant, controlled cousin, and it feeds directly into giros, sacadas, and exits like the parada and mordida.",
+  "howItWorks": "The follower pivots on the standing foot and reaches the free leg straight back with a pointed foot, spiraling the upper body so the hips can rotate more than the shoulders. The leader can lead the whole figure standing still, driving it from the chest and feet and timing each pivot rather than pulling with the arms.",
+  "leaderCues": [
+   "Lead the back ocho from the chest and feet; keep the arms still",
+   "Time each pivot — don't rush her past the change of weight",
+   "You can lead it without stepping yourself",
+   "Position your own feet for stability while she pivots"
+  ],
+  "followerCues": [
+   "Reach the free leg straight back with a pointed foot",
+   "Spiral the upper body so the hips can turn enough for the next step",
+   "Keep the same height — no bending the knees",
+   "Collect through your axis before opening to the next step"
+  ],
+  "commonMistakes": [
+   "Sitting back off your axis as you step back",
+   "Under-rotating the hips so a round ocho goes flat",
+   "Anticipating the leader and pivoting on your own",
+   "Dropping the heel too early instead of staying on the ball of the foot"
+  ],
+  "lessonRefs": [
+   "Vilnius Seminar 1 - Deep conversation about Ocho",
+   "Lesson 7 BEG - Ocho Atrás + Parada/Mordida"
+  ]
+ },
+ "ocho-cortado": {
+  "tagline": "The Cut-Off Turn",
+  "summary": "The ocho cortado is an interrupted ocho: you begin the figure, then 'cut' it with a quick change of direction that lands the follower in the cross. It is the workhorse of crowded, milonguero-style dancing and of milonga, because it turns in almost no space at all.",
+  "howItWorks": "The leader leads a small rocking bounce and, using weight transfer through the feet rather than the arms, reverses direction so the follower's motion snaps back into a cross. Timing and double-timing are everything; the feet stay collected and close, and the whole figure stays compact.",
+  "leaderCues": [
+   "Use weight transfer through your feet to lead into the cortado",
+   "Lead the direction before she changes weight, then push the floor to keep her under control",
+   "Rotate the chest to make space; keep your axis in the middle during the bounce",
+   "Lead the double-timing without blocking her next step"
+  ],
+  "followerCues": [
+   "Quick, compact change of weight — dance with your feet",
+   "In the cross keep the feet together and close",
+   "Push the floor for the fast change of direction; don't bend the knees to do it",
+   "Keep your left hand active and flexible to stay in contact"
+  ],
+  "commonMistakes": [
+   "Over-rotating the hips instead of keeping a small compact turn",
+   "Making the cross on the heel instead of the front of the foot",
+   "Losing the axis during the bounce",
+   "Waiting for a big move — the cortado is small and quick"
+  ],
+  "lessonRefs": [
+   "Lesson 27 - The short step was born long",
+   "Lesson 23 - The Corner",
+   "Lesson 8 BEG - Ocho Cortado"
+  ],
+  "video": "https://drive.google.com/file/d/130saPFH9KDA91cTXJ2Kfv613V__ddPht/view?usp=drive_link"
+ },
+ "molinete": {
+  "tagline": "The Carousel Around You",
+  "summary": "The molinete is the follower's continuous grapevine — forward, side, back, side — orbiting the leader while he turns on the spot at the center. It is the engine of the giro and the foundation for sacadas, ganchos, and most of social turning.",
+  "howItWorks": "The follower travels a circle in a repeating four-step pattern: forward cross, open side, back cross, open side, keeping equal steps and equal distance from the leader's axis. The leader pivots in the center, leading direction from the ground and chest, while dissociation keeps the follower's chest turned toward him.",
+  "leaderCues": [
+   "Turn on your own axis in the center; lead the circle, don't chase it",
+   "Keep the open side of the embrace open so the movement stays continuous",
+   "Lead each direction before the previous step completes",
+   "Keep the same energy and distance all the way around"
+  ],
+  "followerCues": [
+   "Equal steps, equal distance — draw one clean circle",
+   "Forward and back steps are true crosses; the sides are open steps",
+   "Project first and keep the chest to the leader",
+   "Collect the feet through each step; don't stop mid-step"
+  ],
+  "commonMistakes": [
+   "Uneven steps that shrink or bulge the circle",
+   "Changing weight on the side steps instead of stepping through",
+   "Falling into the next step before completing this one",
+   "Letting the distance to the leader drift in and out"
+  ],
+  "lessonRefs": [
+   "The Molinete - The Carousel Blueprint (Intermediate Block 1)",
+   "Lesson 25 - Lovely spins",
+   "Lesson 3 ADV - Round Milonga"
+  ]
+ },
+ "giro-left": {
+  "tagline": "Turning to the Left",
+  "summary": "The giro to the left is a full turn built on the follower's molinete circling counter-clockwise while you pivot in the center. Leading turns in both directions frees you to open space, change the line, and resolve crowded moments on either side of the floor.",
+  "howItWorks": "The mechanics are the molinete turning left: the leader dissociates and leads from the ground, using the back and centrifugal energy to keep the turn smooth. On a left giro a parada sits inside the follower's step rather than in front of it, which makes the exit easier.",
+  "leaderCues": [
+   "Lead the giro before you start moving",
+   "Rotate your upper body to keep facing the follower",
+   "Use the ground and your back to make the turn smooth",
+   "On the left giro, place the parada inside the step, not in front"
+  ],
+  "followerCues": [
+   "Open the forward foot before any rotation",
+   "Turn the hips to the received energy first, finish with the back foot",
+   "Push the floor to complete each step around; bending knees is unnecessary",
+   "Keep the same distance; let the feet go first, then the body"
+  ],
+  "commonMistakes": [
+   "Leading the turn with the arms instead of the torso and ground",
+   "Rushing so the follower falls into her steps",
+   "Collapsing the frame so the hips can't rotate enough",
+   "Uneven distance around the center"
+  ],
+  "lessonRefs": [
+   "Lesson 9 BEG - Turning on the left (giro)",
+   "Lesson 22 BEG - Giro on the right after ocho atras",
+   "Vilnius Seminar 2 - Synchronized Giro + Lapis"
+  ]
+ },
+ "giro-right": {
+  "tagline": "Turning to the Right",
+  "summary": "The giro to the right sends the follower's molinete clockwise around you, and it is often entered straight out of a back ocho. Because the right side of the embrace is the open side, this direction has its own feel worth drilling until both turns are equally easy.",
+  "howItWorks": "From a back ocho, the leader rotates the follower about 180 degrees at the end of her forward step and places a foot in front of hers to catch the turn. He leads the circle from the ground and back, keeps facing her, and stands in front of where she ends the sequence.",
+  "leaderCues": [
+   "Lead the follower into the giro before you start moving forward",
+   "At the end of her forward step, rotate her 180° and place your foot in front of hers",
+   "Use centrifugal energy and your back for a smoother giro",
+   "Check where she ends the sequence and stand in front of her"
+  ],
+  "followerCues": [
+   "Open the forward foot first, then rotate",
+   "Turn the hips to the received energy, finish with the back foot",
+   "Push the floor to make a complete step around the leader",
+   "Adapt the hand on the leader's back; feet go first, then the body"
+  ],
+  "commonMistakes": [
+   "Starting the turn before the leader leads it",
+   "Not completing each step — falling onto the next",
+   "Bending the knees to turn instead of pivoting and pushing the floor",
+   "Letting the upper body break away so the hips can't turn"
+  ],
+  "lessonRefs": [
+   "Lesson 22 BEG - Giro on the right after ocho atras"
+  ],
+  "video": "https://drive.google.com/file/d/1eDymI5AsQ0xpGiqGH-1hHYbEX9kO7sAk/view?usp=sharing"
+ },
+ "calesita": {
+  "tagline": "The Follower's Carousel",
+  "summary": "In the calesita you turn the tables: the follower balances on a single axis while you walk a circle around her, keeping her suspended over one leg. It is a moment of stillness and display — she becomes the center of attention, often decorating the floor with the free foot.",
+  "howItWorks": "The leader keeps a constant distance and walks back-steps around the follower without disturbing her axis, holding the frame of the embrace steady. The follower stays on one grounded axis with a bent standing knee, keeping her posture and facing the leader, and can draw circles on the floor with a pointed, open free foot.",
+  "leaderCues": [
+   "Keep the same distance to the follower during the whole rotation",
+   "Make your steps back-steps as you circle her",
+   "Don't influence her axis — keep the frame steady and your back straight",
+   "Rotate the left hand to keep the connection alive"
+  ],
+  "followerCues": [
+   "Commit to one grounded axis; bend the standing knee",
+   "Keep your posture and face the leader as he circles",
+   "Point and open the free foot; draw circles on the floor with the toes",
+   "Stay collected — let the free leg decorate without disturbing balance"
+  ],
+  "commonMistakes": [
+   "Riding on the leader instead of holding your own axis",
+   "Leader letting the distance grow or shrink as he walks",
+   "Standing bolt-upright instead of settling into the standing knee",
+   "Leader steering the follower's axis with the arms"
+  ],
+  "lessonRefs": [
+   "Lesson 29 - Ballerina Effect",
+   "The Calesita - The Center of Gravity (Intermediate Block 1)"
+  ]
+ },
+ "linear-giro": {
+  "tagline": "The Turn That Travels",
+  "summary": "A linear giro unrolls the turn along the line of dance instead of pinning it to one spot — the circle stretches into a moving spiral so you keep progressing down the floor while still rotating. It is how you turn without losing ground or your orientation in the ronda.",
+  "howItWorks": "The leader takes a side step before the follower and changes his axis while she steps, converting the round giro into a traveling one. The depth of the pivot decides how round or how linear the figure becomes, and direction is led from the feet and the ground, not the arms.",
+  "leaderCues": [
+   "Take a side step before the follower and change your axis while she steps",
+   "For a rounder turn deepen the pivot; for linear, keep it shallow and travel",
+   "Lead direction from the feet and ground, not the arms",
+   "Finish in front of the follower with hips on the same line"
+  ],
+  "followerCues": [
+   "Project first and keep the chest to the leader",
+   "Follow the energy for the length of each step — it can be linear or triangular",
+   "Keep the rotation under control; separate upper and lower body",
+   "Collect the knees and stay on your axis as the figure travels"
+  ],
+  "commonMistakes": [
+   "Spinning in place when the music or space asks you to travel",
+   "Losing orientation to the line of dance mid-turn",
+   "Follower over-rotating so the couple stalls",
+   "Leading the change of direction with the upper body instead of the feet"
+  ],
+  "lessonRefs": [
+   "The Linear Giro - Line and Orbit (Intermediate Block 1)",
+   "Lesson 51 - Giro, out of axis, boleo (Linear)",
+   "Lesson 39 - Lovely Sacadas"
+  ]
+ },
+ "asym-giro": {
+  "tagline": "Breaking the Circle's Symmetry",
+  "summary": "An asymmetric giro deliberately breaks the even four-step molinete: you vary the length, timing, or rhythm of the steps so the turn stops being a perfect circle. This lets you match the music's phrasing and place the follower exactly where the crowded floor allows.",
+  "howItWorks": "The leader leads unequal steps — a long side, a short back, a paused forward — or changes the number of sides (four into three), keeping the quality of the lead constant so the follower reads each altered step. It demands clear dissociation and a direction led cleanly before each step.",
+  "leaderCues": [
+   "Vary step length and timing without changing the quality of the lead",
+   "Change four sides into three when space demands it",
+   "Lead each new direction clearly before she completes the step",
+   "Keep your axis centered so the uneven circle still resolves"
+  ],
+  "followerCues": [
+   "Read the length of each step from the energy, not from habit",
+   "Don't assume the pattern — every step is fresh; follow, don't predict",
+   "Arrive first with the projection, then transfer fully",
+   "Keep the spinning continuous and controlled even when steps are unequal"
+  ],
+  "commonMistakes": [
+   "Auto-piloting the even molinete and missing the change",
+   "Leader letting lead quality drop when the rhythm shifts",
+   "Uneven steps turning into loss of balance instead of design",
+   "Distorting the steps so far the circle loses its center"
+  ],
+  "lessonRefs": [
+   "Lesson 1 ADV - Asymmetric Giro",
+   "Vilnius Seminar 2 - Synchronized Giro + Lapis"
+  ]
+ },
+ "medialuna": {
+  "tagline": "Half-Moon Through Crosses",
+  "summary": "The media luna is a half-turn — a 'half moon' arc — here built out of the follower's crosses rather than a full molinete. In Partyka's milonga version it is triangular and quick: the follower makes several crosses around you while you make just one long diagonal step.",
+  "howItWorks": "The leader leads an arch around himself with an open foot and a side step to create space, keeping his steps long and diagonal. The follower does three steps to his one — deep crosses — staying parallel to his chest so the figure stays a clean half-moon instead of collapsing into ochos. Timing is critical throughout.",
+  "leaderCues": [
+   "Lead the arch around you; open the foot and side-step to create space",
+   "Your steps are long and diagonal; hers are three to your one",
+   "Don't rotate her into ochos — keep her doing crosses",
+   "Timing is everything; lead direction before she completes the step"
+  ],
+  "followerCues": [
+   "Stay parallel to the leader's chest — avoid extra rotation",
+   "Make deep crosses, feet open, knees relaxed",
+   "Stay grounded and balanced; don't collapse",
+   "Follow the leader's timing exactly through the half-moon"
+  ],
+  "commonMistakes": [
+   "Rotating the hips and turning the crosses into ochos",
+   "Leader making short round steps instead of long diagonals",
+   "Rushing the timing so the crosses jam",
+   "Collapsing the posture or bending the knees mid-cross"
+  ],
+  "lessonRefs": [
+   "Lesson 35 - Medialuna via Crosses"
+  ],
+  "video": "https://drive.google.com/file/d/1A5MHljL4CsaXzoyRX6jqMmIfkHyNrKbE/view?usp=sharing"
+ },
+ "ronda": {
+  "tagline": "The Dance Floor's Bloodstream",
+  "summary": "The ronda is the counter-clockwise river of couples circling the floor — tango's traffic system. Learning to read it, hold your lane, and manage the space in front of you is what lets you dance safely and beautifully in a crowded milonga.",
+  "howItWorks": "Couples travel counter-clockwise in lanes; you keep pace with the couple ahead without overtaking, and you dance into the space that opens in front of you rather than the gaps beside or behind. When the floor tightens, you swap long traveling figures for compact ones — ocho cortado, small giros — and keep your eyes up to read the traffic.",
+  "leaderCues": [
+   "Move counter-clockwise and stay in your lane; don't overtake the couple ahead",
+   "Dance into the space in front of you, not into gaps beside or behind",
+   "When the floor tightens, switch to compact turns and cortados",
+   "Keep your eyes up to read the traffic and protect your follower"
+  ],
+  "followerCues": [
+   "Trust the lead and keep your steps within the couple's footprint",
+   "Keep embellishments compact and quick in traffic",
+   "Stay grounded and ready — the next step depends on the floor",
+   "Help protect the space by not over-extending the legs"
+  ],
+  "commonMistakes": [
+   "Overtaking, or leaving big gaps in the lane",
+   "Backing the follower into oncoming couples",
+   "Using long traveling figures in tight space",
+   "Dropping the eyes and losing awareness of nearby couples"
+  ],
+  "lessonRefs": [
+   "Lesson 1 BEG - Walking / Ronda direction",
+   "Lesson 1 INT - Ronda: tango rules to live by",
+   "Lesson 41 INT - Ronda 2"
+  ]
+ },
+ "sacada": {
+  "tagline": "Stepping Into Their Space",
+  "summary": "A sacada is a displacement: you step into the space your partner's leg is just leaving, so it looks as if you push their leg away. It is not a fight — it is precise timing and direction that makes the invasion feel smooth and inevitable.",
+  "howItWorks": "You step into the triangle that forms as your partner steps, aiming for the axis they are vacating rather than the leg itself. The direction is perpendicular and the timing is simultaneous; for the leader it is usually a forward ocho with rotation added after the step, pushing from the standing leg.",
+  "leaderCues": [
+   "Step where the follower's axis used to be, into the vacated space",
+   "Timing is simultaneous — your step and hers happen together",
+   "The direction is perpendicular; add rotation after the step",
+   "Push from the standing leg — it's smooth, not a fight"
+  ],
+  "followerCues": [
+   "Make a confident full step to the side; be really on your axis",
+   "Follow with the chest and deal with the power of the lead",
+   "Don't collect too fast, and don't dance alone",
+   "Avoid over-turning; keep shoulders and hips on their two perpendicular lines"
+  ],
+  "commonMistakes": [
+   "Aiming at the leg instead of the vacated space",
+   "Mistiming so it becomes a shove, not a displacement",
+   "Collecting too early and closing the space",
+   "Skipping the rotation that resolves the leader's step"
+  ],
+  "lessonRefs": [
+   "Lesson 23 BEG - Sacadas",
+   "Lesson 1 ADV - Play with bounce and Sacadas"
+  ]
+ },
+ "giro-sacada": {
+  "tagline": "Invading the Turn",
+  "summary": "Here you fold sacadas into the giro: as the follower travels her molinete, you step into each space she vacates, displacing her legs while the turn keeps spinning. It is one of tango's most satisfying illusions, and it demands you know exactly where her feet are.",
+  "howItWorks": "The leader keeps leading the circular movement while timing forward or side sacadas into the follower's molinete steps. A pivot puts him in position before each sacada; he then leads around and holds the same distance and energy, committing further into the partner than feels natural.",
+  "leaderCues": [
+   "Know where the follower's legs are and be in position before the sacada starts",
+   "After the pivot, place your foot in the right direction, then sacada and lead around",
+   "Don't be afraid to go into your partner — go further than you think",
+   "Keep the same energy and distance, and keep the open side of the embrace open"
+  ],
+  "followerCues": [
+   "Keep your balance and make equal steps through the giro",
+   "Collect the feet as you turn; don't stop in a step",
+   "Make a full pivot on the back step; keep side steps as side steps, no weight change",
+   "Avoid planeos — collect as soon as possible and stay grounded"
+  ],
+  "commonMistakes": [
+   "Mistiming the pivot and arriving late to the sacada",
+   "Pulling the follower instead of leading the circle",
+   "Changing weight on side steps and breaking the molinete",
+   "Stopping the turn to insert the sacada instead of flowing through it"
+  ],
+  "lessonRefs": [
+   "Lesson 24 BEG - Giro with Sacadas",
+   "Sacadas in the Giro - The Intersection (Intermediate Block 1)"
+  ]
+ },
+ "follower-sacada": {
+  "tagline": "When She Invades",
+  "summary": "The follower's sacada flips the initiative: she steps into the space you vacate, displacing your leg. Leading it well means creating the opening, clearing your weight off the target leg, and rotating to make room — all without pushing her with your arms.",
+  "howItWorks": "The leader leads the direction and dissociates, leaving the back foot weightless so the follower can sacada into it; after her step he rotates to reposition his body and pushes from the back foot. The follower goes with the toes, points the hips in the direction of the step, prolongs the step, and forces a full transfer of weight.",
+  "leaderCues": [
+   "Leave the back foot without weight so she can displace it",
+   "Focus on the dissociation and lead the direction cleanly",
+   "After her sacada, rotate your body back to place and push from the back foot",
+   "Make space with your upper body — don't block her with the arms"
+  ],
+  "followerCues": [
+   "Go with the toes and point your hips in the direction of the step",
+   "Prolong the step and force the full transfer of weight",
+   "Make confident steps and arrive on your axis with the whole body",
+   "Open the feet and keep the projection first"
+  ],
+  "commonMistakes": [
+   "Leader leaving weight on the leg she is trying to displace",
+   "Follower short-stepping instead of committing fully into the space",
+   "Pushing with the arms instead of making room with the torso",
+   "Hips not turning to the step, so the sacada loses direction"
+  ],
+  "lessonRefs": [
+   "Lesson 10 ADV - Nothing More than a Dream Sacada",
+   "Follower's Sacadas - Mirror Displacement (Intermediate Block 1)"
+  ]
+ },
+ "cadena": {
+  "tagline": "The Infinite Ribbon",
+  "summary": "A cadena is a chain: a short turning figure linked back into itself so it flows on and on across the floor, prized in vals for its continuous ribbon of movement. Each cycle of side step, bounce, and cross feeds seamlessly into the next.",
+  "howItWorks": "The leader keeps a constant, continuous lead, leading the forward step's direction after each side step and transferring weight completely so the pattern re-arms itself. The follower can decorate — a low boleo cross after the back step — then collect and continue, while the left side of the embrace stays only moderately open.",
+  "leaderCues": [
+   "Lead constantly — the chain never fully stops",
+   "After the side step, lead the direction of the forward step just like the first time",
+   "Transfer weight completely on the right step to re-arm the pattern",
+   "Don't open the left side of the embrace too much"
+  ],
+  "followerCues": [
+   "Open the feet and transfer weight to match the speed of the lead",
+   "Keep the same distance from the leader as you circle",
+   "After a back step there is time for a low boleo cross, then collect and continue",
+   "Watch the leader and keep the right arm honest — it shows the step length"
+  ],
+  "commonMistakes": [
+   "Incomplete weight transfer that stalls the next link",
+   "Over-opening the embrace so the chain loses connection",
+   "Falling back off your axis while going around",
+   "Treating each cycle as separate steps instead of one flowing ribbon"
+  ],
+  "lessonRefs": [
+   "Cadenas - The Infinite Ribbon (Intermediate Block 4)",
+   "Lesson 51 - UFO"
+  ],
+  "video": "https://drive.google.com/file/d/1SIXLKS_1HdJ6kxmUzD4FcyzCJELUzd4Y/view?usp=drivesdk"
+ },
+ "sacada-chain": {
+  "tagline": "Trading Displacements",
+  "summary": "Sacada against sacada is a call-and-response of displacements: you sacada the follower, she sacadas you back, and the exchange chains into a flowing dialogue of stolen spaces. It is advanced timing — every axis has to land exactly where it leaves room for the next invasion.",
+  "howItWorks": "After a sacada, the leader leads the follower into the space of his previous axis, changing weight at the same moment she does; he then collects and steps forward onto her forward foot for the next sacada, always leading her next direction before she moves. Correct axis placement and timing are everything.",
+  "leaderCues": [
+   "Lead her into the space where your previous axis was, changing weight together",
+   "Let her go, dissociate, then start the movement — lead with the feet, not the arms",
+   "After her sacada, collect and step forward onto her forward foot",
+   "Put your axis in the right place to leave space for her next step"
+  ],
+  "followerCues": [
+   "Transfer the weight confidently, projection first, feet open",
+   "Adapt the embrace and keep the spiral movement going",
+   "Bend the knee a touch if needed to hold balance on the standing leg",
+   "Face the leader's chest and keep the hips in the right direction"
+  ],
+  "commonMistakes": [
+   "Mis-placing your axis so there's no room for the return sacada",
+   "Weight changes that don't sync between partners",
+   "Leading the exchange with the arms and turning it into a fight",
+   "Rushing so the alternating timing collapses"
+  ],
+  "lessonRefs": [
+   "Lesson 44 - Sacada Against Sacada",
+   "Combined Sacada Patterns - The Chain Reaction (Intermediate Block 1)",
+   "Lesson 39 - Lovely Sacadas"
+  ]
+ },
+ "parada": {
+  "tagline": "The Foot That Says Stop",
+  "summary": "A parada is the moment you stop the follower mid-step, usually with a light foot-to-foot contact that marks a pause in the dance. It is a shared breath, a comma in the sentence, and the doorway into pasadas, barridas, ganchos and sandwiches. Because it interrupts momentum without breaking the embrace, it teaches both partners to listen and wait.",
+  "howItWorks": "The leader lets the follower begin her step, then arrives with his foot to meet hers and keeps his own weight on the back foot so nothing is forced. The contact is a suggestion, not a shove: the leader's arms stay relaxed while the foot and the axis do the talking. The follower does not transfer her weight during the parada, keeping her upper body soft and her feet in contact until the next intention arrives.",
+  "leaderCues": [
+   "Keep your weight on your back foot during any parada",
+   "Wait for the follower's projection before you place your foot; don't anticipate",
+   "Make a light, tight foot-to-foot contact and lead with the foot, not the arms",
+   "Stay parallel with the follower and keep the same distance in the couple"
+  ],
+  "followerCues": [
+   "Do not transfer your weight during the parada",
+   "Keep the contact between your foot and the leader's foot",
+   "Relax your upper body and stay grounded over your standing leg",
+   "Wait, read the next intention, and keep your feet open"
+  ],
+  "commonMistakes": [
+   "Following through and changing weight, which collapses the pause",
+   "Leading the stop with the arms instead of the foot and axis",
+   "Placing the parada too far from the follower's line so she loses her axis",
+   "Tensing the embrace and rushing straight into the next figure"
+  ],
+  "lessonRefs": [
+   "Lesson 45 - Feet Games",
+   "Lesson 17 ADV - Don't Let Him/Her Go",
+   "Lesson 21 - Play with Me"
+  ]
+ },
+ "mordida": {
+  "tagline": "The Foot Sandwich",
+  "summary": "A mordida, or sandwich, traps the follower's foot between the leader's two feet (or the reverse) right after a parada. The name means \"bite\": one foot is gently caught, held for a beat, and then released into the next step. It is a playful, intimate punctuation that grows directly out of a clean parada.",
+  "howItWorks": "From a parada, the leader closes his free foot toward his standing foot so the follower's foot is lightly framed on both sides, keeping his weight settled and his upper body relaxed. The hold lasts only as long as the music asks, and the exit comes from a clear intention forward, into a pasada, or into a barrida. The follower keeps her trapped foot passive and weightless, staying over her own axis so she is free to step over or be swept when released.",
+  "leaderCues": [
+   "Arrive first with a parada, then close the second foot to frame her foot",
+   "Keep your weight settled and your upper body soft while the foot is held",
+   "Hold only for the musical beat, then give a clear direction out",
+   "Offer the exit into a pasada or barrida rather than pulling with the arms"
+  ],
+  "followerCues": [
+   "Keep the caught foot passive and free of weight",
+   "Stay grounded over your standing leg so you can move the instant you are released",
+   "Relax the embrace and keep your feet open",
+   "Wait for the leader's direction; the sandwich is an invitation, not a trap"
+  ],
+  "commonMistakes": [
+   "Putting weight on the sandwiched foot so it cannot be released",
+   "The leader squeezing with tension instead of a light frame",
+   "Holding too long and losing the musical phrase",
+   "Anticipating the exit before the direction is clear"
+  ],
+  "lessonRefs": [
+   "Lesson 45 - Feet Games",
+   "Lesson 7 BEG - Ocho Atras (Parada + Mordida/Sandwich)"
+  ]
+ },
+ "barrida": {
+  "tagline": "Sweep The Floor Together",
+  "summary": "A barrida (or arrastre) is a sweep: one partner's foot makes contact with the other's and carries it across the floor as if dragging it along. The magic is that the foot never loses contact, so the movement looks like one continuous, sticky line. It flows naturally out of a parada and can be led by either partner.",
+  "howItWorks": "The leader meets the follower's foot with his own and moves it by stepping with his whole lower body, keeping the contact constant and leading with the foot rather than the arms. A slight circular quality gives the sweep a smoother flow, and the sweep should never travel further than the follower can project without leaving her axis. The follower keeps her swept leg weightless and in contact, letting it start from the knee and finish with a straight leg, staying balanced until the sweep ends.",
+  "leaderCues": [
+   "Lead the barrida with your foot and lower body, never with the arms",
+   "Keep constant, tight contact with the follower's foot throughout",
+   "Add a small circular movement for a smoother flow of the free leg",
+   "Don't sweep further than her projection, so she stays on her axis"
+  ],
+  "followerCues": [
+   "Keep the swept leg weightless and in contact with the leader's foot",
+   "Start the barrida from the knee, then let the leg follow",
+   "Finish with a straight leg and keep your balance until the very end",
+   "Take turns: when it's your turn, sweep the leader's foot in the same way"
+  ],
+  "commonMistakes": [
+   "Losing foot contact so the sweep breaks into two separate steps",
+   "Pushing or pulling with the arms instead of leading from the floor",
+   "Over-rotating the hips or leaning the upper body forward",
+   "Sweeping past the follower's axis so she falls onto the foot"
+  ],
+  "lessonRefs": [
+   "Lesson 17 ADV - Don't Let Him/Her Go",
+   "Lesson 45 - Feet Games",
+   "Lesson 12 ADV - Barrida-Gancho Sandwich"
+  ]
+ },
+ "gancho": {
+  "tagline": "The Leg That Hooks",
+  "summary": "A gancho is a hook: the free leg wraps around the partner's leg with a sharp bend of the knee and then releases. It is really just an ordinary back or forward cross performed around an obstacle, the partner's leg, so clean technique and clear axis keep it safe and elegant. Done well it is crisp and light; done carelessly it can hit the partner.",
+  "howItWorks": "The leader bends his leg and rotates his hips to open a clear space, putting his front foot on the toes to make room, and leads the follower's step around that obstacle with energy from the ground rather than the arms. The follower keeps her axis over her standing leg, makes tight contact with the leader's leg first and only then bends the knee, letting the free leg stay light and relaxed. Throughout, the follower keeps her standing knee straight so the hooking leg swings without kicking the leader.",
+  "leaderCues": [
+   "Bend your leg and rise onto your toes to create the space for the hook",
+   "Rotate your hips to face opposite the follower's hips and relax the left side",
+   "Move the follower with energy from the ground, not with the arms",
+   "Time the knee bend so it isn't too early, and keep knees facing the foot"
+  ],
+  "followerCues": [
+   "Keep your axis on your standing leg and your standing knee straight",
+   "Make tight contact with the leader's leg first, then bend the knee",
+   "Keep the free leg light, soft and relaxed, with the foot pointed and heel out",
+   "Keep contact until the leader transfers weight, then release the leg around and straight"
+  ],
+  "commonMistakes": [
+   "Bending the standing knee, which drops the axis and risks kicking the leader",
+   "Kicking hard for height instead of letting the hook happen from contact",
+   "Over-rotating the hips so the leg loses its line",
+   "Losing foot contact before the release, making the gancho snatch"
+  ],
+  "lessonRefs": [
+   "Lesson 21 BEG - Gancho",
+   "Lesson 12 ADV - Barrida-Gancho Sandwich",
+   "Lesson 28 - When the Ganchos Bloom"
+  ],
+  "video": "https://drive.google.com/file/d/1gcZ5CR3eel8zJa_F38pSs7hNi7UTc6xB"
+ },
+ "pasada": {
+  "tagline": "Step Over And Continue",
+  "summary": "A pasada is the invitation to step over: after a parada, the leader offers his foot and the follower steps across it to continue the dance. It is a gracious, unhurried moment that often decorates the close of a giro or a molinete. The whole figure lives on trust, the follower chooses when and how to travel over the offered foot.",
+  "howItWorks": "The leader arrives in a parada, keeps his weight settled and offers the front foot as a low bar for the follower to cross, giving her the time and space to complete the step. The follower makes contact with the leader's foot, collects, and then steps over it with a pointed foot and a clear projection, often adding an adorno on the way. Because nothing is rushed, the leader waits for her to finish before beginning the next intention.",
+  "leaderCues": [
+   "Set a clean parada and keep your weight on the back foot",
+   "Offer your front foot low and give her time and space to pass",
+   "Wait for her to complete the step-over before leading onward",
+   "Invite with the foot and embrace, don't pull her across"
+  ],
+  "followerCues": [
+   "Make contact with the leader's foot, then step over it",
+   "Collect, point the foot, and travel with a clear projection",
+   "Take your time; the pasada is yours to decorate",
+   "Read your partner, since the next step is unpredictable, and follow properly"
+  ],
+  "commonMistakes": [
+   "Rushing the step-over and skipping the pause that makes it beautiful",
+   "Stepping over with a flat or unpointed foot",
+   "The leader lifting the foot too high, turning an invitation into a hurdle",
+   "Losing the contact so the figure looks disconnected"
+  ],
+  "lessonRefs": [
+   "Lesson 22 BEG - Giro on the right after ocho atras",
+   "Lesson 40 - Walk like a Cat"
+  ],
+  "video": "https://drive.google.com/file/d/1eDymI5AsQ0xpGiqGH-1hHYbEX9kO7sAk"
+ },
+ "adornos": {
+  "tagline": "Your Signature In The Pause",
+  "summary": "Adornos are the small embellishments, taps, circles, brushes and the lustrada (\"polishing\" the partner's shoe or leg with your foot), that decorate the spaces the dance leaves open. They are how you sign your name in the music without disturbing the connection. Adornos belong to the pauses: a leader who breathes gives room for them, and a follower who listens fills them.",
+  "howItWorks": "An adorno starts by collecting the knee, then letting the relaxed lower leg draw a circle, a tap, or a brush along the floor or up the standing leg, always keeping your axis quiet. Because the decoration must never cost you your balance or your timing, you take it only when the phrase offers a pause, then arrive on time for the next step. The leader supports adornos by slowing slightly, holding his position, and not moving until the follower has finished.",
+  "leaderCues": [
+   "Slow down and hold your position to open a pause for her adorno",
+   "Don't move before you are sure the follower has completed the decoration",
+   "Keep your axis quiet so your own adorno doesn't disturb the embrace",
+   "Leaders decorate too: circles, taps and brushes in the leg's free moments"
+  ],
+  "followerCues": [
+   "Start from the collected knee, then let the relaxed lower leg draw the shape",
+   "Keep your foot pointed and your axis over your standing leg",
+   "Take the adorno only in the pause, then be on time for the next step",
+   "For a lustrada, brush the leader's shoe or leg lightly, without leaning on it"
+  ],
+  "commonMistakes": [
+   "Decorating on top of a lead and missing the next step",
+   "Losing balance or shifting the axis to reach the embellishment",
+   "Adding so many adornos that the movement looks busy instead of musical",
+   "The leader rushing on before the follower finishes her decoration"
+  ],
+  "lessonRefs": [
+   "Lesson 29 - Ballerina Effect",
+   "Lesson 31 - Little Scoundrel",
+   "Lesson 5 BEG - Follower Adornos (Lustrada)"
+  ]
+ },
+ "boleo": {
+  "tagline": "Whip From The Center",
+  "summary": "A boleo is a whip of the free leg, created when a turn is checked and suddenly reversed, so the leg lashes out and wraps back on its own. It is never a kick: the height comes entirely from the energy the lead gives and the torque in your core, not from muscling the leg upward. A low boleo keeps the foot near the floor for the crowded social floor; a high boleo is saved for open space.",
+  "howItWorks": "The movement is born from dissociation: the leader leads a direction and then a rotation before the follower finishes her step, then goes against it, and that countermovement flings the free leg. The follower keeps her knees together and her hips parallel, letting the leg travel round because of the spin rather than opening it herself. She stays grounded and confident, exits with a pointed foot, and lets the height match the energy she was given.",
+  "leaderCues": [
+   "Lead a direction, then a rotation, then go against it to create the whip",
+   "Keep your own axis in the middle while you lead the countermovement",
+   "For a low boleo, lead down and around to keep the foot near the floor",
+   "Give the energy through the body; timing matters more than force"
+  ],
+  "followerCues": [
+   "Let the boleo happen from the change of direction; never kick",
+   "Keep your knees together and your free knee glued to the standing leg",
+   "Keep your hips parallel and stay grounded, resisting into a confident step",
+   "Exit with a pointed foot and let the height match the energy given"
+  ],
+  "commonMistakes": [
+   "Kicking the leg up for height instead of letting torque create it",
+   "Opening the knees or the hips and losing the whip's clean line",
+   "Breaking at the waist or hips instead of staying grounded",
+   "Throwing a high boleo in close quarters, a hazard on a social floor"
+  ],
+  "lessonRefs": [
+   "Lesson 34 - Boleo? No, Step!",
+   "Lesson 8 ADV - Boleos and Soltadas",
+   "Lesson 49 - Managing small space 3 - boleo"
+  ],
+  "video": "https://drive.google.com/file/d/1XlOWU6gDIabD5xK5nsKVSr1Ublv3DrfK"
+ },
+ "planeo": {
+  "tagline": "The Gliding Free Leg",
+  "summary": "A planeo is a glide: you pivot on one leg while the free leg trails along the floor, drawing a long arc like a compass leg. It stretches a single moment into something sustained and sculptural, asking for a steady axis and a patient partner. Where the leader pivots and the follower's leg planes, it becomes one of the dance's most elegant sustained shapes.",
+  "howItWorks": "The pivoting partner stays firmly over the standing leg with the axis stacked and quiet, while the free leg extends and grazes the floor, carried by the rotation rather than pushed. The lead sets the direction and the length of the glide and keeps the connection steady so the trailing leg neither collapses nor stiffens. To leave the planeo, you collect the free leg cleanly and step, resolving the shape into the next movement.",
+  "leaderCues": [
+   "Give the follower a clear, stable axis to pivot around and don't pull",
+   "Lead the direction and length of the glide, then hold it steady",
+   "Keep the connection flexible so the trailing leg stays alive",
+   "Resolve the planeo by leading a clean collection into the next step"
+  ],
+  "followerCues": [
+   "Stack your axis over the standing leg and stay grounded",
+   "Let the free leg extend and graze the floor, carried by the pivot",
+   "Keep the trailing foot in light contact, neither collapsed nor rigid",
+   "Collect your feet cleanly to exit; don't let the planeo drift on unled"
+  ],
+  "commonMistakes": [
+   "Letting the axis drift so the pivot wobbles and the glide dies",
+   "Bending the standing knee and sinking out of the shape",
+   "Leaving an unintended planeo when you should have collected on time",
+   "Pushing the free leg actively instead of letting the rotation carry it"
+  ],
+  "lessonRefs": [
+   "Lesson 24 BEG - Giro with Sacadas",
+   "Intermediate - Planeo 1"
+  ]
+ },
+ "volcada": {
+  "tagline": "The Shared Forward Lean",
+  "summary": "A volcada is a controlled forward fall: the follower tilts off her own axis toward the leader, who catches and carries her weight through the embrace, and her free leg swings or draws underneath. Both partners share one leaning axis, so it only works when the connection is committed and the exit is led from the floor. It is dramatic yet delicate, built on trust rather than force.",
+  "howItWorks": "The leader moves the follower's axis forward to compensate his own, taking her weight through a flexible embrace and timing the tilt so it is smooth, then leads the free leg's path underneath. The follower keeps her body in the same shape as during a normal step, waist straight and hips slightly back, and does not break at the back or hips as she leans. She maintains the lean by pushing the floor with her feet rather than clutching with the upper body, and the exit comes from the leader's energy rising from the feet, never from the hands.",
+  "leaderCues": [
+   "Move the follower's axis forward to compensate for your own",
+   "Take her weight through a flexible embrace and time the tilt smoothly",
+   "Lead the free leg's path underneath while she is off axis",
+   "Bring her back and exit with energy from the feet, not the hands"
+  ],
+  "followerCues": [
+   "Keep your body in the same shape as a normal step; don't break the back",
+   "Keep the waist straight and the hips slightly back as you lean",
+   "Maintain contact by pushing the floor with your feet, not the upper body",
+   "Keep the free knee straight and let the leg draw underneath"
+  ],
+  "commonMistakes": [
+   "Breaking at the waist or hips instead of leaning as one straight shape",
+   "Holding the lean with the arms and upper body rather than the floor",
+   "The leader lifting or exiting with the hands instead of from the feet",
+   "Mistiming the tilt so the shared axis jerks instead of flowing"
+  ],
+  "lessonRefs": [
+   "Lesson 21 - Play with Me",
+   "Lesson 51 - Giro, out of axis, boleo (Linear)"
+  ]
+ },
+ "colgada": {
+  "tagline": "Lean Out And Trust",
+  "summary": "A colgada is the opposite of a volcada: instead of falling in, both partners lean out, hanging away from a shared point so counterbalance and gentle centrifugal pull hold you up. The connection through the arms and embrace becomes a lifeline, and the axis lives between you rather than under either dancer. It rewards commitment, calm, and a clear sense of where the shared center sits.",
+  "howItWorks": "Both partners settle onto a stable common axis, then lean outward together so their combined weight balances across the connection, keeping the arms firm but elastic. The leader manages the timing of going out of axis and, crucially, how to come back, using a flexible embrace to keep the counterbalance honest. The follower frees and points her leg, keeps her body in its normal shape without breaking the line, and trusts the shared connection to hold her as she hangs.",
+  "leaderCues": [
+   "Establish a stable shared axis before either of you leans out",
+   "Keep the arms firm but elastic so the counterbalance stays honest",
+   "Manage the timing of going out of axis and, above all, of coming back",
+   "Recover through the connection and the feet, not by yanking the arms"
+  ],
+  "followerCues": [
+   "Commit to the lean and trust the counterbalance to hold you",
+   "Keep your body in its normal shape; don't break the back or hips",
+   "Free and point the leg while you hang, staying over the shared center",
+   "Keep the arm connection alive and elastic, never limp or clutching"
+  ],
+  "commonMistakes": [
+   "Half-committing to the lean so the counterbalance collapses",
+   "Pulling hard with the arms instead of sharing weight through the axis",
+   "Losing the common center so one partner carries all the weight",
+   "Mistiming the return and stumbling back onto your own axis"
+  ],
+  "lessonRefs": [
+   "Intermediate - Introduction to Colgadas (The Gravity Defier)"
+  ]
+ },
+ "bounce": {
+  "tagline": "The Elastic Rebound",
+  "summary": "The bounce (rebote) is the elastic push-and-return you get from the floor — you send energy down and it springs you back, letting you change direction without a whole new step. It's the engine behind rebounds, quick milonga accents, and saving a step in tight space.",
+  "howItWorks": "Soften the knee and press into the ground on a beat; the floor returns that energy and lifts you back toward your axis, ready to travel the other way. Nothing moves from the arms — the impulse lives in the legs and the shared connection, so both partners feel the same rebound at the same instant.",
+  "leaderCues": [
+   "Send the energy straight down into the floor, then let it spring you back — don't pull with the arms",
+   "Keep the impulse in the legs; your chest stays quietly connected",
+   "Use a rebound to reverse direction in tight space instead of taking a full step"
+  ],
+  "followerCues": [
+   "Meet the floor and let it return you — stay elastic through knees and ankles",
+   "Keep your axis; the bounce moves you a little, it doesn't take you off your feet",
+   "Don't anticipate the direction — feel the rebound and let it decide"
+  ],
+  "commonMistakes": [
+   "Bouncing from the upper body instead of the floor",
+   "Going rigid so the rebound has nowhere to travel",
+   "Losing the axis and turning a small bounce into a lurch"
+  ],
+  "lessonRefs": [
+   "Lesson 3 BEG - Change of weight, bounce, outside",
+   "Lesson 37 - Bounce to save your Partner"
+  ]
+ },
+ "soltada": {
+  "tagline": "Let Go, Catch Again",
+  "summary": "A soltada is a moment where you release the embrace — one or both hands let go — so the follower can spin freely and then be caught again. It's a nuevo-flavored flourish that turns the space between figures into a small piece of theatre.",
+  "howItWorks": "The leader launches a clear rotational impulse and opens the embrace so the follower completes a full turn on her own axis, then re-forms the embrace to catch her as she arrives. Timing and a shared sense of the axis are everything — the release only works if the turn already has momentum before the hands come apart.",
+  "leaderCues": [
+   "Launch the turn first, then release — never let go to make the turn happen",
+   "Open and re-form the embrace on a clear beat so she knows when she's free and when she's caught",
+   "Give her a stable point to return to; be there when she arrives"
+  ],
+  "followerCues": [
+   "Keep spinning on your own axis — the release means finish the turn, not stop",
+   "Stay collected and vertical so you can be caught cleanly",
+   "Trust the axis; the embrace will come back to you"
+  ],
+  "commonMistakes": [
+   "Releasing before the turn has real momentum",
+   "Breaking axis and drifting during the free spin",
+   "Grabbing on the re-catch instead of softly re-forming the embrace"
+  ],
+  "lessonRefs": [
+   "Lesson 8 ADV - Boleos and Soltadas, the step you always wanted"
+  ]
+ },
+ "vals": {
+  "tagline": "The Endless Turning Sweep",
+  "summary": "Vals is tango danced to a 3/4 waltz — flowing, circular, and continuous. Instead of the tango habit of pausing on a beat, you keep moving, letting turns and changes of direction ride the lilt of the music.",
+  "howItWorks": "You dance mostly on the strong first beat of each bar, stringing giros, crosses and changes of weight into one sweeping line. The feeling is round and buoyant — momentum carries from one figure into the next, so you rarely stop; when you do, you fill the pause with a small circular step rather than a hard halt.",
+  "leaderCues": [
+   "Keep it flowing — favor continuous turns and avoid hard stops",
+   "Dance the '1' of the waltz; save double-time for when the music invites it",
+   "Use the cross system to keep changing direction smoothly"
+  ],
+  "followerCues": [
+   "Stay buoyant and let momentum carry you between steps",
+   "Keep your turns round and continuous — don't square them off",
+   "Breathe with the lilt; vals is lighter and more suspended than tango"
+  ],
+  "commonMistakes": [
+   "Dancing vals like a slow tango with pauses",
+   "Getting heavy and killing the momentum",
+   "Hitting every beat instead of riding the '1'"
+  ],
+  "lessonRefs": [
+   "Lesson 2 ADV - How to Dance Countryside Afternoon Vals",
+   "Beginners program — Vals (Lessons 13-15)"
+  ]
+ },
+ "milonga": {
+  "tagline": "The Cheeky 2/4 Drive",
+  "summary": "Milonga is tango's fast, playful cousin — a quick 2/4 rhythm that keeps you low to the floor and light on your feet. It rewards clarity and cheek over big figures: small steps, a steady pulse, and syncopation.",
+  "howItWorks": "You dance grounded and compact, stepping on the strong beat and adding traspié (syncopated double-steps) for spice. The whole body stays low and rhythmic — you 'walk the beat' rather than pause and pose — with the square and change of weight as your bread and butter.",
+  "leaderCues": [
+   "Keep it small and grounded — milonga lives on the floor, not in the air",
+   "Mark the steady 2/4 pulse first; add traspié only when it's clean",
+   "Favor the square, weight changes and short steps over big turns"
+  ],
+  "followerCues": [
+   "Stay light and quick on the balls of your feet; don't sink between steps",
+   "Keep steps small so you're ready for a syncopation at any moment",
+   "Follow the pulse, not the melody — milonga is a rhythm dance"
+  ],
+  "commonMistakes": [
+   "Dancing milonga like a fast tango with big steps",
+   "Losing the steady beat when adding traspié",
+   "Getting heavy or late — milonga punishes hesitation"
+  ],
+  "lessonRefs": [
+   "Beginners program — Milonga (Lessons 16-17)",
+   "Intermediate — Milonga (traspié, rebounds)"
+  ]
+ },
+ "chacarera": {
+  "tagline": "The Folk Interlude",
+  "summary": "Chacarera isn't tango at all — it's a lively Argentine folk dance that milongas often break into between tandas. Danced apart rather than embraced, it's a joyful, foot-stamping call-and-response of circles, turns and zapateo (footwork).",
+  "howItWorks": "Partners face each other without touching and move through a fixed sequence — advances and retreats, a big circle (vuelta entera), and turns — punctuated by the man's zapateo (stamping) and the woman's zarandeo (a swaying step with the skirt). Learning chacarera is learning its structure and its cues, which repeat with the music.",
+  "leaderCues": [
+   "Lead with eye contact and energy, not the hands — you dance apart",
+   "Know the fixed structure: advance/retreat, giro, vuelta, zapateo",
+   "Keep the zapateo crisp and on the beat"
+  ],
+  "followerCues": [
+   "Mirror the leader's path around the shared circle",
+   "Carry the zarandeo lightly and playfully",
+   "Watch and answer — chacarera is a conversation across the space"
+  ],
+  "commonMistakes": [
+   "Trying to 'lead' it like embraced tango",
+   "Losing the shared floor pattern",
+   "Stiff, heavy footwork instead of light and rhythmic"
+  ],
+  "lessonRefs": [
+   "Beginners program — Chacarera (Lesson 31)"
+  ]
+ },
+ "salon": {
+  "tagline": "Elegant And Spacious",
+  "summary": "Tango salón is the elegant social style of the milonga — walking-based, musical and precise, danced in a flexible close embrace with room to travel along the line of dance. It's the mainstream 'social tango' most dancers are aiming for.",
+  "howItWorks": "You make a beautiful walk the centerpiece, opening the embrace slightly for giros and ochos and closing it for intimacy, always respecting the ronda. Elegance comes from a clean axis, unhurried musicality and clear leading — the figures serve the walk and the music, not the other way around.",
+  "leaderCues": [
+   "Make the walk itself beautiful — it's the heart of salón",
+   "Flex the embrace open for turns, closed for closeness",
+   "Navigate the ronda; never sacrifice the line of dance for a figure"
+  ],
+  "followerCues": [
+   "Walk with a long, grounded, elegant step",
+   "Keep your axis through the opening and closing of the embrace",
+   "Let posture and musicality, not big legs, do the work"
+  ],
+  "commonMistakes": [
+   "Cramming nuevo-sized figures onto a social floor",
+   "A rushed or heavy walk",
+   "Breaking the ronda to fit a move in"
+  ],
+  "lessonRefs": [
+   "Advanced program — Salón lessons (Tango / Vals / Milonga)"
+  ]
+ },
+ "milonguero": {
+  "tagline": "Chest To Chest",
+  "summary": "Estilo milonguero is the close-embrace style born on packed downtown floors — chest-to-chest, feet economical, everything small and shared. It's tango at its most intimate, where the connection matters far more than showing shapes.",
+  "howItWorks": "You stay in a constant, close embrace and dance almost entirely with the torso and small steps — no big figures, no room for legs to fly. Turns become the ocho cortado and tiny giros; the pleasure is in the music, the closeness and precise weight changes inside a crowded ronda.",
+  "leaderCues": [
+   "Keep the embrace closed and constant — lead from the chest",
+   "Choose small figures that fit a crowded floor (ocho cortado, short giros)",
+   "Put the connection and the beat ahead of shapes"
+  ],
+  "followerCues": [
+   "Stay with the chest and keep your own axis so closeness never becomes leaning",
+   "Keep steps small and collected",
+   "Sink into the music — milonguero is felt more than performed"
+  ],
+  "commonMistakes": [
+   "Opening the embrace to make room for figures that don't belong",
+   "Leaning on the partner instead of keeping your axis",
+   "Trying to dance salón-sized steps in a milonguero embrace"
+  ],
+  "lessonRefs": [
+   "Advanced program — Milonguero lessons (Tango / Vals / Milonga)"
+  ]
+ },
+ "nuevo": {
+  "tagline": "The Open Language",
+  "summary": "Tango nuevo opens the embrace and explores the dance as a system: off-axis shapes (colgadas, volcadas), sacadas, ganchos and unexpected pathways. It's the analytical, elastic, exploratory dialect that expanded tango's vocabulary.",
+  "howItWorks": "The embrace flexes open and closed as needed, making room for the legs and for shared-axis movement. You play with dissociation, changes of the axis, and 'what happens if' — leading and following become a two-way exploration of momentum, so both partners actively shape the movement rather than one simply proposing.",
+  "leaderCues": [
+   "Let the embrace open and close to allow off-axis shapes and big legs",
+   "Think in momentum and axis, not fixed figures",
+   "Invite the follower's contribution — nuevo is a dialogue"
+  ],
+  "followerCues": [
+   "Stay active — nuevo asks you to co-create momentum, not just receive it",
+   "Keep a strong, mobile axis for colgadas and volcadas",
+   "Use the open embrace without losing the connection through the arms"
+  ],
+  "commonMistakes": [
+   "Opening the embrace so far the connection is lost",
+   "Forcing off-axis shapes without a shared, stable axis",
+   "Treating nuevo as a bag of tricks rather than a way of moving"
+  ],
+  "lessonRefs": [
+   "Advanced program — Nuevo lessons (Centrifugal Force, Wave Effect, Without Ground)"
+  ]
+ },
+ "improvisation": {
+  "tagline": "Composing In Real Time",
+  "summary": "Improvisation is the point of tango: not performing memorized sequences but composing in the moment, to this music, with this partner. It's the skill every other skill has been building toward.",
+  "howItWorks": "You stop thinking in fixed patterns and work from a small set of elements — walk, cross, ocho, giro, pause — recombining them in response to the music and the floor. Constraints help: limiting yourself to a few options frees you to listen and choose, so improvisation grows from deep, automatic fundamentals rather than from more figures.",
+  "leaderCues": [
+   "Build from a few solid elements you can do without thinking",
+   "Let the music and the open space pick the next step, not a memorized routine",
+   "When stuck, walk — a good walk is always an answer"
+  ],
+  "followerCues": [
+   "Stay present and unhurried; don't guess the pattern",
+   "Offer your own musicality within the lead — pauses, adornos, timing",
+   "Trust that the next step becomes clear if you keep listening"
+  ],
+  "commonMistakes": [
+   "Stringing memorized sequences instead of responding",
+   "Panicking in a pause instead of using it",
+   "Reaching for more figures rather than listening more deeply"
+  ],
+  "lessonRefs": [
+   "Intermediate — Improvisation 1 & 2",
+   "Partyka Workshop - How to Practice"
+  ]
+ },
+ "stops-endings": {
+  "tagline": "Land With The Music",
+  "summary": "Knowing how to stop — and how to end — is what separates dancing from moving. A clean stop lands with the music; a good ending resolves the phrase so the dance feels finished rather than interrupted.",
+  "howItWorks": "You anticipate the musical phrase and bring the movement to rest on a strong close, collecting both partners onto their axes on the final note. Stops mid-dance are led with the body settling rather than a yank; the ending is a small resolution — a close, a pause, a shared breath — timed to the last chord.",
+  "leaderCues": [
+   "Feel the phrase coming and settle the body to stop — don't pull",
+   "Land the ending on the final note, collected and balanced",
+   "Use stops as punctuation; a clean pause is a musical statement"
+  ],
+  "followerCues": [
+   "Let the stop settle you onto your axis — don't brace or collapse",
+   "Collect your feet and finish quietly with the music",
+   "Breathe the ending — resolve, don't just halt"
+  ],
+  "commonMistakes": [
+   "Stopping abruptly with the arms instead of the body",
+   "Missing the phrase and ending off the music",
+   "Leaving the ending unresolved so the dance just stops"
+  ],
+  "lessonRefs": [
+   "Advanced — Stops and the end with the stops"
+  ]
+ }
+}
