@@ -3,7 +3,7 @@ import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile } from '@/db/schema';
 import { canSeeLessonVideos } from '@/src/lib/teachers';
-import { getSkillContent } from '@/src/lib/knowledge';
+import { getSkillContent, getVideos } from '@/src/lib/knowledge';
 
 // Gated lesson video for a skill. The URL is deliberately NOT baked into the
 // static skill page (that would leak it to everyone via view-source); it is
@@ -19,12 +19,12 @@ export async function GET(req: Request) {
   const slug = new URL(req.url).searchParams.get('slug') ?? '';
   const session = await auth();
   const uid = session?.user?.id;
-  if (!uid) return Response.json({ video: null }, { headers: HEADERS });
+  if (!uid) return Response.json({ videos: [] }, { headers: HEADERS });
 
   const prof = await db.query.profile.findFirst({ where: eq(profile.userId, uid) });
   if (!canSeeLessonVideos({ email: session?.user?.email, cardSerial: prof?.cardSerial })) {
-    return Response.json({ video: null }, { headers: HEADERS });
+    return Response.json({ videos: [] }, { headers: HEADERS });
   }
 
-  return Response.json({ video: getSkillContent(slug)?.video ?? null }, { headers: HEADERS });
+  return Response.json({ videos: getVideos(getSkillContent(slug)) }, { headers: HEADERS });
 }

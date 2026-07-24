@@ -45,5 +45,12 @@
 
 /* teacher-gated lesson video */
 .tm-teacher-badge{font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--tm-ember); border:1px solid var(--tm-line); border-radius:999px; padding:2px 8px; vertical-align:middle; margin-left:8px; font-weight:600}
+.tm-vidcount{font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--tm-faint); margin-left:8px; font-weight:600}
+/* a lesson filmed in several takes — one player, pick the part */
+.tm-vidparts{display:flex; gap:6px; flex-wrap:wrap; margin:0 0 10px}
+.tm-vidpart{font-family:var(--mono); font-size:11px; min-width:28px; padding:5px 9px; border:1px solid var(--tm-line); border-radius:999px; background:transparent; color:var(--tm-muted); cursor:pointer; transition:border-color .15s,color .15s,background .15s}
+.tm-vidpart:hover{border-color:var(--tm-ember); color:var(--tm-ink)}
+.tm-vidpart.on{border-color:transparent; background:var(--tm-ember-s); color:var(--tm-ember); font-weight:600}
+.tm-vidpart:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
 .tm-skvideo{position:relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; border:1px solid var(--tm-line); background:#000; margin:6px 0 12px}
 .tm-skvideo iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
