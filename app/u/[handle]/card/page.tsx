@@ -10,6 +10,7 @@ import { dnaSignature, perCategory } from '@/src/lib/dna';
 import { recommend } from '@/src/lib/recommend';
 import { furthestTier, TIER_NAME } from '@/src/lib/levels';
 import { DancerCard } from '@/src/components/DancerCard';
+import { ArPresentButton } from '@/src/components/ArPresentButton';
 import { cardPaletteFor } from '@/src/lib/cardTheme';
 import { TopNav } from '@/src/components/TopNav';
 
@@ -89,6 +90,10 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
           </a>
           <a className="tm-cta ghost" href={`/u/${encodeURIComponent(data.handle)}`}>
             ← Full profile
+          </a>
+          <ArPresentButton serial={data.serial} name={name} />
+          <a className="tm-cta ghost" href="/ar/scan">
+            Scan a card
           </a>
         </div>
       </main>
