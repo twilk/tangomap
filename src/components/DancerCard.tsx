@@ -10,6 +10,8 @@ const loadQR = () => import('qrcode').then((m) => m.default);
 
 // Max tilt in degrees — enough to sell depth, low enough to keep text readable.
 const MAX_TILT = 12;
+// Stronger in-hand feel once the card is fullscreen ("AR"); still readable.
+const MAX_TILT_AR = 18;
 
 export type CardRec = { name: string; label: string; level: number; reason: string };
 
@@ -97,11 +99,16 @@ export function DancerCard(props: DancerCardProps) {
   // Write tilt through CSS vars so pointer + gyro share one render path and
   // React never re-renders per frame. The unitless twins (--rxn/--ryn) drive
   // the pseudo-parallax translations (real translateZ dies under overflow:hidden).
+  // Current tilt limit, bumped in immersive mode. A ref (not the render value) so
+  // the gyro handler — armed once, in a stale closure — still reads today's limit.
+  const tiltMaxRef = useRef(MAX_TILT);
+
   const setTilt = (rx: number, ry: number) => {
     const el = wrapRef.current;
     if (!el) return;
-    const cx = Math.max(-MAX_TILT, Math.min(MAX_TILT, rx));
-    const cy = Math.max(-MAX_TILT, Math.min(MAX_TILT, ry));
+    const lim = tiltMaxRef.current;
+    const cx = Math.max(-lim, Math.min(lim, rx));
+    const cy = Math.max(-lim, Math.min(lim, ry));
     el.style.setProperty('--rx', `${cx}deg`);
     el.style.setProperty('--ry', `${cy}deg`);
     el.style.setProperty('--rxn', String(cx));
@@ -117,7 +124,8 @@ export function DancerCard(props: DancerCardProps) {
     if (!r) return;
     const px = (e.clientX - r.left) / r.width - 0.5;
     const py = (e.clientY - r.top) / r.height - 0.5;
-    setTilt(-py * 2 * MAX_TILT, px * 2 * MAX_TILT);
+    const lim = tiltMaxRef.current;
+    setTilt(-py * 2 * lim, px * 2 * lim);
   };
 
   const onPointerLeave = () => {
@@ -244,20 +252,42 @@ export function DancerCard(props: DancerCardProps) {
 
   useEffect(() => {
     if (!immersive) return;
+    tiltMaxRef.current = MAX_TILT_AR; // stronger tilt while fullscreen
     arCloseRef.current?.focus();
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    // Trap Tab within the overlay chrome (close + optional "Enable motion").
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setImmersive(false);
-      else if (e.key === 'Tab') {
+      if (e.key === 'Escape') {
+        setImmersive(false);
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const f = arRef.current?.querySelectorAll<HTMLElement>('button');
+      if (!f || f.length === 0) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
-        arCloseRef.current?.focus();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = prevOverflow;
+      tiltMaxRef.current = MAX_TILT;
+      // Drop the amplified tilt so the card returns flat, not stuck at 18°.
+      const el = wrapRef.current;
+      if (el) {
+        el.style.setProperty('--rx', '0deg');
+        el.style.setProperty('--ry', '0deg');
+        el.style.setProperty('--rxn', '0');
+        el.style.setProperty('--ryn', '0');
+      }
       arOpenerRef.current?.focus();
     };
   }, [immersive]);
@@ -631,18 +661,30 @@ export function DancerCard(props: DancerCardProps) {
             aria-label={`${props.name}'s card, immersive view`}
             onClick={() => setImmersive(false)}
           />
-          <button
-            ref={arCloseRef}
-            type="button"
-            className="tm-card-ar-close"
-            aria-label="Exit immersive view"
-            onClick={() => setImmersive(false)}
-          >
-            ✕
-          </button>
-          <p className="tm-card-ar-hint" aria-hidden="true">
-            {motionOn ? 'Move your phone to look around' : 'Drag to look around'} · tap to close
-          </p>
+          <div ref={arRef} className="tm-card-ar-chrome">
+            <button
+              ref={arCloseRef}
+              type="button"
+              className="tm-card-ar-close"
+              aria-label="Exit immersive view"
+              onClick={() => setImmersive(false)}
+            >
+              ✕
+            </button>
+            {needsMotionOptIn && !motionOn && (
+              <button type="button" className="tm-card-ar-motion" onClick={requestMotion}>
+                Enable motion
+              </button>
+            )}
+            <p className="tm-card-ar-hint">
+              {motionOn
+                ? 'Move your phone to look around'
+                : needsMotionOptIn
+                  ? 'Enable motion, or drag to look'
+                  : 'Drag to look around'}{' '}
+              · tap to close
+            </p>
+          </div>
         </>
       )}
     </div>

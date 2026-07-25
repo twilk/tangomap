@@ -558,12 +558,20 @@ body { margin: 0; }
 .tm-card-ar-scrim{position:fixed; inset:0; z-index:50; background:rgba(12,9,6,.9); -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px)}
 .tm-card3d.immersive{position:fixed; inset:0; z-index:60; margin:0; display:grid; place-items:center; padding:24px; animation:none}
 .tm-card3d.immersive .tm-card{width:min(440px,92vw)}
-.tm-card-ar-close{position:fixed; top:max(14px,env(safe-area-inset-top)); right:max(16px,env(safe-area-inset-right)); z-index:70; width:40px; height:40px;
+/* Overlay chrome sits above the card (z 70) but is click-through except its own
+   controls, so the card still tilts and taps on empty space fall to the scrim. */
+.tm-card-ar-chrome{position:fixed; inset:0; z-index:70; pointer-events:none}
+.tm-card-ar-chrome button{pointer-events:auto}
+.tm-card-ar-close{position:absolute; top:max(14px,env(safe-area-inset-top)); right:max(16px,env(safe-area-inset-right)); width:40px; height:40px;
   display:grid; place-items:center; font-size:16px; color:#F2EADC; background:rgba(241,233,220,.08); border:1px solid rgba(241,233,220,.25); border-radius:999px; cursor:pointer}
 .tm-card-ar-close:hover{border-color:#E58C44}
 .tm-card-ar-close:focus-visible{outline:2px solid #E58C44; outline-offset:2px}
-.tm-card-ar-hint{position:fixed; left:0; right:0; bottom:max(22px,env(safe-area-inset-bottom)); z-index:70; text-align:center; margin:0;
-  font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:rgba(241,233,220,.6); pointer-events:none}
+.tm-card-ar-motion{position:absolute; top:max(14px,env(safe-area-inset-top)); left:50%; transform:translateX(-50%);
+  font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#110D09; background:#E58C44; border:0; border-radius:999px; padding:9px 16px; cursor:pointer}
+.tm-card-ar-motion:hover{filter:brightness(1.07)}
+.tm-card-ar-motion:focus-visible{outline:2px solid #F2EADC; outline-offset:2px}
+.tm-card-ar-hint{position:absolute; left:0; right:0; bottom:max(22px,env(safe-area-inset-bottom)); text-align:center; margin:0;
+  font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:rgba(241,233,220,.6)}
 /* identity + footer, centered under the radar */
 .tm-card-id{text-align:center}
 .tm-card-id h1{font-family:var(--serif); font-weight:600; font-size:clamp(21px,5.6vw,27px); line-height:1.05; letter-spacing:-.015em; margin:0; overflow-wrap:anywhere}
