@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { smoothPathD, type Pt } from '@/src/lib/radarPath';
 import { CATEGORIES, iconSvg } from '@/src/lib/dna';
 import { ArPlaceCard } from './ArPlaceCard';
@@ -61,6 +61,12 @@ const ICON_BY_LABEL: Record<string, string> = Object.fromEntries(CATEGORIES.map(
 const axIconUrl = (inner: string, color: string) =>
   'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(inner, 24).replace(/currentColor/g, color));
 
+// QR polarity is intentionally theme-independent: both the badge and the story
+// export always render dark modules on a light field (the frozen gradMid/ink
+// pair) — a light custom theme would otherwise invert them into an unscannable
+// light-on-dark code. Shared so the two QRs can never diverge.
+export const QR_COLORS = { dark: FROZEN_CARD.gradMid, light: FROZEN_CARD.ink };
+
 function radarPoints(dna: { pct: number }[], r = R): Pt[] {
   const N = dna.length;
   const ang = (i: number) => -Math.PI / 2 + (i * 2 * Math.PI) / N;
@@ -91,16 +97,21 @@ export function DancerCard(props: DancerCardProps) {
   // hairlines used 241,233,220) fall back to the exact old literal strings.
   const palette = props.palette ?? FROZEN_CARD;
   const frozen = palette === FROZEN_CARD;
-  const inkRGB: RGB = parseHex(palette.ink) ?? { r: 242, g: 234, b: 220 };
-  const accentRGB: RGB = parseHex(palette.ember) ?? { r: 229, g: 140, b: 68 };
-  const carmRGB: RGB = parseHex(palette.carmine) ?? { r: 230, g: 65, b: 92 };
+  // Parses memoised on `palette` so downloadStory's useCallback deps stay stable
+  // (fresh objects each render would defeat its memo).
+  const inkRGB: RGB = useMemo(() => parseHex(palette.ink) ?? { r: 242, g: 234, b: 220 }, [palette]);
+  const accentRGB: RGB = useMemo(() => parseHex(palette.ember) ?? { r: 229, g: 140, b: 68 }, [palette]);
+  const carmRGB: RGB = useMemo(() => parseHex(palette.carmine) ?? { r: 230, g: 65, b: 92 }, [palette]);
+  const verdRGB: RGB = useMemo(() => parseHex(palette.verd) ?? { r: 97, g: 171, b: 149 }, [palette]);
   // Radar strokes: rings come straight from the palette; spoke/ghost/star are
   // composed from the same ink/carmine — but frozen keeps the exact old literals.
   const spokeStroke = frozen ? 'rgba(241,233,220,.05)' : rgba(inkRGB, 0.05);
   const ghostStroke = frozen ? 'rgba(241,233,220,.30)' : rgba(inkRGB, 0.30);
   const starSoft = frozen ? 'rgba(230,65,92,.22)' : rgba(carmRGB, 0.22);
   // The --tm-card-* overrides the .tm-card* CSS reads (fallbacks there equal these
-  // frozen values, so an unset var and a frozen var render the same pixel).
+  // frozen values, so an unset var and a frozen var render the same pixel). The
+  // glow/mono/verd entries theme the card's decorative tints; frozen keeps the
+  // exact old literals.
   const cardVars: Record<string, string> = {
     '--tm-card-ink': palette.ink,
     '--tm-card-muted': palette.muted,
@@ -112,6 +123,9 @@ export function DancerCard(props: DancerCardProps) {
     '--tm-card-ember-14': frozen ? 'rgba(229,140,68,.14)' : rgba(accentRGB, 0.14),
     '--tm-card-ember-55': frozen ? 'rgba(229,140,68,.55)' : rgba(accentRGB, 0.55),
     '--tm-card-line': frozen ? 'rgba(241,233,220,.11)' : rgba(inkRGB, 0.11),
+    '--tm-card-glow-ember': frozen ? 'rgba(229,140,68,.16)' : rgba(accentRGB, 0.16),
+    '--tm-card-glow-verd': frozen ? 'rgba(97,171,149,.13)' : rgba(verdRGB, 0.13),
+    '--tm-card-mono': frozen ? 'rgba(229,140,68,.07)' : rgba(accentRGB, 0.07),
   };
 
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -235,7 +249,7 @@ export function DancerCard(props: DancerCardProps) {
   useEffect(() => {
     if (!badge || qr) return;
     loadQR()
-      .then((QRCode) => QRCode.toDataURL(profileUrl, { width: 480, margin: 4, color: { dark: '#110D09', light: '#F2EADC' } }))
+      .then((QRCode) => QRCode.toDataURL(profileUrl, { width: 480, margin: 4, color: QR_COLORS }))
       .then(setQr)
       .catch(() => {});
   }, [badge, qr, profileUrl]);
@@ -463,7 +477,8 @@ export function DancerCard(props: DancerCardProps) {
       // Standard dark-on-light with a real quiet zone — inverted QR codes fail
       // in many scanner apps, which defeats the whole point of a story image.
       const QRCode = await loadQR();
-      const qrData = await QRCode.toDataURL(profileUrl, { width: 300, margin: 4, color: { dark: palette.gradMid, light: palette.ink } });
+      // Fixed dark-on-light QR (see QR_COLORS) — theme-independent for scannability.
+      const qrData = await QRCode.toDataURL(profileUrl, { width: 300, margin: 4, color: QR_COLORS });
       const img = new Image();
       await new Promise<void>((res, rej) => {
         img.onload = () => res();

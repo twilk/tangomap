@@ -14,7 +14,7 @@ import { parseHex, rgba } from '@/src/lib/color';
 export type CardPalette = {
   ground: string; gradFrom: string; gradMid: string; gradTo: string;
   panel: string; border: string; ink: string; muted: string; faint: string;
-  ember: string; emberSoft: string; carmine: string; ring: string;
+  ember: string; emberSoft: string; carmine: string; verd: string; ring: string;
 };
 
 /** The exact colours the card used before it became theme-aware. Every string
@@ -26,7 +26,10 @@ export const FROZEN_CARD: CardPalette = {
   ground: '#0c0906', gradFrom: '#221B14', gradMid: '#110D09', gradTo: '#0c0906',
   panel: '#191309', border: 'rgba(241,233,220,.16)', ink: '#F2EADC',
   muted: '#9E907E', faint: '#6C5F50', ember: '#E58C44',
-  emberSoft: 'rgba(229,140,68,.30)', carmine: '#E6415C', ring: 'rgba(241,233,220,.09)',
+  emberSoft: 'rgba(229,140,68,.30)', carmine: '#E6415C',
+  // the base RGB (97,171,149) behind the card's frozen verd glow tints; only ever
+  // used to compose a themed tint, the frozen surfaces emit the literal directly.
+  verd: '#61AB95', ring: 'rgba(241,233,220,.09)',
 };
 
 /** Map a validated custom Theme onto the card palette. Solid tokens come straight
@@ -39,7 +42,7 @@ export function cardPalette(theme: Theme): CardPalette {
   return {
     ground: t.ground, gradFrom: t.panel2, gradMid: t.panel, gradTo: t.ground,
     panel: t.panel2, border: rgba(ink, 0.16), ink: t.ink, muted: t.muted, faint: t.faint,
-    ember: t.ember, emberSoft: rgba(accent, 0.30), carmine: t.carmine, ring: rgba(ink, 0.09),
+    ember: t.ember, emberSoft: rgba(accent, 0.30), carmine: t.carmine, verd: t.verd, ring: rgba(ink, 0.09),
   };
 }
 

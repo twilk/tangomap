@@ -464,8 +464,8 @@ body { margin: 0; }
 .tm-card{position:relative; width:min(340px,84vw); aspect-ratio:5/7; overflow:hidden; display:flex; flex-direction:column;
   padding:20px 22px; border-radius:18px; border:1px solid rgba(241,233,220,.14);
   background:
-    radial-gradient(120% 90% at 20% 0%,rgba(229,140,68,.16),transparent 55%),
-    radial-gradient(120% 90% at 85% 100%,rgba(97,171,149,.13),transparent 55%),
+    radial-gradient(120% 90% at 20% 0%,var(--tm-card-glow-ember,rgba(229,140,68,.16)),transparent 55%),
+    radial-gradient(120% 90% at 85% 100%,var(--tm-card-glow-verd,rgba(97,171,149,.13)),transparent 55%),
     linear-gradient(160deg,var(--tm-card-grad-from,#221B14),var(--tm-card-grad-mid,#110D09) 62%);
   color:var(--tm-card-ink,#F2EADC); cursor:pointer; backface-visibility:hidden; -webkit-backface-visibility:hidden;
   transform:rotateX(var(--rx)) rotateY(var(--ry));
@@ -492,6 +492,9 @@ body { margin: 0; }
   background:
     radial-gradient(52% 40% at var(--mx) var(--my),rgba(255,244,224,.28),transparent 62%),
     conic-gradient(from 210deg at var(--mx) var(--my),transparent 8%,rgba(229,140,68,.10) 22%,transparent 38%,rgba(142,166,255,.09) 55%,transparent 70%,rgba(97,171,149,.10) 84%,transparent 96%)}
+/* Scoped OUT of theming (kept frozen): the .tm-card grain below, the card
+   box-shadow, and the immersive .tm-card-ar-* overlay chrome — a deliberate
+   neutral / dark "lightbox" treatment, intentionally theme-independent. */
 .tm-card-grain{position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.5;
   background:repeating-linear-gradient(115deg,transparent 0 3px,rgba(241,233,220,.012) 3px 4px)}
 .tm-card>*{position:relative; z-index:2}
@@ -523,7 +526,7 @@ body { margin: 0; }
     repeating-linear-gradient(45deg,transparent 0 9px,rgba(229,140,68,.05) 9px 10px),
     repeating-linear-gradient(-45deg,transparent 0 9px,rgba(241,233,220,.03) 9px 10px)}
 .tm-card-mono{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); font-family:var(--serif); font-style:italic; font-weight:600;
-  font-size:190px; line-height:1; color:rgba(229,140,68,.07); pointer-events:none; user-select:none}
+  font-size:190px; line-height:1; color:var(--tm-card-mono,rgba(229,140,68,.07)); pointer-events:none; user-select:none}
 .tm-card-recs{list-style:none; margin:auto 0; padding:0; display:flex; flex-direction:column; gap:13px; position:relative}
 .tm-card-recs li{display:flex; flex-direction:column; gap:2px; padding-left:14px; border-left:2px solid var(--tm-card-ember-55,rgba(229,140,68,.55))}
 .tm-card-recs b{font-family:var(--serif); font-size:16.5px; font-weight:600; letter-spacing:.01em}
@@ -532,7 +535,7 @@ body { margin: 0; }
 .tm-card-done{margin:auto 0; font-family:var(--serif); font-style:italic; font-size:17px; color:var(--tm-card-muted,#9E907E); text-align:center}
 /* owner confetti */
 .tm-conf{position:absolute; inset:0; pointer-events:none; display:flex; align-items:center; justify-content:center}
-.tm-conf span{position:absolute; font-size:15px; color:#E58C44; text-shadow:0 0 10px rgba(229,140,68,.6); opacity:0;
+.tm-conf span{position:absolute; font-size:15px; color:var(--tm-card-ember,#E58C44); text-shadow:0 0 10px rgba(229,140,68,.6); opacity:0;
   animation:tm-conf-fly 1.5s cubic-bezier(.2,.6,.3,1) both}
 .tm-conf span:nth-child(3n){color:#E6415C; text-shadow:0 0 10px rgba(230,65,92,.6)}
 .tm-conf span:nth-child(4n){font-size:10px}

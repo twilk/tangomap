@@ -1,9 +1,17 @@
 import React, { act } from 'react';
-import { describe, test, expect, beforeEach, afterEach } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import axe from 'axe-core';
-import { DancerCard, type DancerCardProps } from '@/src/components/DancerCard';
+import { DancerCard, QR_COLORS, type DancerCardProps } from '@/src/components/DancerCard';
 import { cardPaletteFor } from '@/src/lib/cardTheme';
+import { parseHex, rgba } from '@/src/lib/color';
+import QRCode from 'qrcode';
+
+// Mock qrcode so the badge/story QR generation resolves in jsdom and we can
+// inspect the colour pair it is asked to render.
+vi.mock('qrcode', () => ({
+  default: { toDataURL: vi.fn().mockResolvedValue('data:image/png;base64,QR') },
+}));
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -119,6 +127,10 @@ describe('DancerCard', () => {
     expect(stage.style.getPropertyValue('--tm-card-ember')).toBe('#E58C44');
     expect(stage.style.getPropertyValue('--tm-card-muted')).toBe('#9E907E');
     expect(stage.style.getPropertyValue('--tm-card-line')).toBe('rgba(241,233,220,.11)');
+    // decorative tints keep their exact old literals when frozen
+    expect(stage.style.getPropertyValue('--tm-card-glow-ember')).toBe('rgba(229,140,68,.16)');
+    expect(stage.style.getPropertyValue('--tm-card-glow-verd')).toBe('rgba(97,171,149,.13)');
+    expect(stage.style.getPropertyValue('--tm-card-mono')).toBe('rgba(229,140,68,.07)');
   });
 
   test('a themed palette repaints the SVG strokes and the root css vars', async () => {
@@ -129,6 +141,30 @@ describe('DancerCard', () => {
     const stage = q<HTMLElement>('.tm-cardstage')!;
     expect(stage.style.getPropertyValue('--tm-card-ember')).toBe(palette.ember);
     expect(stage.style.getPropertyValue('--tm-card-grad-from')).toBe(palette.gradFrom);
+    // decorative tints are composed from the palette's accent / second accent
+    expect(stage.style.getPropertyValue('--tm-card-glow-ember')).toBe(rgba(parseHex(palette.ember)!, 0.16));
+    expect(stage.style.getPropertyValue('--tm-card-glow-verd')).toBe(rgba(parseHex(palette.verd)!, 0.13));
+    expect(stage.style.getPropertyValue('--tm-card-mono')).toBe(rgba(parseHex(palette.ember)!, 0.07));
+  });
+
+  test('the QR export stays the fixed frozen dark-on-light pair, even under a light theme', async () => {
+    // the shared constant is the frozen pair, never palette-derived
+    expect(QR_COLORS).toEqual({ dark: '#110D09', light: '#F2EADC' });
+
+    // opening the badge under a LIGHT custom theme still requests that fixed pair
+    const light = cardPaletteFor({ v: 1, ground: '#f5ead8', ink: '#201e1d', accent: '#b5642c', accent2: '#5f7048' });
+    await render({ palette: light });
+    const open = qa('.tm-card-actions button').find((b) => b.textContent?.includes('Badge')) as HTMLButtonElement;
+    await act(async () => {
+      open.click();
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    const calls = vi.mocked(QRCode.toDataURL).mock.calls as unknown as Array<[string, { color: { dark: string; light: string } }]>;
+    const lastColor = calls.at(-1)?.[1]?.color;
+    expect(lastColor).toEqual({ dark: '#110D09', light: '#F2EADC' });
+    expect(lastColor?.dark).not.toBe(light.gradMid); // definitely not the light palette's own colour
   });
 
   test('axe finds no violations on the rendered card (front + actions)', async () => {

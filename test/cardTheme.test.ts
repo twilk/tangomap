@@ -15,12 +15,13 @@ import { parseHex, rgba } from '@/src/lib/color';
 //  ember           #E58C44              — accents / OG EMBER
 //  emberSoft       rgba(229,140,68,.30) — OG blob fill / canvas halo
 //  carmine         #E6415C              — star / OG carmine
+//  verd            #61AB95              — base RGB (97,171,149) of the verd glow tints
 //  ring            rgba(241,233,220,.09)— radar rings
 const OLD_LITERALS: CardPalette = {
   ground: '#0c0906', gradFrom: '#221B14', gradMid: '#110D09', gradTo: '#0c0906',
   panel: '#191309', border: 'rgba(241,233,220,.16)', ink: '#F2EADC',
   muted: '#9E907E', faint: '#6C5F50', ember: '#E58C44',
-  emberSoft: 'rgba(229,140,68,.30)', carmine: '#E6415C', ring: 'rgba(241,233,220,.09)',
+  emberSoft: 'rgba(229,140,68,.30)', carmine: '#E6415C', verd: '#61AB95', ring: 'rgba(241,233,220,.09)',
 };
 
 // A legible custom theme (parseTheme would accept it), used to exercise cardPalette.
@@ -51,6 +52,7 @@ describe('cardPalette(theme)', () => {
     expect(p.faint).toBe(t.faint);
     expect(p.ember).toBe(t.ember);
     expect(p.carmine).toBe(t.carmine);
+    expect(p.verd).toBe(t.verd);
   });
 
   test('composes the alpha tokens from the derived ink and accent', () => {
