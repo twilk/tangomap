@@ -92,7 +92,9 @@ export async function PUT(req: Request) {
       if (!t) return Response.json({ error: 'invalid_body' }, { status: 400 });
       customTheme = t;
     }
-    if (body.customThemeUpdatedAt !== undefined) {
+    // Loose `!= null` catches both null and undefined, so an explicit
+    // customThemeUpdatedAt:null never becomes `new Date(null)` (epoch 1970).
+    if (body.customThemeUpdatedAt != null) {
       const d = new Date(body.customThemeUpdatedAt as string | number);
       customThemeUpdatedAt = Number.isNaN(d.getTime()) ? new Date() : d;
     } else {

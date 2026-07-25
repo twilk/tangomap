@@ -3,6 +3,12 @@
 import React, { useState } from 'react';
 import type { ProfileDTO, Style } from '@/src/lib/types';
 
+/** The identity fields this form owns. The custom theme (customTheme /
+ *  customThemeUpdatedAt / cardUsesCustomTheme / themeShared) is owned by
+ *  ThemeEditor + the sync layer — this form must never PUT those keys, or a
+ *  stale page-load snapshot would clobber a just-applied, synced theme. */
+export type ProfileFields = Pick<ProfileDTO, 'handle' | 'isPublic' | 'displayName' | 'style'>;
+
 const STYLE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: '', label: 'No style set' },
   { value: 'salon', label: 'Salón' },
@@ -10,8 +16,8 @@ const STYLE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: 'nuevo', label: 'Nuevo' },
 ];
 
-export default function SettingsForm({ initial }: { initial: ProfileDTO }) {
-  const [state, setState] = useState<ProfileDTO>(initial);
+export default function SettingsForm({ initial }: { initial: ProfileFields }) {
+  const [state, setState] = useState<ProfileFields>(initial);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [handleError, setHandleError] = useState<string | null>(null);
@@ -26,11 +32,23 @@ export default function SettingsForm({ initial }: { initial: ProfileDTO }) {
       const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(state),
+        // Only the identity fields — the route's partial-update discipline leaves
+        // customTheme (owned by ThemeEditor + sync) untouched.
+        body: JSON.stringify({
+          handle: state.handle,
+          isPublic: state.isPublic,
+          displayName: state.displayName,
+          style: state.style,
+        }),
       });
       if (res.status === 200) {
         const dto = (await res.json()) as ProfileDTO;
-        setState(dto);
+        setState({
+          handle: dto.handle,
+          isPublic: dto.isPublic,
+          displayName: dto.displayName,
+          style: dto.style,
+        });
         setSaved(true);
       } else if (res.status === 409) {
         setHandleError('Handle already taken');
