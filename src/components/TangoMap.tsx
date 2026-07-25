@@ -6,6 +6,7 @@ import { computeMapLayout, type MapLayout } from '@/src/lib/mapLayout';
 import { NODE_BY_ID, dependentsOf, relatedTo } from '@/src/lib/mapGraph';
 import { SkillDetailPanel } from '@/src/components/SkillDetailPanel';
 import { MapSearch } from '@/src/components/MapSearch';
+import { MapExplorer } from '@/src/components/MapExplorer';
 
 // The whole-map view, ported from the decoded bundle's `buildMap` (template.html
 // ~L1090–1220) onto the app's --tm-* design tokens. This is the render half; the pure
@@ -36,6 +37,13 @@ const FALLBACK_WIDTH = 1024;
 const MASTERED_KEY = 'tsm-mastered';
 const SEL_KEY = 'tsm-sel';
 
+// The explorer (dependency-graph) view is desktop-only, matching the bundle's
+// `explorerOn = !!sel && !showMap && !isMobile` (template L1454). Below this width
+// the whole map is the only view.
+const EXPLORER_MIN_WIDTH = 768;
+
+type ViewMode = 'map' | 'explorer';
+
 type EdgeKind = 'prereq' | 'unlock' | 'dim' | 'base';
 
 /** Read the persisted mastered set, guarded — bad/absent JSON yields an empty set. */
@@ -60,6 +68,20 @@ export function TangoMap() {
   const [hover, setHover] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [mastered, setMastered] = useState<Set<string>>(() => new Set());
+  const [viewMode, setViewMode] = useState<ViewMode>('map');
+  const [isDesktop, setIsDesktop] = useState(true);
+
+  // Track whether the viewport is wide enough for the explorer. Read once on mount
+  // and on resize; the explorer guard (below) folds this in so a narrow viewport
+  // always falls back to the whole map.
+  useEffect(() => {
+    const check = () =>
+      setIsDesktop((typeof window !== 'undefined' ? window.innerWidth : EXPLORER_MIN_WIDTH) >= EXPLORER_MIN_WIDTH);
+    check();
+    if (typeof window === 'undefined') return;
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const recompute = useCallback(() => {
     const el = scrollRef.current;
@@ -176,6 +198,15 @@ export function TangoMap() {
   const selectedNode = selected ? NODE_BY_ID.get(selected) ?? null : null;
   const m = layout ? pageMargin(layout.width) : 0;
 
+  // The explorer shows only when the user is in explorer mode, a node is selected,
+  // and the viewport is desktop-width. Otherwise the whole map renders (so an empty
+  // selection in explorer mode falls back to the map — where a skill can be picked).
+  const explorerOn = viewMode === 'explorer' && !!selected && isDesktop;
+  const exitExplorer = useCallback(() => {
+    setViewMode('map');
+    setHover(null);
+  }, []);
+
   const edgeKind = (from: string, to: string): EdgeKind => {
     if (!focus) return 'base';
     if (to === focus) return 'prereq'; // focus is the dependent → this is a prereq edge (ember)
@@ -187,10 +218,41 @@ export function TangoMap() {
     <div className="tsm-map">
       <div className="tsm-header">
         <MapSearch nodes={MAP_NODES} levels={LEVELS} onPick={selectNode} />
+        {isDesktop && (
+          <div className="tsm-view" role="group" aria-label="View mode">
+            <button
+              type="button"
+              className={`tsm-view-btn${!explorerOn ? ' on' : ''}`}
+              aria-pressed={!explorerOn}
+              data-view="map"
+              onClick={() => setViewMode('map')}
+            >
+              Map
+            </button>
+            <button
+              type="button"
+              className={`tsm-view-btn${explorerOn ? ' on' : ''}`}
+              aria-pressed={explorerOn}
+              data-view="explorer"
+              title={selected ? undefined : 'Select a skill to explore its graph'}
+              onClick={() => setViewMode('explorer')}
+            >
+              Explorer
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="tsm-body">
-        <div className="tsm-scroll" ref={scrollRef} onClick={clearSelection}>
+        {explorerOn ? (
+          <MapExplorer
+            centerId={selected!}
+            mastered={mastered}
+            onSelect={selectNode}
+            onExitToMap={exitExplorer}
+          />
+        ) : (
+          <div className="tsm-scroll" ref={scrollRef} onClick={clearSelection}>
           {layout && (
             <div className="tsm-stage" style={{ height: layout.height }}>
               {/* edge layer — behind the pills, never intercepts pointer events */}
@@ -261,7 +323,8 @@ export function TangoMap() {
               })}
             </div>
           )}
-        </div>
+          </div>
+        )}
 
         <SkillDetailPanel
           node={selectedNode}

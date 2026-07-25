@@ -3,6 +3,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import { TangoMap } from '@/src/components/TangoMap';
 import { MAP_NODES } from '@/src/data/mapNodes';
+import { NODE_BY_ID, dependentsOf } from '@/src/lib/mapGraph';
 
 // React 19's act() checks this flag; without it, act() logs a warning.
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -26,6 +27,9 @@ beforeEach(() => {
     font: '',
     measureText: (t: string) => ({ width: t.length * 8 }),
   });
+  // Default to a desktop viewport so the explorer guard (>= 768px) is satisfied;
+  // the mobile-breakpoint test overrides this and dispatches a resize.
+  (window as unknown as { innerWidth: number }).innerWidth = 1024;
   localStorage.clear();
   container = document.createElement('div');
   document.body.appendChild(container);
@@ -48,6 +52,12 @@ async function render(): Promise<void> {
 /** Click a node pill by its id (wrapped in act). */
 async function clickNode(id: string): Promise<void> {
   const btn = container.querySelector<HTMLButtonElement>(`button.tsm-node[data-id="${id}"]`)!;
+  await act(async () => btn.click());
+}
+
+/** Click a header view-mode button ('map' | 'explorer'). */
+async function clickView(view: 'map' | 'explorer'): Promise<void> {
+  const btn = container.querySelector<HTMLButtonElement>(`button.tsm-view-btn[data-view="${view}"]`)!;
   await act(async () => btn.click());
 }
 
@@ -258,5 +268,91 @@ describe('TangoMap', () => {
     await clickNode('cross');
     expect(localStorage.getItem('tsm-sel')).toBeNull();
     expect(container.querySelector('.tsm-panel-empty')).not.toBeNull();
+  });
+});
+
+describe('TangoMap — explorer view', () => {
+  test('switching to explorer with a selection renders the dependency graph', async () => {
+    await render();
+    await clickNode('cross');
+    // whole map is showing; the explorer canvas is absent until toggled
+    expect(container.querySelector('.tsm-ex')).toBeNull();
+
+    await clickView('explorer');
+    expect(container.querySelector('.tsm-ex')).not.toBeNull();
+    // the whole-map scroll canvas is replaced by the explorer
+    expect(container.querySelector('.tsm-scroll')).toBeNull();
+
+    // one directed edge per prerequisite + unlock of 'cross'
+    const expected = NODE_BY_ID.get('cross')!.deps.length + dependentsOf('cross').length;
+    expect(container.querySelectorAll('svg.tsm-ex-edges path.tsm-ex-edge').length).toBe(expected);
+    // arrowheads accompany the edges
+    expect(container.querySelectorAll('svg.tsm-ex-edges path.tsm-ex-arrow').length).toBe(expected);
+    // the centre node is the selection
+    expect(container.querySelector('.tsm-ex-node.center')!.getAttribute('data-id')).toBe('cross');
+  });
+
+  test('the layered/radial control switches the sub-layout', async () => {
+    await render();
+    await clickNode('cross');
+    await clickView('explorer');
+
+    const host = container.querySelector('.tsm-ex')!;
+    expect(host.getAttribute('data-submode')).toBe('layered');
+
+    const radial = container.querySelector<HTMLButtonElement>('.tsm-ex-mode[data-mode="radial"]')!;
+    await act(async () => radial.click());
+    expect(host.getAttribute('data-submode')).toBe('radial');
+    // radial edges are quadratic; the graph still renders every neighbour edge
+    const expected = NODE_BY_ID.get('cross')!.deps.length + dependentsOf('cross').length;
+    expect(container.querySelectorAll('svg.tsm-ex-edges path.tsm-ex-edge').length).toBe(expected);
+  });
+
+  test('clicking a neighbour re-centres the explorer on that node', async () => {
+    await render();
+    await clickNode('cross');
+    await clickView('explorer');
+
+    const neighbour = 'ocho-adelante'; // an unlock of 'cross'
+    const nbBtn = container.querySelector<HTMLButtonElement>(`.tsm-ex-node[data-id="${neighbour}"]`)!;
+    expect(nbBtn).not.toBeNull();
+    await act(async () => nbBtn.click());
+
+    // the explorer now centres on the clicked neighbour and renders its neighbourhood
+    expect(container.querySelector('.tsm-ex-node.center')!.getAttribute('data-id')).toBe(neighbour);
+    const expected = NODE_BY_ID.get(neighbour)!.deps.length + dependentsOf(neighbour).length;
+    expect(container.querySelectorAll('svg.tsm-ex-edges path.tsm-ex-edge').length).toBe(expected);
+    // the detail panel followed the selection
+    expect(container.querySelector('.tsm-panel-name')!.textContent).toContain(
+      NODE_BY_ID.get(neighbour)!.name,
+    );
+  });
+
+  test('clicking the centre node returns to the whole map', async () => {
+    await render();
+    await clickNode('cross');
+    await clickView('explorer');
+
+    const center = container.querySelector<HTMLButtonElement>('.tsm-ex-node.center')!;
+    await act(async () => center.click());
+    expect(container.querySelector('.tsm-ex')).toBeNull();
+    expect(container.querySelector('.tsm-scroll')).not.toBeNull();
+  });
+
+  test('below the desktop breakpoint the explorer is disabled (guard folds to false)', async () => {
+    await render();
+    await clickNode('cross');
+    await clickView('explorer');
+    expect(container.querySelector('.tsm-ex')).not.toBeNull();
+
+    // shrink under 768px and fire resize → explorerOn = false, whole map returns
+    (window as unknown as { innerWidth: number }).innerWidth = 500;
+    await act(async () => {
+      window.dispatchEvent(new Event('resize'));
+    });
+    expect(container.querySelector('.tsm-ex')).toBeNull();
+    expect(container.querySelector('.tsm-scroll')).not.toBeNull();
+    // the view toggle itself is hidden on narrow viewports
+    expect(container.querySelector('.tsm-view')).toBeNull();
   });
 });

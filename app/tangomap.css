@@ -213,3 +213,90 @@
   .tsm-body { flex-direction: column; }
   .tsm-panel { flex: none; width: 100%; max-height: 46%; border-left: none; border-top: 1px solid var(--tm-line); }
 }
+
+/* ============================================================
+   VIEW TOGGLE — Map / Explorer segmented control (header)
+   ============================================================ */
+.tsm-view {
+  flex: none; display: flex; gap: 2px; padding: 3px; box-sizing: border-box;
+  border: 1.5px solid var(--tm-line); border-radius: 999px; background: var(--tm-panel);
+}
+.tsm-view-btn {
+  height: 34px; padding: 0 14px; border: none; border-radius: 999px; background: transparent;
+  color: var(--tm-muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+.tsm-view-btn.on { background: var(--tm-ember); color: var(--tm-ground); }
+.tsm-view-btn:focus-visible { outline: 2px solid var(--tm-ember); outline-offset: 2px; }
+
+/* ============================================================
+   EXPLORER — dependency-graph canvas (desktop-only sibling of
+   the whole-map scroll canvas; both live under .tsm-body)
+   ============================================================ */
+.tsm-ex {
+  position: relative; flex: 1 1 auto; min-width: 0; min-height: 0;
+  overflow: hidden; font-family: var(--sans);
+}
+
+/* layered / radial sub-mode control, pinned top-right of the canvas */
+.tsm-ex-modes {
+  position: absolute; top: 12px; right: 14px; z-index: 5; display: flex; gap: 2px; padding: 3px;
+  border: 1px solid var(--tm-line); border-radius: 999px; background: var(--tm-panel); box-shadow: var(--tm-elev);
+}
+.tsm-ex-mode {
+  height: 28px; padding: 0 12px; border: none; border-radius: 999px; background: transparent;
+  color: var(--tm-muted); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.tsm-ex-mode.on { background: var(--tm-ember-s); color: var(--tm-ember); }
+.tsm-ex-mode:focus-visible { outline: 2px solid var(--tm-ember); outline-offset: 2px; }
+
+/* ---- directed edge + arrowhead layer ---- */
+.tsm-ex-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.tsm-ex-edge {
+  fill: none; stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: tsmExDraw .34s ease forwards;
+}
+.tsm-ex-edge-prereq { stroke: var(--tm-ember); stroke-width: 2.4; }
+.tsm-ex-edge-unlock { stroke: var(--tm-verd); stroke-width: 2.2; }
+.tsm-ex-arrow { opacity: 0; animation: tsmExFade .4s ease .12s forwards; }
+.tsm-ex-arrow-prereq { fill: var(--tm-ember); }
+.tsm-ex-arrow-unlock { fill: var(--tm-verd); }
+
+@keyframes tsmExDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes tsmExFade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---- explorer nodes ---- */
+.tsm-ex-node {
+  position: absolute; box-sizing: border-box; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px; text-align: center; padding: 4px 12px;
+  border: 1.5px solid var(--tm-line); border-radius: 16px; background: var(--tm-panel); color: var(--tm-ink);
+  font: inherit; cursor: pointer; z-index: 2;
+  transition: border-color .15s ease, box-shadow .2s ease, background .15s ease;
+}
+.tsm-ex-node:hover { box-shadow: var(--tm-elev); z-index: 3; }
+.tsm-ex-node:focus-visible { outline: 2px solid var(--tm-ember); outline-offset: 2px; z-index: 3; }
+.tsm-ex-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: 13.5px; font-weight: 700; line-height: 1.15; }
+.tsm-ex-meta { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--tm-muted); }
+
+.tsm-ex-node.prereq { border-color: var(--tm-ember); }
+.tsm-ex-node.unlock { border-color: var(--tm-verd); background: var(--tm-verd-s); }
+.tsm-ex-node.unlock .tsm-ex-name { color: var(--tm-verd); }
+.tsm-ex-node.center {
+  border: 2px solid var(--tm-ember); border-radius: 20px;
+  box-shadow: 0 0 0 5px var(--tm-ember-s), var(--tm-elev); z-index: 4;
+}
+.tsm-ex-node.center .tsm-ex-name { font-family: var(--serif); font-size: 18px; font-weight: 600; }
+.tsm-ex-node.center .tsm-ex-meta { color: var(--tm-ember); }
+
+.tsm-ex-node.done { border-color: var(--tm-verd); }
+.tsm-ex-badge {
+  position: absolute; top: -7px; left: -7px; width: 17px; height: 17px; border-radius: 999px;
+  box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  background: var(--tm-verd); color: var(--tm-ground); border: 2px solid var(--tm-panel); font-size: 10px;
+}
+
+/* reduced motion: show edges + arrows immediately, no draw-in */
+@media (prefers-reduced-motion: reduce) {
+  .tsm-ex-edge, .tsm-ex-arrow { animation: none !important; stroke-dashoffset: 0 !important; opacity: 1 !important; }
+}
