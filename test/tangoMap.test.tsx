@@ -20,6 +20,30 @@ class MockResizeObserver {
 let container: HTMLDivElement;
 let root: Root;
 
+/** A minimal ok Response stub for the map's guarded fetches. */
+function jsonOk(body: unknown): Promise<unknown> {
+  return Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
+}
+
+/** Route the two APIs the map calls (/api/next, /api/teacher-videos); everything
+ *  else resolves empty. Tests override the bodies before rendering. */
+function setFetch(nextBody: unknown, videoBody: unknown = { slugs: [] }): void {
+  (globalThis as unknown as { fetch: unknown }).fetch = vi.fn((url: string) => {
+    const u = String(url);
+    if (u.includes('/api/next')) return jsonOk(nextBody);
+    if (u.includes('/api/teacher-videos')) return jsonOk(videoBody);
+    return jsonOk({});
+  });
+}
+
+/** Flush pending microtasks (guarded fetch → json → setState) inside act. A macrotask
+ *  hop drains the whole promise chain, then React commits the resulting render. */
+async function settle(): Promise<void> {
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 0));
+  });
+}
+
 beforeEach(() => {
   (globalThis as unknown as { ResizeObserver: typeof ResizeObserver }).ResizeObserver =
     MockResizeObserver as unknown as typeof ResizeObserver;
@@ -31,6 +55,10 @@ beforeEach(() => {
   // the mobile-breakpoint test overrides this and dispatches a resize.
   (window as unknown as { innerWidth: number }).innerWidth = 1024;
   localStorage.clear();
+  // Default the onboarding flag so the first-visit modal does not appear in unrelated
+  // tests; the onboarding tests clear it explicitly. Default the APIs to signed-out.
+  localStorage.setItem('tsm-onboarded', '1');
+  setFetch({ signedIn: false });
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -43,10 +71,12 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+/** Render the map and settle its guarded fetches so state is deterministic. */
 async function render(): Promise<void> {
   await act(async () => {
     root.render(<TangoMap />);
   });
+  await settle();
 }
 
 /** Click a node pill by its id (wrapped in act). */
@@ -146,9 +176,10 @@ describe('TangoMap', () => {
     expect(anyPath.getAttribute('data-hl')).toBe('base');
   });
 
-  test('empty state until a node is selected', async () => {
+  test('with no selection, the panel shows the home card (signed-out invite)', async () => {
     await render();
-    expect(container.querySelector('.tsm-panel-empty')).not.toBeNull();
+    // no skill selected → the home card replaces the phase-3 empty hint
+    expect(container.querySelector('.tsm-home[data-signed-in="false"]')).not.toBeNull();
     expect(container.querySelector('.tsm-panel-name')).toBeNull();
   });
 
@@ -267,7 +298,10 @@ describe('TangoMap', () => {
     // clicking the same node again toggles it off and clears the key
     await clickNode('cross');
     expect(localStorage.getItem('tsm-sel')).toBeNull();
-    expect(container.querySelector('.tsm-panel-empty')).not.toBeNull();
+    // the panel returns to the home card (no skill selected)
+    await settle();
+    expect(container.querySelector('.tsm-home')).not.toBeNull();
+    expect(container.querySelector('.tsm-panel-name')).toBeNull();
   });
 });
 
@@ -354,5 +388,107 @@ describe('TangoMap — explorer view', () => {
     expect(container.querySelector('.tsm-scroll')).not.toBeNull();
     // the view toggle itself is hidden on narrow viewports
     expect(container.querySelector('.tsm-view')).toBeNull();
+  });
+});
+
+describe('TangoMap — re-hosted enhancements', () => {
+  test('clicking a category dims non-matching nodes; re-clicking clears the filter', async () => {
+    await render();
+
+    // PARTNER → "Connection" (members include mirada-cabeceo); walking is a STEP node.
+    const row = container.querySelector<HTMLButtonElement>('button.tsm-cat[data-tag="PARTNER"]');
+    expect(row).not.toBeNull();
+    await act(async () => row!.click());
+
+    const match = container.querySelector('button.tsm-node[data-id="mirada-cabeceo"]')!;
+    const other = container.querySelector('button.tsm-node[data-id="walking"]')!;
+    // matching-tag node lights (cat) and is not dimmed; the non-matching node dims
+    expect(match.classList.contains('cat')).toBe(true);
+    expect(match.classList.contains('dim')).toBe(false);
+    expect(other.classList.contains('dim')).toBe(true);
+    expect(row!.getAttribute('aria-pressed')).toBe('true');
+
+    // re-click the pinned category → filter clears
+    await act(async () => row!.click());
+    expect(container.querySelector('button.tsm-node[data-id="walking"]')!.classList.contains('dim')).toBe(false);
+    expect(container.querySelector('button.tsm-node[data-id="mirada-cabeceo"]')!.classList.contains('cat')).toBe(false);
+    expect(row!.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  test('the home card shows progress + next-up skills; clicking one selects that node', async () => {
+    setFetch({
+      signedIn: true,
+      mastered: 5,
+      total: 62,
+      next: [
+        { name: 'Walking', slug: 'walking', level: 1, reason: 'Start here' },
+        { name: 'The Cross', slug: 'cross', level: 6, reason: 'Finishes a level' },
+      ],
+    });
+    await render();
+
+    expect(container.querySelector('.tsm-home[data-signed-in="true"]')).not.toBeNull();
+    expect(container.querySelector('.tsm-home-count-num')!.textContent).toBe('5');
+
+    const nextBtns = container.querySelectorAll<HTMLButtonElement>('button.tsm-home-next');
+    expect(nextBtns.length).toBe(2);
+    expect(nextBtns[0].getAttribute('data-id')).toBe('walking');
+
+    await act(async () => nextBtns[0].click());
+    // selecting via the home card selects that node on the map and opens its panel
+    expect(container.querySelector('button.tsm-node[data-id="walking"]')!.classList.contains('on')).toBe(true);
+    expect(container.querySelector('.tsm-panel-name')!.textContent).toContain('Walking');
+  });
+
+  test('the selected panel links to /skill/<id>; the teacher badge is gated by /api/teacher-videos', async () => {
+    // the viewer may see a video for 'cross' but not 'walking'
+    setFetch({ signedIn: false }, { slugs: ['cross'] });
+    await render();
+
+    await clickNode('cross');
+    const link = container.querySelector<HTMLAnchorElement>('.tsm-guide-link')!;
+    expect(link).not.toBeNull();
+    expect(link.getAttribute('href')).toBe('/skill/cross');
+    // cross is in the teacher's list → the video badge shows
+    expect(container.querySelector('.tsm-guide-badge')).not.toBeNull();
+
+    // walking is not in the list → guide link still present, but no badge
+    await clickNode('walking');
+    expect(container.querySelector<HTMLAnchorElement>('.tsm-guide-link')!.getAttribute('href')).toBe('/skill/walking');
+    expect(container.querySelector('.tsm-guide-badge')).toBeNull();
+  });
+
+  test('the onboarding modal shows on first visit and hides after dismiss (setting the flag)', async () => {
+    localStorage.removeItem('tsm-onboarded');
+    await render();
+    expect(container.querySelector('.tsm-onboard')).not.toBeNull();
+
+    const go = container.querySelector<HTMLButtonElement>('.tsm-onboard-go')!;
+    await act(async () => go.click());
+    expect(localStorage.getItem('tsm-onboarded')).toBe('1');
+    expect(container.querySelector('.tsm-onboard')).toBeNull();
+  });
+
+  test('the onboarding modal does not show when the flag is already set', async () => {
+    // (beforeEach already sets it, but be explicit)
+    localStorage.setItem('tsm-onboarded', '1');
+    await render();
+    expect(container.querySelector('.tsm-onboard')).toBeNull();
+  });
+
+  test('marking a skill mastered shows a toast and bumps the top progress bar', async () => {
+    await render();
+    expect(container.querySelector('.tsm-progress')!.getAttribute('aria-valuenow')).toBe('0');
+
+    await clickNode('cross');
+    const master = container.querySelector<HTMLButtonElement>('.tsm-master')!;
+    await act(async () => master.click());
+
+    const toast = container.querySelector('.tsm-toast')!;
+    expect(toast).not.toBeNull();
+    expect(toast.textContent).toContain('Marked');
+    expect(toast.textContent).toContain('The Cross');
+    // the top progress bar reflects the new mastered count
+    expect(container.querySelector('.tsm-progress')!.getAttribute('aria-valuenow')).toBe('1');
   });
 });

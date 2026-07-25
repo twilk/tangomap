@@ -1,14 +1,20 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import type { MapNode } from '@/src/data/mapNodes';
 import { NODE_BY_ID, dependentsOf, pathSteps } from '@/src/lib/mapGraph';
+import { MapHomeCard } from '@/src/components/MapHomeCard';
 
 // The skill detail panel — the aside beside the map that opens when a node is
 // selected. Ported from the decoded bundle's detail column (template.html ~L766–853)
 // onto the app's --tm-* tokens. Presentational: all state (selection, mastery) lives
-// in TangoMap; this renders it and calls back. A later phase adds the "in the course"
-// list, the full-path timeline and the mark-with-prerequisites action; this phase
-// carries the essentials — identity, stats, and the two relation lists.
+// in TangoMap; this renders it and calls back.
+//
+// This phase also re-hosts three injected enhancements natively: the idle-panel home
+// card (public/map-home.js, via MapHomeCard when nothing is selected), the "Read the
+// guide →" link + teacher video badge (public/map-skilllink.js — slug === node id, so
+// no /api/skill-index round-trip is needed), and the dialog focus-on-open a11y from the
+// template's inline glue.
 
 // role code -> the badge label shown when a skill is role-typical.
 const ROLE_LABEL: Record<'L' | 'F', string> = { L: 'Leader', F: 'Follower' };
@@ -22,7 +28,9 @@ type Props = {
   levels: string[];
   /** The set of mastered node ids (drives the ✓ affordance + button state). */
   mastered: Set<string>;
-  /** Select another node (used by the prerequisite / unlock buttons). */
+  /** Slugs the viewer may see a lesson video for (from /api/teacher-videos). */
+  videoSlugs: Set<string>;
+  /** Select another node (used by the prerequisite / unlock / home-card buttons). */
   onSelect: (id: string) => void;
   /** Toggle the selected node's mastered flag. */
   onToggleMastered: (id: string) => void;
@@ -63,17 +71,25 @@ function RelRow({
   );
 }
 
-export function SkillDetailPanel({ node, levels, mastered, onSelect, onToggleMastered }: Props) {
+export function SkillDetailPanel({ node, levels, mastered, videoSlugs, onSelect, onToggleMastered }: Props) {
+  const asideRef = useRef<HTMLElement>(null);
+  const prevId = useRef<string | null>(null);
+
+  // Dialog a11y (template inline glue): when the panel transitions from empty to a
+  // selection (open), move focus into it. Only on that transition, so navigating
+  // between skills while the panel stays open never steals focus mid-read.
+  useEffect(() => {
+    const id = node?.id ?? null;
+    if (prevId.current === null && id !== null) {
+      asideRef.current?.focus({ preventScroll: true } as FocusOptions);
+    }
+    prevId.current = id;
+  }, [node]);
+
   if (!node) {
     return (
-      <aside className="tsm-panel" role="dialog" aria-label="Skill details">
-        <div className="tsm-panel-empty">
-          <span className="tsm-panel-empty-mark" aria-hidden="true" />
-          <p>
-            Nothing selected yet. Pick a skill to see its level, prerequisites and
-            everything it unlocks.
-          </p>
-        </div>
+      <aside className="tsm-panel" role="dialog" aria-label="Skill details" tabIndex={-1} ref={asideRef}>
+        <MapHomeCard onSelect={onSelect} />
       </aside>
     );
   }
@@ -82,9 +98,10 @@ export function SkillDetailPanel({ node, levels, mastered, onSelect, onToggleMas
   const prereqs = node.deps;
   const unlocks = dependentsOf(node.id);
   const done = mastered.has(node.id);
+  const hasVideo = videoSlugs.has(node.id);
 
   return (
-    <aside className="tsm-panel" role="dialog" aria-labelledby={titleId}>
+    <aside className="tsm-panel" role="dialog" aria-labelledby={titleId} tabIndex={-1} ref={asideRef}>
       <div className="tsm-panel-body">
         <div className="tsm-panel-kicker">
           LEVEL {node.level + 1} · {(levels[node.level] ?? '').toUpperCase()}
@@ -97,6 +114,18 @@ export function SkillDetailPanel({ node, levels, mastered, onSelect, onToggleMas
           <div className="tsm-panel-role">{ROLE_LABEL[node.role]}</div>
         )}
         <p className="tsm-panel-desc">{node.desc}</p>
+
+        {/* Skill-guide link + teacher video badge (public/map-skilllink.js). */}
+        <div className="tsm-guide">
+          <a className="tsm-guide-link" href={`/skill/${node.id}`}>
+            Read the guide <span aria-hidden="true">→</span>
+          </a>
+          {hasVideo && (
+            <span className="tsm-guide-badge" aria-label="Lesson video available">
+              <span aria-hidden="true">▶</span> video
+            </span>
+          )}
+        </div>
 
         <button
           type="button"

@@ -7,6 +7,8 @@ import { NODE_BY_ID, dependentsOf, relatedTo } from '@/src/lib/mapGraph';
 import { SkillDetailPanel } from '@/src/components/SkillDetailPanel';
 import { MapSearch } from '@/src/components/MapSearch';
 import { MapExplorer } from '@/src/components/MapExplorer';
+import { MapCategoryNav } from '@/src/components/MapCategoryNav';
+import { MapOnboarding } from '@/src/components/MapOnboarding';
 
 // The whole-map view, ported from the decoded bundle's `buildMap` (template.html
 // ~L1090–1220) onto the app's --tm-* design tokens. This is the render half; the pure
@@ -42,6 +44,21 @@ const SEL_KEY = 'tsm-sel';
 // the whole map is the only view.
 const EXPLORER_MIN_WIDTH = 768;
 
+// The map is fixed at 62 skills — the top progress bar's denominator.
+const TOTAL_SKILLS = 62;
+
+// How long the "Marked …" toast stays up. Purely a display timer; the mastered set is
+// already persisted by the time it shows.
+const TOAST_MS = 2800;
+
+// Member-node count per category tag, computed once from the authoritative node data —
+// the trailing count chip in the category navigator. Each node carries exactly one tag.
+const CAT_COUNTS: Record<string, number> = (() => {
+  const m: Record<string, number> = {};
+  for (const n of MAP_NODES) m[n.tag] = (m[n.tag] ?? 0) + 1;
+  return m;
+})();
+
 type ViewMode = 'map' | 'explorer';
 
 type EdgeKind = 'prereq' | 'unlock' | 'dim' | 'base';
@@ -70,6 +87,21 @@ export function TangoMap() {
   const [mastered, setMastered] = useState<Set<string>>(() => new Set());
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [isDesktop, setIsDesktop] = useState(true);
+
+  // Category navigator (public/map-categories.js): pinned = the persistent filter,
+  // catHover = the transient hover preview. The pinned category always wins, matching
+  // the bundle (hovering another row while one is pinned does nothing).
+  const [catPinned, setCatPinned] = useState<string | null>(null);
+  const [catHover, setCatHover] = useState<string | null>(null);
+
+  // Slugs the viewer may see a lesson video for (public/map-skilllink.js). Empty until
+  // /api/teacher-videos resolves, and stays empty for non-teachers or on error.
+  const [videoSlugs, setVideoSlugs] = useState<Set<string>>(() => new Set());
+
+  // Transient "Marked <name> ✓" toast (template inline glue), shown when a skill is
+  // newly marked mastered. null = hidden.
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Track whether the viewport is wide enough for the explorer. Read once on mount
   // and on resize; the explorer guard (below) folds this in so a narrow viewport
@@ -179,16 +211,51 @@ export function TangoMap() {
   const toggleMastered = useCallback((id: string) => {
     setMastered((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      const adding = !next.has(id);
+      if (adding) next.add(id);
+      else next.delete(id);
       try {
         localStorage.setItem(MASTERED_KEY, JSON.stringify([...next]));
       } catch {
         /* ignore */
       }
+      // Confirm only the positive action (marking), matching the bundle's toast.
+      if (adding) setToast(`Marked ${NODE_BY_ID.get(id)?.name ?? 'skill'} ✓`);
       return next;
     });
   }, []);
+
+  // Fetch once the slugs the viewer may see a lesson video for. Guarded — a failed or
+  // absent response simply means no video badges (never an error surfaced to the panel).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const r = await fetch('/api/teacher-videos', { credentials: 'same-origin' });
+        const d = r.ok ? await r.json() : null;
+        const slugs: unknown = d && typeof d === 'object' ? (d as { slugs?: unknown }).slugs : null;
+        if (alive && Array.isArray(slugs)) {
+          setVideoSlugs(new Set(slugs.filter((s): s is string => typeof s === 'string')));
+        }
+      } catch {
+        /* no badges */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Auto-dismiss the toast. The timer is display-only; the mastered set is already
+  // persisted, so nothing is lost if the component unmounts first.
+  useEffect(() => {
+    if (!toast) return;
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), TOAST_MS);
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, [toast]);
 
   // Hover wins over selection as the highlight focus (a transient preview), exactly
   // as the bundle does: `hover || (sel ? … )`.
@@ -197,6 +264,11 @@ export function TangoMap() {
   const focusNode = focus ? NODE_BY_ID.get(focus) : null;
   const selectedNode = selected ? NODE_BY_ID.get(selected) ?? null : null;
   const m = layout ? pageMargin(layout.width) : 0;
+
+  // The category lens: a pinned category always wins over a hover preview (bundle
+  // behaviour). When active it drives the dimming — matching-tag nodes light, the rest
+  // dim — taking precedence over the relation-based dimming.
+  const catActive = catPinned ?? catHover;
 
   // The explorer shows only when the user is in explorer mode, a node is selected,
   // and the viewport is desktop-width. Otherwise the whole map renders (so an empty
@@ -214,8 +286,22 @@ export function TangoMap() {
     return 'dim';
   };
 
+  const masteredCount = mastered.size;
+
   return (
     <div className="tsm-map">
+      {/* Top progress bar — mastered / 62 (template inline glue). */}
+      <div
+        className="tsm-progress"
+        role="progressbar"
+        aria-label="Skills mastered"
+        aria-valuemin={0}
+        aria-valuemax={TOTAL_SKILLS}
+        aria-valuenow={masteredCount}
+      >
+        <i style={{ width: `${(masteredCount / TOTAL_SKILLS) * 100}%` }} />
+      </div>
+
       <div className="tsm-header">
         <MapSearch nodes={MAP_NODES} levels={LEVELS} onPick={selectNode} />
         {isDesktop && (
@@ -252,6 +338,15 @@ export function TangoMap() {
             onExitToMap={exitExplorer}
           />
         ) : (
+          <>
+          {isDesktop && (
+            <MapCategoryNav
+              counts={CAT_COUNTS}
+              pinned={catPinned}
+              onHover={setCatHover}
+              onPin={(tag) => setCatPinned((p) => (p === tag ? null : tag))}
+            />
+          )}
           <div className="tsm-scroll" ref={scrollRef} onClick={clearSelection}>
           {layout && (
             <div className="tsm-stage" style={{ height: layout.height }}>
@@ -289,13 +384,16 @@ export function TangoMap() {
                 const isPre = focusNode ? focusNode.deps.includes(box.id) : false;
                 const isKid = focus ? dependentsOf(focus).includes(box.id) : false;
                 const isDone = mastered.has(box.id);
-                const dim = rel ? !rel.has(box.id) : false;
+                const catMatch = catActive ? n.tag === catActive : false;
+                // Category filter (when active) overrides relation dimming.
+                const dim = catActive ? !catMatch : rel ? !rel.has(box.id) : false;
                 const cls = ['tsm-node'];
                 if (isSel) cls.push('on');
                 if (isHov) cls.push('hov');
                 if (isPre) cls.push('pre');
                 if (isKid) cls.push('kid');
                 if (isDone) cls.push('done');
+                if (catMatch) cls.push('cat');
                 if (dim) cls.push('dim');
                 return (
                   <button
@@ -324,16 +422,28 @@ export function TangoMap() {
             </div>
           )}
           </div>
+          </>
         )}
 
         <SkillDetailPanel
           node={selectedNode}
           levels={LEVELS}
           mastered={mastered}
+          videoSlugs={videoSlugs}
           onSelect={selectNode}
           onToggleMastered={toggleMastered}
         />
       </div>
+
+      {/* Transient "Marked <name> ✓" confirmation (template inline glue). */}
+      {toast && (
+        <div className="tsm-toast" role="status" aria-live="polite">
+          {toast}
+        </div>
+      )}
+
+      {/* First-visit welcome (public/onboarding.js), self-gated on localStorage. */}
+      <MapOnboarding />
     </div>
   );
 }

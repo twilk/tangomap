@@ -300,3 +300,193 @@
 @media (prefers-reduced-motion: reduce) {
   .tsm-ex-edge, .tsm-ex-arrow { animation: none !important; stroke-dashoffset: 0 !important; opacity: 1 !important; }
 }
+
+/* ============================================================
+   ENHANCEMENTS — re-hosted from the bundle's injected scripts as
+   first-class React (category navigator, home card, guide link +
+   teacher badge, onboarding modal, top progress bar + toast).
+   All consume ONLY the app's --tm-* tokens.
+   ============================================================ */
+
+/* ---- top progress bar — mastered / 62 ---- */
+.tsm-progress {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 20;
+  background: transparent; pointer-events: none;
+}
+.tsm-progress > i {
+  display: block; height: 100%; width: 0; background: var(--tm-ember);
+  border-bottom-right-radius: 3px; border-top-right-radius: 3px;
+  transition: width .45s ease;
+}
+
+/* ---- transient "Marked …" toast ---- */
+.tsm-toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+  z-index: 2147483001; max-width: min(92vw, 440px);
+  background: var(--tm-ink); color: var(--tm-ground);
+  border-radius: 14px; padding: 12px 18px; box-shadow: var(--tm-elev);
+  font-family: var(--sans); font-size: 14px; font-weight: 600; line-height: 1.4;
+  animation: tsmToastIn .25s ease;
+}
+@keyframes tsmToastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ============================================================
+   CATEGORY NAVIGATOR — left rail ("Browse by category")
+   ============================================================ */
+.tsm-catnav {
+  flex: none; width: clamp(196px, 17vw, 232px); box-sizing: border-box;
+  border-right: 1px solid var(--tm-line); background: var(--tm-panel);
+  overflow-y: auto; padding: 6px 6px 12px; font-family: var(--sans);
+}
+.tsm-catnav-head {
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--tm-muted); padding: 10px 10px 8px;
+}
+.tsm-catnav-list { list-style: none; margin: 0; padding: 0; }
+.tsm-cat-row { display: flex; align-items: center; gap: 2px; }
+.tsm-cat {
+  flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 10px;
+  padding: 7px 8px 7px 10px; margin: 1px 0; border: none; border-radius: 9px;
+  background: transparent; color: var(--tm-ink); font: inherit; font-size: 14px; font-weight: 600;
+  text-align: left; cursor: pointer; transition: background .15s ease, color .15s ease;
+}
+.tsm-cat:hover { background: var(--tm-ember-s); }
+.tsm-cat-row.on .tsm-cat { background: var(--tm-ember-s); color: var(--tm-ember); }
+.tsm-cat:focus-visible { outline: 2px solid var(--tm-ember); outline-offset: -2px; }
+.tsm-cat-ico { display: inline-flex; flex: none; color: var(--tm-muted); }
+.tsm-cat-row.on .tsm-cat-ico { color: var(--tm-ember); }
+.tsm-cat-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tsm-cat-count { flex: none; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--tm-muted); }
+.tsm-cat-link {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 30px; border-radius: 8px; text-decoration: none;
+  color: var(--tm-faint); font-size: 14px; transition: color .15s ease, background .15s ease;
+}
+.tsm-cat-link:hover { color: var(--tm-ember); background: var(--tm-ember-s); }
+.tsm-cat-clear {
+  display: block; width: 100%; margin: 8px 0 2px; padding: 7px 10px;
+  border: none; border-radius: 9px; background: transparent; color: var(--tm-muted);
+  font: inherit; font-size: 12px; font-weight: 600; text-align: left; cursor: pointer;
+}
+.tsm-cat-clear:hover { color: var(--tm-ember); background: var(--tm-ember-s); }
+
+/* nodes matching the active category get an ember ring (bundle's preview highlight) */
+.tsm-node.cat { border-color: var(--tm-ember); box-shadow: 0 0 0 2px var(--tm-ember), var(--tm-elev); z-index: 3; }
+
+/* the rail collapses on narrow viewports (matches the panel-stack breakpoint) */
+@media (max-width: 900px) {
+  .tsm-catnav { display: none; }
+}
+
+/* ============================================================
+   HOME CARD — idle Skill Details panel ("Next up")
+   ============================================================ */
+.tsm-home { padding: 20px 20px 28px; font-family: var(--sans); }
+.tsm-home-kicker {
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--tm-muted); margin-bottom: 10px;
+}
+.tsm-home-lead { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--tm-ink); }
+
+.tsm-home-count { display: flex; align-items: baseline; gap: 7px; }
+.tsm-home-count-num { font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--tm-ember); }
+.tsm-home-count-total { font-size: 13px; font-weight: 600; color: var(--tm-muted); }
+.tsm-home-bar {
+  height: 6px; border-radius: 999px; background: var(--tm-chip);
+  margin: 10px 0 18px; overflow: hidden;
+}
+.tsm-home-bar > i { display: block; height: 100%; background: var(--tm-ember); border-radius: 999px; transition: width .45s ease; }
+
+.tsm-home-sechead {
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--tm-muted); margin-bottom: 4px;
+}
+.tsm-home-next-list { display: flex; flex-direction: column; }
+.tsm-home-next-row {
+  display: flex; align-items: center; gap: 6px;
+  border-top: 1px solid var(--tm-line); padding: 2px 0;
+}
+.tsm-home-next {
+  flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px;
+  padding: 9px 8px 9px 0; border: none; background: transparent; color: inherit;
+  font: inherit; text-align: left; cursor: pointer; border-radius: 8px;
+  transition: background .12s ease;
+}
+.tsm-home-next:hover { background: var(--tm-ember-s); padding-left: 8px; }
+.tsm-home-next-top { display: flex; align-items: baseline; gap: 8px; }
+.tsm-home-next-name { font-size: 14px; font-weight: 600; color: var(--tm-ink); }
+.tsm-home-next-lvl { flex: none; font-family: var(--mono); font-size: 10px; color: var(--tm-muted); }
+.tsm-home-next-reason { font-size: 12px; color: var(--tm-muted); }
+.tsm-home-next-guide {
+  flex: none; align-self: center; text-decoration: none; white-space: nowrap;
+  font-size: 12px; font-weight: 600; color: var(--tm-ember); padding: 4px 6px; border-radius: 8px;
+}
+.tsm-home-next-guide:hover { background: var(--tm-ember-s); }
+
+.tsm-home-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+.tsm-home-btn {
+  text-decoration: none; border-radius: 999px; padding: 7px 15px; line-height: 1; white-space: nowrap;
+  font-size: 13px; font-weight: 600; border: 1px solid var(--tm-line); color: var(--tm-ink);
+  transition: background .15s ease, border-color .15s ease;
+}
+.tsm-home-btn:hover { border-color: var(--tm-ember); }
+.tsm-home-btn.primary { background: var(--tm-ember); color: var(--tm-ground); border-color: var(--tm-ember); }
+.tsm-home-link { text-decoration: none; font-size: 13px; font-weight: 600; color: var(--tm-ember); }
+
+/* ============================================================
+   SKILL-GUIDE LINK + TEACHER BADGE (selected panel)
+   ============================================================ */
+.tsm-guide { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.tsm-guide-link {
+  display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+  font-size: 13.5px; font-weight: 600; color: var(--tm-ember);
+}
+.tsm-guide-link:hover { text-decoration: underline; }
+.tsm-guide-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--tm-ember); border: 1px solid var(--tm-ember); border-radius: 999px; padding: 2px 8px;
+}
+
+/* ============================================================
+   ONBOARDING MODAL — first-visit welcome
+   ============================================================ */
+.tsm-onboard {
+  position: fixed; inset: 0; z-index: 2147483002; display: flex;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(0, 0, 0, .45); font-family: var(--sans);
+  animation: tsmOnboardFade .2s ease;
+}
+@keyframes tsmOnboardFade { from { opacity: 0; } to { opacity: 1; } }
+.tsm-onboard-card {
+  max-width: 400px; width: 100%; box-sizing: border-box;
+  background: var(--tm-panel); border: 1px solid var(--tm-line); border-radius: 18px;
+  padding: 26px 24px; box-shadow: var(--tm-elev);
+}
+.tsm-onboard-brand {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--tm-muted);
+}
+.tsm-onboard-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--tm-ember); }
+.tsm-onboard-title { margin: 0 0 6px; font-family: var(--serif); font-size: 25px; line-height: 1.1; font-weight: 600; color: var(--tm-ink); }
+.tsm-onboard-lead { margin: 0 0 18px; font-size: 14px; line-height: 1.5; color: var(--tm-muted); }
+.tsm-onboard-steps { list-style: none; margin: 0 0 22px; padding: 0; }
+.tsm-onboard-steps li { display: flex; gap: 12px; align-items: flex-start; margin: 0 0 13px; font-size: 14.5px; line-height: 1.45; color: var(--tm-ink); }
+.tsm-onboard-num {
+  flex: none; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--tm-ember); color: var(--tm-ground);
+  font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+}
+.tsm-onboard-go {
+  width: 100%; padding: 12px; border: none; border-radius: 12px;
+  background: var(--tm-ember); color: var(--tm-ground);
+  font: inherit; font-size: 14.5px; font-weight: 600; cursor: pointer;
+}
+.tsm-onboard-go:focus-visible { outline: 2px solid var(--tm-ink); outline-offset: 2px; }
+
+/* reduced motion: no entrance animations or width tweens on the new surfaces */
+@media (prefers-reduced-motion: reduce) {
+  .tsm-progress > i, .tsm-home-bar > i { transition: none !important; }
+  .tsm-toast, .tsm-onboard { animation: none !important; }
+}
