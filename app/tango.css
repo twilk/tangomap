@@ -663,3 +663,6 @@ body { margin: 0; }
 .tm-community-save button:hover{border-color:var(--tm-ember)}
 .tm-community-save button:focus-visible{outline:2px solid var(--tm-ember);outline-offset:2px}
 .tm-community-note{margin:0;font-size:12px;color:var(--tm-muted)}
+
+/* Apply-shared-theme affordance on a public profile (/u/[handle]). */
+.tm-apply-shared{display:flex;flex-direction:column;gap:8px;margin:14px 0}
