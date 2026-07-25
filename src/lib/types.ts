@@ -9,7 +9,10 @@ export type Progress = {
   sel: string | null;
   updatedAt: string;
 };
-export type ProgressInput = { mastered: string[]; theme: Theme | null; sel: string | null };
+// `updatedAt` is the client's clock at the moment its local state last changed —
+// the token for last-write-wins. Optional: a missing/invalid value is treated as
+// "now" by the server (a client that doesn't stamp its writes always wins ties).
+export type ProgressInput = { mastered: string[]; theme: Theme | null; sel: string | null; updatedAt?: string };
 
 export type ProfileDTO = {
   handle: string | null;

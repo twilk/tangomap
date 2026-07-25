@@ -47,6 +47,12 @@ export type CardData = PublicProfile & {
   mintedYear: number;
   /** Mastered set from the newest snapshot ≥30 days old, or null when no history reaches back that far. */
   ghostMastered: string[] | null;
+  /** The owner's custom theme to render the card in — ONLY when they opted the card
+   *  in (cardUsesCustomTheme) AND the stored struct re-validates. Null = frozen default. */
+  customTheme: Theme | null;
+  /** Epoch ms of the theme's last write, used to cache-bust the OG image. Null unless
+   *  a customTheme is emitted. */
+  customThemeUpdatedAt: number | null;
 };
 
 /**
@@ -57,7 +63,7 @@ export type CardData = PublicProfile & {
  */
 export const getCardData = cache(async (handle: string): Promise<CardData | null> => {
   const h = normalizeHandle(handle);
-  const row = await db.query.profile.findFirst({ where: eq(profile.handle, h) });
+  const row = await profileRowByHandle(h);
   if (!row || !row.isPublic) return null;
 
   const cutoff = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
@@ -69,6 +75,13 @@ export const getCardData = cache(async (handle: string): Promise<CardData | null
     }),
   ]);
 
+  // Gate on the opt-in AND re-validate the untrusted JSONB through parseTheme
+  // (the trust boundary), so a malformed stored struct can never reach the card.
+  // The clock only exists when a theme actually made it out.
+  const customTheme = row.cardUsesCustomTheme ? parseTheme(row.customTheme) : null;
+  const customThemeUpdatedAt =
+    customTheme && row.customThemeUpdatedAt ? row.customThemeUpdatedAt.getTime() : null;
+
   return {
     handle: row.handle!,
     displayName: row.displayName,
@@ -79,6 +92,8 @@ export const getCardData = cache(async (handle: string): Promise<CardData | null
     serial: row.cardSerial ?? 0,
     mintedYear: row.createdAt.getUTCFullYear(),
     ghostMastered: ghostRow?.mastered ?? null,
+    customTheme,
+    customThemeUpdatedAt,
   };
 });
 
