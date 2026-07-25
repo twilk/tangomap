@@ -3,6 +3,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import axe from 'axe-core';
 import { DancerCard, type DancerCardProps } from '@/src/components/DancerCard';
+import { cardPaletteFor } from '@/src/lib/cardTheme';
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -106,6 +107,28 @@ describe('DancerCard', () => {
     await act(async () => close!.click());
     expect(q('.tm-badge')).toBeNull();
     expect(document.activeElement).toBe(open);
+  });
+
+  test('default (no palette prop) paints the frozen card literals', async () => {
+    await render();
+    // blob stroke + a radar ring keep their exact old literals
+    expect(q('.tm-card-blob')?.getAttribute('stroke')).toBe('#E58C44');
+    expect(q('circle[stroke]')?.getAttribute('stroke')).toBe('rgba(241,233,220,.09)');
+    // and the root exposes the frozen --tm-card-* the CSS falls back to
+    const stage = q<HTMLElement>('.tm-cardstage')!;
+    expect(stage.style.getPropertyValue('--tm-card-ember')).toBe('#E58C44');
+    expect(stage.style.getPropertyValue('--tm-card-muted')).toBe('#9E907E');
+    expect(stage.style.getPropertyValue('--tm-card-line')).toBe('rgba(241,233,220,.11)');
+  });
+
+  test('a themed palette repaints the SVG strokes and the root css vars', async () => {
+    const palette = cardPaletteFor({ v: 1, ground: '#101828', ink: '#f8fafc', accent: '#38bdf8', accent2: '#34d399' });
+    expect(palette.ember).not.toBe('#E58C44'); // guard: the theme actually differs
+    await render({ palette });
+    expect(q('.tm-card-blob')?.getAttribute('stroke')).toBe(palette.ember);
+    const stage = q<HTMLElement>('.tm-cardstage')!;
+    expect(stage.style.getPropertyValue('--tm-card-ember')).toBe(palette.ember);
+    expect(stage.style.getPropertyValue('--tm-card-grad-from')).toBe(palette.gradFrom);
   });
 
   test('axe finds no violations on the rendered card (front + actions)', async () => {

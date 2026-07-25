@@ -31,7 +31,12 @@ const card: CardData = {
   serial: 7,
   mintedYear: 2026,
   ghostMastered: null,
+  customTheme: null,
+  customThemeUpdatedAt: null,
 };
+
+// A legible custom theme; deriveTokens maps ground→#101828, ember→#38bdf8.
+const THEME = { v: 1 as const, ground: '#101828', ink: '#f8fafc', accent: '#38bdf8', accent2: '#34d399' };
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -70,5 +75,27 @@ describe('card opengraph-image route', () => {
     const mod = await load();
     const res = (await mod.default({ params: Promise.resolve({ handle: 'nobody' }) })) as unknown as { opts: { height: number } };
     expect(res.opts.height).toBe(630);
+  });
+
+  test('no custom theme → the frozen literals are rendered', async () => {
+    mockedGet.mockResolvedValue(card);
+    const mod = await load();
+    const res = (await mod.default({ params: Promise.resolve({ handle: 'ana' }) })) as unknown as { el: unknown };
+    const html = JSON.stringify(res.el);
+    expect(html).toContain('#0c0906'); // frozen ground
+    expect(html).toContain('#E58C44'); // frozen ember
+  });
+
+  test('an opted-in custom theme repaints the OG in the derived palette', async () => {
+    mockedGet.mockResolvedValue({ ...card, customTheme: THEME, customThemeUpdatedAt: 123 });
+    const mod = await load();
+    const res = (await mod.default({ params: Promise.resolve({ handle: 'ana' }) })) as unknown as { el: unknown };
+    const html = JSON.stringify(res.el);
+    // derived ground + accent are present…
+    expect(html).toContain('#101828');
+    expect(html).toContain('#38bdf8');
+    // …and the frozen ones are gone.
+    expect(html).not.toContain('#0c0906');
+    expect(html).not.toContain('#E58C44');
   });
 });
