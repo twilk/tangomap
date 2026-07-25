@@ -26,6 +26,7 @@ beforeEach(() => {
     font: '',
     measureText: (t: string) => ({ width: t.length * 8 }),
   });
+  localStorage.clear();
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -34,12 +35,28 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  localStorage.clear();
   vi.restoreAllMocks();
 });
 
 async function render(): Promise<void> {
   await act(async () => {
     root.render(<TangoMap />);
+  });
+}
+
+/** Click a node pill by its id (wrapped in act). */
+async function clickNode(id: string): Promise<void> {
+  const btn = container.querySelector<HTMLButtonElement>(`button.tsm-node[data-id="${id}"]`)!;
+  await act(async () => btn.click());
+}
+
+/** Set a controlled input's value the React-compatible way, then fire `input`. */
+async function typeIn(input: HTMLInputElement, value: string): Promise<void> {
+  const desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(input), 'value')!;
+  await act(async () => {
+    desc.set!.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
 
@@ -117,5 +134,129 @@ describe('TangoMap', () => {
     // with nothing focused, edges fall back to their base (neither prereq nor dim)
     const anyPath = container.querySelector('svg.tsm-edges path')!;
     expect(anyPath.getAttribute('data-hl')).toBe('base');
+  });
+
+  test('empty state until a node is selected', async () => {
+    await render();
+    expect(container.querySelector('.tsm-panel-empty')).not.toBeNull();
+    expect(container.querySelector('.tsm-panel-name')).toBeNull();
+  });
+
+  test('selecting a node shows the detail panel: name, gloss, stats, prereq + unlock lists', async () => {
+    await render();
+    await clickNode('cross');
+
+    // identity
+    expect(container.querySelector('.tsm-panel-name')!.textContent).toContain('The Cross');
+    expect(container.querySelector('.tsm-panel-gloss')!.textContent).toContain('la cruzada');
+
+    // stats — requires = # direct prereqs (2), unlocks = # direct dependents (5),
+    // path steps = longest prereq chain length (6: …→walking→outside-walking→cross)
+    const stat = (k: string) =>
+      container.querySelector(`.tsm-stat[data-stat="${k}"] .tsm-stat-num`)!.textContent;
+    expect(stat('requires')).toBe('2');
+    expect(stat('unlocks')).toBe('5');
+    expect(stat('path')).toBe('6');
+
+    // prerequisite list — cross.deps = outside-walking, weight-change
+    const prereqs = container.querySelectorAll('[data-rel-list="prereq"] .tsm-rel');
+    expect(prereqs.length).toBe(2);
+    expect(new Set(Array.from(prereqs, (b) => b.getAttribute('data-id')))).toEqual(
+      new Set(['outside-walking', 'weight-change']),
+    );
+
+    // unlock list — the five nodes that list 'cross' as a prerequisite
+    const unlocks = container.querySelectorAll('[data-rel-list="unlock"] .tsm-rel');
+    expect(unlocks.length).toBe(5);
+    expect(new Set(Array.from(unlocks, (b) => b.getAttribute('data-id')))).toEqual(
+      new Set(['cross-exits', 'ocho-adelante', 'improvisation', 'volcada', 'medialuna']),
+    );
+  });
+
+  test('clicking a prerequisite in the panel selects THAT node', async () => {
+    await render();
+    await clickNode('cross');
+
+    const prereq = container.querySelector<HTMLButtonElement>(
+      '[data-rel-list="prereq"] .tsm-rel[data-id="outside-walking"]',
+    )!;
+    await act(async () => prereq.click());
+
+    // the panel now describes Walking Outside, and its pill is the selected one
+    expect(container.querySelector('.tsm-panel-name')!.textContent).toContain('Walking Outside');
+    expect(
+      container.querySelector('button.tsm-node[data-id="outside-walking"]')!.classList.contains('on'),
+    ).toBe(true);
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('on')).toBe(false);
+  });
+
+  test('typing in search filters suggestions; Enter selects the top suggestion', async () => {
+    await render();
+    const input = container.querySelector<HTMLInputElement>('input.tsm-search-input')!;
+
+    await typeIn(input, 'ocho');
+    const options = container.querySelectorAll('#tsm-suglist button[role="option"]');
+    // three skills whose name starts with "ocho" (adelante, atrás, cortado)
+    expect(options.length).toBeGreaterThan(1);
+    // top suggestion is the lowest-level match — ocho-adelante (level 1)
+    expect(options[0].getAttribute('data-id')).toBe('ocho-adelante');
+
+    await act(async () => {
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    });
+
+    expect(container.querySelector('.tsm-panel-name')!.textContent).toContain('Ocho Adelante');
+    expect(
+      container.querySelector('button.tsm-node[data-id="ocho-adelante"]')!.classList.contains('on'),
+    ).toBe(true);
+    // selecting clears the query and closes the listbox
+    expect(input.value).toBe('');
+    expect(container.querySelector('#tsm-suglist')).toBeNull();
+  });
+
+  test('mark-mastered writes the node id into localStorage[tsm-mastered] and toggles off', async () => {
+    await render();
+    await clickNode('cross');
+
+    const master = container.querySelector<HTMLButtonElement>('.tsm-master')!;
+    expect(master.getAttribute('aria-pressed')).toBe('false');
+
+    await act(async () => master.click());
+    expect(localStorage.getItem('tsm-mastered')).toBe('["cross"]');
+    expect(master.getAttribute('aria-pressed')).toBe('true');
+    // the pill picks up the "done" class on the map
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(true);
+
+    await act(async () => master.click());
+    expect(localStorage.getItem('tsm-mastered')).toBe('[]');
+    expect(master.getAttribute('aria-pressed')).toBe('false');
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(false);
+  });
+
+  test('a persisted mastered set renders its pills done on mount', async () => {
+    localStorage.setItem('tsm-mastered', JSON.stringify(['cross', 'walking']));
+    await render();
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(true);
+    expect(container.querySelector('button.tsm-node[data-id="walking"]')!.classList.contains('done')).toBe(true);
+    expect(container.querySelector('button.tsm-node[data-id="posture"]')!.classList.contains('done')).toBe(false);
+  });
+
+  test('selection persists: a pre-seeded tsm-sel is restored on mount', async () => {
+    localStorage.setItem('tsm-sel', 'molinete');
+    await render();
+
+    expect(container.querySelector('button.tsm-node[data-id="molinete"]')!.classList.contains('on')).toBe(true);
+    expect(container.querySelector('.tsm-panel-name')!.textContent).toContain('Molinete');
+  });
+
+  test('clearing the selection removes the tsm-sel key', async () => {
+    await render();
+    await clickNode('cross');
+    expect(localStorage.getItem('tsm-sel')).toBe('cross');
+
+    // clicking the same node again toggles it off and clears the key
+    await clickNode('cross');
+    expect(localStorage.getItem('tsm-sel')).toBeNull();
+    expect(container.querySelector('.tsm-panel-empty')).not.toBeNull();
   });
 });

@@ -14,8 +14,14 @@
 /* map root — fills the space under the top bar */
 .tsm-map { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; font-family: var(--sans); }
 
+/* header row — carries the search combobox */
+.tsm-header { flex: none; display: flex; align-items: center; gap: 12px; padding: 8px clamp(12px, 3vw, 22px) 12px; }
+
+/* body row — the scrolling map stage beside the detail panel */
+.tsm-body { flex: 1; min-height: 0; display: flex; align-items: stretch; }
+
 /* scroll container (the data-tsm-scroll analog) */
-.tsm-scroll { position: relative; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.tsm-scroll { position: relative; flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 .tsm-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
 .tsm-scroll::-webkit-scrollbar-thumb { background: var(--tm-line2); border-radius: 9px; }
 .tsm-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -68,9 +74,142 @@
   box-shadow: 0 0 0 1px var(--tm-ember); z-index: 4;
 }
 
+/* mastered → a verd "done" fill; the left accent becomes a check tick */
+.tsm-node.done { border-color: var(--tm-verd); background: var(--tm-verd-s); }
+.tsm-node.done .tsm-node-dot { background: var(--tm-verd); }
+.tsm-node.done.on { box-shadow: 0 0 0 1px var(--tm-verd); }
+
 /* everything unrelated to the focused node dims back */
 .tsm-node.dim { opacity: .25; }
 
 @media (prefers-reduced-motion: reduce) {
   .tsm-map *, .tsm-map { transition: none !important; }
+}
+
+/* ============================================================
+   HEADER SEARCH — combobox + suggestion listbox
+   ============================================================ */
+.tsm-search { position: relative; flex: 1 1 320px; max-width: 470px; min-width: 190px; }
+.tsm-search-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 17px; height: 17px; color: var(--tm-muted); pointer-events: none;
+}
+.tsm-search-input {
+  width: 100%; height: 42px; border-radius: 999px; box-sizing: border-box;
+  border: 1.5px solid var(--tm-line); background: var(--tm-panel); color: var(--tm-ink);
+  padding: 0 16px 0 39px; font-family: var(--sans); font-size: 15px;
+  transition: border-color .15s ease;
+}
+.tsm-search-input::placeholder { color: var(--tm-faint); }
+.tsm-search-input:focus-visible { outline: none; border-color: var(--tm-ember); }
+
+.tsm-suglist {
+  position: absolute; top: 48px; left: 0; right: 0; z-index: 60;
+  background: var(--tm-panel); border: 1px solid var(--tm-line); border-radius: 18px;
+  box-shadow: var(--tm-elev); padding: 6px; max-height: 330px; overflow-y: auto;
+}
+.tsm-sug {
+  width: 100%; display: flex; align-items: center; gap: 8px; box-sizing: border-box;
+  padding: 9px 11px; border: none; border-radius: 12px; background: transparent;
+  color: var(--tm-ink); font: inherit; text-align: left; cursor: pointer;
+  transition: background .12s ease;
+}
+.tsm-sug:hover, .tsm-sug.active { background: var(--tm-ember-s); }
+.tsm-sug-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tsm-sug-name { font-weight: 700; font-size: 14px; }
+.tsm-sug-gloss { font-size: 13px; font-style: italic; color: var(--tm-muted); }
+.tsm-sug-lvl {
+  flex: none; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  color: var(--tm-ember); background: var(--tm-ember-s); border-radius: 999px; padding: 3px 9px;
+}
+.tsm-sug-empty { padding: 12px; font-size: 13.5px; font-style: italic; color: var(--tm-muted); }
+.tsm-sug-hint {
+  padding: 7px 12px 3px; margin-top: 4px; font-size: 11.5px; color: var(--tm-muted);
+  border-top: 1px solid var(--tm-line);
+}
+
+/* ============================================================
+   DETAIL PANEL — the aside beside the map
+   ============================================================ */
+.tsm-panel {
+  flex: 0 0 clamp(300px, 30vw, 384px); min-width: 0;
+  border-left: 1px solid var(--tm-line); background: var(--tm-panel);
+  overflow-y: auto; font-family: var(--sans);
+}
+.tsm-panel-body { padding: 18px 20px 32px; }
+
+/* empty state */
+.tsm-panel-empty { padding: 30px 20px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.tsm-panel-empty p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--tm-muted); }
+.tsm-panel-empty-mark {
+  width: 40px; height: 40px; border-radius: 999px;
+  background: var(--tm-ember-s); border: 1px solid var(--tm-line);
+}
+
+/* identity block */
+.tsm-panel-kicker {
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--tm-ember);
+}
+.tsm-panel-name { margin: 5px 0 0; font-family: var(--serif); font-size: 25px; line-height: 1.15; color: var(--tm-ink); font-weight: 600; }
+.tsm-panel-gloss { margin-top: 3px; font-size: 13.5px; font-style: italic; color: var(--tm-muted); }
+.tsm-panel-role {
+  display: inline-flex; margin-top: 10px; padding: 4px 11px; border-radius: 999px;
+  background: var(--tm-verd-s); color: var(--tm-verd); font-size: 12.5px; font-weight: 700;
+}
+.tsm-panel-desc { margin: 11px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--tm-ink); }
+
+/* mark-mastered control */
+.tsm-master {
+  width: 100%; min-height: 42px; margin-top: 14px; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border-radius: 999px; border: none; background: var(--tm-ember); color: var(--tm-ground);
+  font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.tsm-master .tsm-master-check { display: inline-flex; font-size: 15px; line-height: 1; }
+.tsm-master.done {
+  background: var(--tm-verd-s); color: var(--tm-verd); border: 1.5px solid var(--tm-verd);
+}
+
+/* stats row */
+.tsm-panel-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 15px 0 4px; }
+.tsm-stat { background: var(--tm-panel2); border-radius: 14px; padding: 10px 6px; text-align: center; }
+.tsm-stat-num { font-size: 19px; font-weight: 800; color: var(--tm-ink); }
+.tsm-stat-label { margin-top: 1px; font-size: 11px; color: var(--tm-muted); }
+
+/* section headings */
+.tsm-panel-sechead {
+  margin: 18px 0 8px; font-family: var(--mono); font-size: 11.5px; font-weight: 700;
+  letter-spacing: .12em; color: var(--tm-muted);
+}
+.tsm-panel-note { margin: 0; font-size: 13px; font-style: italic; color: var(--tm-muted); }
+
+/* prerequisite / unlock relation rows */
+.tsm-rel-list { display: flex; flex-direction: column; gap: 5px; }
+.tsm-rel {
+  width: 100%; display: flex; align-items: center; gap: 9px; box-sizing: border-box;
+  min-height: 40px; padding: 9px 11px; border-radius: 14px; background: transparent;
+  border: 1.5px solid var(--tm-line); color: inherit; font: inherit; text-align: left;
+  cursor: pointer; transition: background .15s ease, border-color .15s ease;
+}
+.tsm-rel[data-rel="prereq"]:hover { background: var(--tm-ember-s); border-color: var(--tm-ember); }
+.tsm-rel[data-rel="unlock"]:hover { background: var(--tm-verd-s); border-color: var(--tm-verd); }
+.tsm-rel-check {
+  flex: none; width: 18px; height: 18px; border-radius: 999px; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--tm-line2); color: var(--tm-ground); font-size: 10px;
+}
+.tsm-rel-check.done { background: var(--tm-verd); border-color: var(--tm-verd); }
+.tsm-rel-lvl {
+  flex: none; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  color: var(--tm-muted); background: var(--tm-chip); border-radius: 999px; padding: 3px 8px;
+}
+.tsm-rel-name { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tsm-rel-arr { flex: none; color: var(--tm-muted); font-size: 15px; }
+
+/* narrow viewports: the panel drops below the map instead of beside it */
+@media (max-width: 820px) {
+  .tsm-body { flex-direction: column; }
+  .tsm-panel { flex: none; width: 100%; max-height: 46%; border-left: none; border-top: 1px solid var(--tm-line); }
 }
