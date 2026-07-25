@@ -7,8 +7,9 @@ Live: https://partykamap.vercel.app
 
 ## Quickstart (local dev)
 
-Prerequisites: **Node 20+** and a Supabase Postgres database (already provisioned as project
-`tangomap`, eu-west-3).
+Prerequisites: **Node 22.6+** (see `.nvmrc` = 22.12; the design generator uses
+`--experimental-strip-types`, which needs 22.6) and a Supabase Postgres database (already
+provisioned as project `tangomap`, eu-west-3).
 
 ```bash
 git clone https://github.com/twilk/tangomap
@@ -20,6 +21,12 @@ npm run db:generate               # emit SQL from db/schema.ts (no DB needed)
 npm run db:migrate                # apply it to Supabase (reads .env.local)
 npm run dev                       # open the printed URL — the map renders
 ```
+
+> **Migrations are manual and must target the right database.** `db:migrate` applies to whatever
+> `DIRECT_URL` points at — make sure that's the intended DB. Follow expand-migrate-contract: land the
+> migration on the DB **first**, confirm the columns/tables exist there, and only then merge code that
+> reads them. Drizzle's queries select every column declared in `db/schema.ts`, so a schema that's ahead
+> of the database returns 500s on every affected read (this bit production once).
 
 Fill three values in `.env.local`:
 
@@ -39,7 +46,7 @@ Fill three values in `.env.local`:
 |--------|------|
 | `npm run dev` | Next.js dev server (port 3000, or the next free one) |
 | `npm run build` / `start` | production build / serve |
-| `npm test` | Vitest suite (41 tests) |
+| `npm test` | Vitest suite |
 | `npm run db:generate` | generate migration SQL from `db/schema.ts` |
 | `npm run db:migrate` | apply migrations to Supabase (uses `DIRECT_URL`) |
 

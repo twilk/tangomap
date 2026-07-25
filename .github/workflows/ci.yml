@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Guards drift between design/tokens.ts and the generated CSS/JS/DESIGN.md.
+      - run: npm run design:check
+      - run: npm test
+      # `build` re-runs design:check then `next build`; proves every route compiles.
+      - run: npm run build
