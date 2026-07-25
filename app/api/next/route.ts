@@ -6,7 +6,7 @@ import { SKILLS } from '@/src/data/skills';
 import { sanitizeMastered } from '@/src/lib/progress';
 import { recommend } from '@/src/lib/recommend';
 
-// "What's next" for the map's idle Skill Details panel (public/map-home.js).
+// "What's next" for the map's idle Skill Details panel (the MapHomeCard).
 // Deliberately never 401s: a signed-out visitor gets { signedIn: false } so the
 // panel can render its sign-in invitation instead of swallowing an error.
 // `handle` is included ONLY for a public profile — same rule as app/me/page.tsx,

@@ -1,27 +1,57 @@
-// Tango Skill Map — data model built from the Partyka course programs
-// (01 Beginners, 02 Intermediate, 03 Advanced, 04 Intermediate 2026).
-export const LEVELS = [
-  { id: 0, title: 'Beginners · First Steps' },
-  { id: 1, title: 'Beginners · The Cross & Ocho' },
-  { id: 2, title: 'Beginners · Exits & Back Ochos' },
-  { id: 3, title: 'Beginners · Giros & Close Embrace' },
-  { id: 4, title: 'Beginners · Vals, Milonga & Music' },
-  { id: 5, title: 'Beginners · First Figures' },
-  { id: 6, title: 'Intermediate · Craft' },
-  { id: 7, title: 'Intermediate · Figures Deepened' },
-  { id: 8, title: 'Advanced · Dynamics' },
-  { id: 9, title: 'Advanced · Styles & Mastery' }
-];
-
-export const TAGS = {
-  'BODY': 'Body technique', 'STEP': 'Stepping', 'PARTNER': 'Partnering', 'SPACE': 'Space & floorcraft',
-  'RHYTHM': 'Rhythm & musicality', 'ROTATION': 'Rotation', 'DYNAMICS': 'Dynamics', 'FREE LEG': 'Free-leg work',
-  'CONTACT': 'Leg contact', 'OFF AXIS': 'Off-axis', 'GENRE': 'Genre & music', 'STYLE': 'Style', 'MASTERY': 'Mastery'
+// The authoritative Tango Skill Map data — 62 nodes across 10 levels, built from
+// the Partyka course programs (01 Beginners, 02 Intermediate, 03 Advanced,
+// 04 Intermediate 2026). This module is the single source of truth for the map:
+// src/data/skills.ts (the app's SKILLS projection) mirrors it, and
+// test/mapNodes.test.ts locks its integrity.
+//
+// role: 'L' leader-typical, 'F' follower-typical, omitted = both roles.
+// taught: where the skill appears in the actual course programs.
+// deps: prerequisite ids (this node's inbound edges in the map's graph).
+export type MapNode = {
+  id: string;
+  name: string;
+  level: number;
+  tag: string;
+  deps: string[];
+  gloss: string;
+  aliases: string[];
+  desc: string;
+  taught: string[];
+  role?: 'L' | 'F';
 };
 
-// role: 'L' leader-typical, 'F' follower-typical, omitted = both roles
-// taught: where this appears in the actual course programs
-export const NODES = [
+/** The 10 level headings, top of the map to bottom (index === level). */
+export const LEVELS: string[] = [
+  'Beginners · First Steps',
+  'Beginners · The Cross & Ocho',
+  'Beginners · Exits & Back Ochos',
+  'Beginners · Giros & Close Embrace',
+  'Beginners · Vals, Milonga & Music',
+  'Beginners · First Figures',
+  'Intermediate · Craft',
+  'Intermediate · Figures Deepened',
+  'Advanced · Dynamics',
+  'Advanced · Styles & Mastery',
+];
+
+/** The 13 skill categories: node `tag` code -> human label. */
+export const TAGS: Record<string, string> = {
+  'BODY': 'Body technique',
+  'STEP': 'Stepping',
+  'PARTNER': 'Partnering',
+  'SPACE': 'Space & floorcraft',
+  'RHYTHM': 'Rhythm & musicality',
+  'ROTATION': 'Rotation',
+  'DYNAMICS': 'Dynamics',
+  'FREE LEG': 'Free-leg work',
+  'CONTACT': 'Leg contact',
+  'OFF AXIS': 'Off-axis',
+  'GENRE': 'Genre & music',
+  'STYLE': 'Style',
+  'MASTERY': 'Mastery',
+};
+
+export const MAP_NODES: MapNode[] = [
   { id:'mirada-cabeceo', name:'Mirada & Cabeceo', level:0, tag:'PARTNER', deps:[], gloss:'the look & the nod', aliases:['invitation','mirada','cabeceo'], desc:'The silent invitation across the room — eye contact, a nod, and only then the dance.', taught:['Beginners · Lessons 1–2'] },
   { id:'posture', name:'Posture', level:0, tag:'BODY', deps:[], gloss:'upright, released stance', aliases:['postura','stance','alignment'], desc:'A tall, released stance the whole dance hangs from — revisited when the embrace closes.', taught:['Beginners · Lessons 1 & 11'] },
   { id:'embrace', name:'The Embrace', level:0, tag:'PARTNER', deps:['posture'], gloss:'el abrazo', aliases:['abrazo','hold','technical embrace'], desc:'The technical embrace: a comfortable frame that transmits intention, never grip.', taught:['Beginners · Lesson 1','Beginners · Lesson 6 — how it works'] },
@@ -39,7 +69,7 @@ export const NODES = [
   { id:'cross', name:'The Cross', level:1, tag:'STEP', deps:['outside-walking','weight-change'], gloss:'la cruzada', aliases:['cruzada','cross','la cruz'], desc:'The follower crosses one foot in front of the other — tango’s signature comma.', taught:['Beginners · Lesson 4','Intermediate · Cross 1–2','Int 2026 · Month 7'] },
   { id:'cross-exits', name:'Exits from the Cross', level:1, tag:'STEP', deps:['cross'], gloss:'back, parada or forward', aliases:['exit','salida'], desc:'Leaving the cross backward, or through a parada and over the top.', taught:['Beginners · Lessons 4–5','Beginners · Lesson 21 — close embrace'] },
   { id:'ocho-adelante', name:'Ocho Adelante', level:1, tag:'ROTATION', deps:['dissociation','cross'], gloss:'forward ocho', aliases:['forward ocho','front ocho','figure eight'], desc:'Forward crossing steps linked by pivots — dissociation made visible.', taught:['Beginners · Lesson 5','Beginners · Lesson 21 — close embrace'] },
-  { id:'adornos', name:'Adornos & Lustrada', level:1, tag:'FREE LEG', deps:['walking'], role:'F', gloss:'embellishments', aliases:['lustrada','adorno','decoration','embellishment'], desc:'The follower’s small signatures — starting with the lustrada, polishing the shoe.', taught:['Beginners · Lesson 5','Int 2026 · Month 12 — the Artist’s Signature'] },
+  { id:'adornos', name:'Adornos & Lustrada', level:1, tag:'FREE LEG', deps:['walking'], gloss:'embellishments', aliases:['lustrada','adorno','decoration','embellishment'], desc:'The follower’s small signatures — starting with the lustrada, polishing the shoe.', taught:['Beginners · Lesson 5','Int 2026 · Month 12 — the Artist’s Signature'], role:'F' },
 
   { id:'double-timing', name:'Double Timing', level:2, tag:'RHYTHM', deps:['music-timing','square'], gloss:'two steps per beat', aliases:['double time','quick quick','syncopation'], desc:'Doubling the pulse inside the square and the walk — the first taste of play.', taught:['Beginners · Lesson 6'] },
   { id:'ocho-atras', name:'Ocho Atrás', level:2, tag:'ROTATION', deps:['ocho-adelante'], gloss:'back ocho', aliases:['back ocho','backward ocho'], desc:'The mirror twin: backward crossing steps with pivots between.', taught:['Beginners · Lesson 7','Beginners · Lesson 22 — close embrace','Int 2026 · Month 4 — the Iron Axis'] },
@@ -48,7 +78,7 @@ export const NODES = [
   { id:'ocho-cortado', name:'Ocho Cortado', level:2, tag:'ROTATION', deps:['ocho-atras','bounce'], gloss:'the cut ocho', aliases:['cut ocho'], desc:'An ocho interrupted mid-flight and folded into a cross — in more timings than one.', taught:['Beginners · Lesson 8','Int 2026 · Month 7 — the Rhythmic Snap'] },
   { id:'americana', name:'Americana', level:2, tag:'STEP', deps:['ocho-cortado'], gloss:'side-by-side exit', aliases:['americana exit'], desc:'Both facing forward for a moment — the sunny side-by-side exit.', taught:['Beginners · Lesson 8'] },
 
-  { id:'molinete', name:'Molinete', level:3, tag:'ROTATION', deps:['ocho-adelante','ocho-atras','weight-change'], role:'F', gloss:'the grapevine', aliases:['grapevine','windmill','box step'], desc:'Forward, side, back, side around the leader — the follower’s engine of every giro.', taught:['Int 2026 · Month 1 — the Carousel Blueprint'] },
+  { id:'molinete', name:'Molinete', level:3, tag:'ROTATION', deps:['ocho-adelante','ocho-atras','weight-change'], gloss:'the grapevine', aliases:['grapevine','windmill','box step'], desc:'Forward, side, back, side around the leader — the follower’s engine of every giro.', taught:['Int 2026 · Month 1 — the Carousel Blueprint'], role:'F' },
   { id:'giro-left', name:'Giro to the Left', level:3, tag:'ROTATION', deps:['molinete','dissociation'], gloss:'the turn', aliases:['turn','giro','vuelta'], desc:'The couple turns around a shared hub — first to the left.', taught:['Beginners · Lesson 9','Beginners · Lesson 23 — close embrace','Intermediate · Giro 1–3'] },
   { id:'giro-right', name:'Giro to the Right', level:3, tag:'ROTATION', deps:['giro-left','ocho-atras'], gloss:'after ocho atrás', aliases:['right turn'], desc:'The other direction, entered from a back ocho — tighter and more surprising.', taught:['Beginners · Lessons 10 & 22'] },
   { id:'close-embrace', name:'Close Embrace', level:3, tag:'PARTNER', deps:['embrace','walking'], gloss:'chest to chest', aliases:['apilado','close hold','milonguero embrace'], desc:'Posture, embrace and connection compressed to a heartbeat’s distance.', taught:['Beginners · Lesson 11','Beginners · Lessons 21–23 — figures revisited'] },
@@ -77,8 +107,8 @@ export const NODES = [
   { id:'calesita', name:'Calesita', level:7, tag:'ROTATION', deps:['giro-left','close-embrace'], gloss:'the carousel', aliases:['carousel'], desc:'The follower on a single vertical axis while the leader walks the orbit.', taught:['Intermediate · Calesita','Int 2026 · Month 3 — the Center of Gravity'] },
   { id:'planeo', name:'Planeo', level:7, tag:'FREE LEG', deps:['giro-left','dissociation'], gloss:'the glide', aliases:['glide','leg sweep'], desc:'The free leg glides a long arc — new techniques to get things from under the wardrobe.', taught:['Intermediate · Planeo 1'] },
   { id:'linear-giro', name:'Linear Giro', level:7, tag:'ROTATION', deps:['giro-left','ronda'], gloss:'line and orbit', aliases:['travelling turn'], desc:'Turning while travelling the line of dance — rotation that still goes somewhere.', taught:['Int 2026 · Month 1 — Line and Orbit'] },
-  { id:'follower-sacada', name:'Follower’s Sacada', level:7, tag:'SPACE', deps:['sacada'], role:'F', gloss:'mirror displacement', aliases:['follower sacada'], desc:'The other side of the trick — displacing the leader’s leg with precision.', taught:['Intermediate · Sacada 2','Int 2026 · Month 2 — Mirror Displacement'] },
-  { id:'pasada', name:'Pasada', level:7, tag:'CONTACT', deps:['parada','adornos'], role:'F', gloss:'the step-over', aliases:['step over','pass over'], desc:'Invited over the leader’s foot, the follower takes her time — the still moment’s reward.', taught:['Int 2026 · Month 4 — Paradas & Pasadas'] },
+  { id:'follower-sacada', name:'Follower’s Sacada', level:7, tag:'SPACE', deps:['sacada'], gloss:'mirror displacement', aliases:['follower sacada'], desc:'The other side of the trick — displacing the leader’s leg with precision.', taught:['Intermediate · Sacada 2','Int 2026 · Month 2 — Mirror Displacement'], role:'F' },
+  { id:'pasada', name:'Pasada', level:7, tag:'CONTACT', deps:['parada','adornos'], gloss:'the step-over', aliases:['step over','pass over'], desc:'Invited over the leader’s foot, the follower takes her time — the still moment’s reward.', taught:['Int 2026 · Month 4 — Paradas & Pasadas'], role:'F' },
   { id:'cadena', name:'Cadenas', level:7, tag:'SPACE', deps:['giro-sacada','vals'], gloss:'the chains', aliases:['chains','chain'], desc:'The infinite ribbon — linked turning patterns flowing down the floor.', taught:['Beginners · Lesson 25 — vals chains','Int 2026 · Month 10 — the Infinite Ribbon','Advanced · Vals'] },
   { id:'volcada', name:'Volcada', level:7, tag:'OFF AXIS', deps:['close-embrace','cross'], gloss:'the leaning tower', aliases:['forward lean','off axis','tilt'], desc:'The follower tilts forward onto the shared center — the leaning tower.', taught:['Intermediate · Out of axis 1–3','Int 2026 · Month 12'] },
   { id:'colgada', name:'Colgada', level:7, tag:'OFF AXIS', deps:['giro-left','connection'], gloss:'the gravity defier', aliases:['hang','off-axis rotation','off axis'], desc:'Both hang away from a shared point and let centrifugal force pay the bill.', taught:['Intermediate · Out of axis 2–3','Advanced · Colgadas','Int 2026 · Month 12'] },
@@ -92,5 +122,5 @@ export const NODES = [
 
   { id:'salon', name:'Tango Salón', level:9, tag:'STYLE', deps:['posture-walking','sacada','vals','musicality'], gloss:'the elegant open style', aliases:['salon'], desc:'Elegant lines and unhurried turns — great in simple, from tango to vals to milonga.', taught:['Advanced · Salon cycle — Tango, Vals, Milonga'] },
   { id:'milonguero', name:'Estilo Milonguero', level:9, tag:'STYLE', deps:['close-embrace','milonga','ocho-cortado','emb-comm'], gloss:'the crowded-floor style', aliases:['milonguero','milonghero','apilado'], desc:'Chest-to-chest economy for a packed floor — stop thinking, just follow.', taught:['Advanced · Milonghero cycle — Tango, Vals, Milonga'] },
-  { id:'nuevo', name:'Tango Nuevo', level:9, tag:'STYLE', deps:['volcada','colgada','soltada','sacada-chain'], gloss:'the laboratory style', aliases:['nuevo'], desc:'Centrifugal force, waves and wrapped legs — the laboratory where ganchos bloom.', taught:['Advanced · Nuevo cycle'] }
+  { id:'nuevo', name:'Tango Nuevo', level:9, tag:'STYLE', deps:['volcada','colgada','soltada','sacada-chain'], gloss:'the laboratory style', aliases:['nuevo'], desc:'Centrifugal force, waves and wrapped legs — the laboratory where ganchos bloom.', taught:['Advanced · Nuevo cycle'] },
 ];

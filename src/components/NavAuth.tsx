@@ -11,8 +11,8 @@ type State = 'unknown' | 'in' | 'out';
  * It reads the session on the *client* on purpose. `/skills` and
  * `/skill/[slug]` are statically generated; calling `auth()` inside `TopNav`
  * would read cookies and force all 63 of those pages to render per request.
- * Fetching `/api/auth/session` keeps them static and matches the map bundle's
- * own pill (public/auth-ui.js), so both navs always agree.
+ * Fetching `/api/auth/session` keeps them static, and it is the single account
+ * menu the map header and the app pages both render, so both navs always agree.
  *
  * Renders nothing until the answer arrives: server and first client render
  * agree (no hydration mismatch), and we never flash "Sign in" at someone who
