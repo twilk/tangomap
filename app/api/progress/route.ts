@@ -32,18 +32,37 @@ export async function PUT(req: Request) {
   const theme =
     input.theme === 'dark' || input.theme === 'light' || input.theme === 'custom' ? input.theme : null;
   const sel = typeof input.sel === 'string' ? input.sel : null;
-  const now = new Date();
-  await db.insert(progress).values({ userId: session.user.id, mastered, theme, sel, updatedAt: now })
-    .onConflictDoUpdate({ target: progress.userId, set: { mastered, theme, sel, updatedAt: now } });
+  // Last-write-wins. The client stamps the write with the moment its local state
+  // changed (input.updatedAt); a missing/invalid stamp defaults to now. If the
+  // stored row is newer than that stamp, another device already wrote something
+  // more recent — REJECT the write and return the authoritative row so the caller
+  // adopts it, instead of letting a stale device clobber fresh cross-device state.
+  const clientMs = input.updatedAt ? Date.parse(input.updatedAt) : NaN;
+  const writeAt = new Date(Number.isNaN(clientMs) ? Date.now() : clientMs);
+  const existing = await db.query.progress.findFirst({ where: eq(progress.userId, session.user.id) });
+  if (existing && existing.updatedAt.getTime() > writeAt.getTime()) {
+    return Response.json(
+      {
+        mastered: sanitizeMastered(existing.mastered),
+        theme: existing.theme as Progress['theme'],
+        sel: existing.sel,
+        updatedAt: existing.updatedAt.toISOString(),
+      } satisfies Progress,
+      { headers: { 'Cache-Control': 'private, no-store' } },
+    );
+  }
+  await db.insert(progress).values({ userId: session.user.id, mastered, theme, sel, updatedAt: writeAt })
+    .onConflictDoUpdate({ target: progress.userId, set: { mastered, theme, sel, updatedAt: writeAt } });
   // Daily history snapshot (one row per UTC day) — powers growth views like the
-  // card's ghost blob. Best-effort: a failed snapshot must not fail the save,
-  // but it must leave a trace (silent loss here silently kills the ghost).
+  // card's ghost blob. Uses the real server day, not the client stamp, so a skewed
+  // client clock can't bucket the snapshot on the wrong day. Best-effort: a failed
+  // snapshot must not fail the save, but it must leave a trace.
   try {
-    const day = now.toISOString().slice(0, 10);
+    const day = new Date().toISOString().slice(0, 10);
     await db.insert(progressHistory).values({ userId: session.user.id, day, mastered })
       .onConflictDoUpdate({ target: [progressHistory.userId, progressHistory.day], set: { mastered } });
   } catch (e) {
     console.error('progress_history snapshot failed', e);
   }
-  return Response.json({ mastered, theme, sel, updatedAt: now.toISOString() } satisfies Progress);
+  return Response.json({ mastered, theme, sel, updatedAt: writeAt.toISOString() } satisfies Progress);
 }
