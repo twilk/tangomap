@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { smoothPathD, type Pt } from '@/src/lib/radarPath';
 import { CATEGORIES, iconSvg } from '@/src/lib/dna';
+import { ArPlaceCard } from './ArPlaceCard';
 
 // qrcode is only needed after an explicit user action (badge / story export),
 // so it stays out of the card's initial bundle.
@@ -639,6 +640,7 @@ export function DancerCard(props: DancerCardProps) {
         >
           View in AR
         </button>
+        <ArPlaceCard handle={props.handle} onFallback={() => setImmersive(true)} />
         {needsMotionOptIn && (
           <button type="button" className="tm-cta ghost" onClick={requestMotion}>
             Enable motion
