@@ -25,8 +25,12 @@ const EXPECTED_COUNT = 62;
 /** Level offset: skills.ts is 1-indexed, the map data is 0-indexed. */
 const LEVEL_OFFSET = 1;
 
-type MapNode = { id: string; name: string; level: number; tag: string };
-type SkillEntry = { slug: string; name: string; level: number; tag: string };
+type MapNode = { id: string; name: string; level: number; tag: string; deps: string[] };
+type SkillEntry = { slug: string; name: string; level: number; tag: string; deps: string[] };
+
+/** Pull the quoted slugs out of a `deps:[…]` body (single- or double-quoted). */
+const slugsIn = (body: string | undefined): string[] =>
+  body ? [...body.matchAll(/['"]([a-z0-9-]+)['"]/g)].map((m) => m[1]) : [];
 
 function readRepoFile(relPath: string): string {
   return readFileSync(join(REPO_ROOT, relPath), 'utf8');
@@ -41,12 +45,13 @@ function parseNodes(source: string, label: string): MapNode[] {
   if (!marker) throw new Error(`${label}: no "NODES = [" marker found`);
 
   const region = source.slice(marker.index);
-  const re = /\{\s*id:\s*'([^']+)'\s*,\s*name:\s*'([^']*)'\s*,\s*level:\s*(\d+)\s*,\s*tag:\s*'([^']+)'/g;
+  const re =
+    /\{\s*id:\s*'([^']+)'\s*,\s*name:\s*'([^']*)'\s*,\s*level:\s*(\d+)\s*,\s*tag:\s*'([^']+)'(?:\s*,\s*deps:\s*\[([^\]]*)\])?/g;
 
   const nodes: MapNode[] = [];
   let m: RegExpExecArray | null;
   while ((m = re.exec(region)) !== null) {
-    nodes.push({ id: m[1], name: m[2], level: Number(m[3]), tag: m[4] });
+    nodes.push({ id: m[1], name: m[2], level: Number(m[3]), tag: m[4], deps: slugsIn(m[5]) });
   }
   return nodes;
 }
@@ -73,12 +78,12 @@ function decodeBundleTemplate(html: string): string {
 /** Parse `{ slug: "x", name: "X", level: 1, tag: "TAG" }` entries from skills.ts. */
 function parseSkills(source: string): SkillEntry[] {
   const re =
-    /\{\s*slug:\s*"([^"]+)"\s*,\s*name:\s*"([^"]*)"\s*,\s*level:\s*(\d+)\s*,\s*tag:\s*"([^"]+)"\s*\}/g;
+    /\{\s*slug:\s*"([^"]+)"\s*,\s*name:\s*"([^"]*)"\s*,\s*level:\s*(\d+)\s*,\s*tag:\s*"([^"]+)"(?:\s*,\s*deps:\s*\[([^\]]*)\])?\s*\}/g;
 
   const skills: SkillEntry[] = [];
   let m: RegExpExecArray | null;
   while ((m = re.exec(source)) !== null) {
-    skills.push({ slug: m[1], name: m[2], level: Number(m[3]), tag: m[4] });
+    skills.push({ slug: m[1], name: m[2], level: Number(m[3]), tag: m[4], deps: slugsIn(m[5]) });
   }
   return skills;
 }
@@ -147,6 +152,21 @@ describe('map data parity', () => {
 
       expect(skill.name, `name drift for "${skill.slug}"`).toBe(node.name);
       expect(skill.tag, `tag drift for "${skill.slug}"`).toBe(node.tag);
+    }
+  });
+
+  test('per-id prerequisite deps match between the map data and skills.ts', () => {
+    const nodes = byId(bundleNodes);
+    // Every skills.ts dep set equals the map node's, and every dep points at a
+    // real skill — so the graph the "builds on / leads to" UI walks can't drift
+    // from the map, and can't reference a slug that doesn't exist.
+    const slugs = new Set(skills.map((s) => s.slug));
+    for (const skill of skills) {
+      const node = nodes.get(skill.slug);
+      if (!node) continue;
+      expect([...skill.deps].sort(), `deps drift for "${skill.slug}"`).toEqual([...node.deps].sort());
+      const dangling = skill.deps.filter((d) => !slugs.has(d));
+      expect(dangling, `"${skill.slug}" deps point at unknown slugs: ${dangling.join(', ')}`).toEqual([]);
     }
   });
 
