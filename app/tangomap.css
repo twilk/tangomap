@@ -1,0 +1,76 @@
+/* ============================================================
+   TANGO MAP — whole-map view (app/mapview, TEMPORARY preview route).
+   The React port of the bundle's map canvas. Everything is scoped
+   under .tsm-map and consumes ONLY the app's --tm-* tokens (plus
+   --serif/--sans/--mono), which the enclosing .tm-profile supplies,
+   so the map reads as one product with the rest of the app.
+   ============================================================ */
+
+/* full-viewport preview page shell */
+.tsm-page { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+.tsm-topbar { flex: none; padding: 12px clamp(14px, 3vw, 22px) 0; }
+/* the shared top bar carries a 22px bottom margin of its own; nothing to add here */
+
+/* map root — fills the space under the top bar */
+.tsm-map { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; font-family: var(--sans); }
+
+/* scroll container (the data-tsm-scroll analog) */
+.tsm-scroll { position: relative; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.tsm-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+.tsm-scroll::-webkit-scrollbar-thumb { background: var(--tm-line2); border-radius: 9px; }
+.tsm-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* positioned stage — its height comes from the layout */
+.tsm-stage { position: relative; width: 100%; min-height: 100%; }
+
+/* ---- edge layer ---- */
+.tsm-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.tsm-edge { transition: opacity .15s ease, stroke .15s ease, stroke-width .15s ease; }
+.tsm-edge-base   { stroke: var(--tm-line2); stroke-width: 1.4; opacity: .14; }
+.tsm-edge-dim    { stroke: var(--tm-line2); stroke-width: 1.4; opacity: .05; }
+.tsm-edge-prereq { stroke: var(--tm-ember); stroke-width: 2.2; opacity: .95; }
+.tsm-edge-unlock { stroke: var(--tm-verd);  stroke-width: 2.2; opacity: .95; }
+
+/* ---- level-band labels ---- */
+.tsm-band {
+  position: absolute; font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--tm-muted);
+  white-space: nowrap; pointer-events: none;
+}
+
+/* ---- node pills ---- */
+.tsm-node {
+  position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  box-sizing: border-box; padding: 0 8px; border-radius: 999px;
+  border: 1px solid var(--tm-line); background: var(--tm-panel); color: var(--tm-ink);
+  font-family: var(--sans); font-size: 14px; font-weight: 600; line-height: 1; white-space: nowrap;
+  cursor: pointer; z-index: 2;
+  transition: border-color .15s ease, background .2s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.tsm-node-name { overflow: hidden; text-overflow: ellipsis; }
+/* left category accent — a slim bar clipped to the pill's rounded cap (dna.ts
+   exposes no per-category colour yet, so it falls back to the ember accent) */
+.tsm-node-dot { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--tm-ember); }
+
+/* hover / keyboard-focus a node → raise its border to ember and lift it */
+.tsm-node:hover,
+.tsm-node.hov { border-color: var(--tm-ember); box-shadow: var(--tm-elev); z-index: 3; }
+.tsm-node:focus-visible { outline: 2px solid var(--tm-ember); outline-offset: 2px; z-index: 3; }
+
+/* prereqs of the focused node get an ember border; unlocks get a verd border */
+.tsm-node.pre { border-color: var(--tm-ember); }
+.tsm-node.kid { border-color: var(--tm-verd); }
+.tsm-node.kid .tsm-node-dot { background: var(--tm-verd); }
+
+/* selected (persistent) */
+.tsm-node.on {
+  border-color: var(--tm-ember); background: var(--tm-ember-s);
+  box-shadow: 0 0 0 1px var(--tm-ember); z-index: 4;
+}
+
+/* everything unrelated to the focused node dims back */
+.tsm-node.dim { opacity: .25; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tsm-map *, .tsm-map { transition: none !important; }
+}
