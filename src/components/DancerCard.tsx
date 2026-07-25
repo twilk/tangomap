@@ -252,6 +252,10 @@ export function DancerCard(props: DancerCardProps) {
 
   useEffect(() => {
     if (!immersive) return;
+    // Fire-and-forget usage beacon (see /api/ar-open). Never blocks the open.
+    try {
+      navigator.sendBeacon?.('/api/ar-open');
+    } catch {}
     tiltMaxRef.current = MAX_TILT_AR; // stronger tilt while fullscreen
     arCloseRef.current?.focus();
     const prevOverflow = document.body.style.overflow;
@@ -291,6 +295,14 @@ export function DancerCard(props: DancerCardProps) {
       arOpenerRef.current?.focus();
     };
   }, [immersive]);
+
+  // Deep-link: /u/<handle>/card?ar=1 opens the immersive view on load, so an
+  // "open my card in AR" link can be shared and land straight in the mode.
+  useEffect(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get('ar') === '1') setImmersive(true);
+    } catch {}
+  }, []);
 
   const share = async () => {
     const data = { title: `${props.name} — Tango Map`, text: `${props.name}: ${props.count}/62 · ${props.signature}`, url: cardUrl };
