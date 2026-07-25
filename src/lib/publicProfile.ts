@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { profile, progress, progressHistory } from '@/db/schema';
 import { and, eq, isNotNull, lte } from 'drizzle-orm';
 import { normalizeHandle } from '@/src/lib/handle';
+import { parseTheme, type Theme } from '@/src/lib/theme';
 import type { PublicProfile } from '@/src/lib/types';
 
 /**
@@ -35,6 +36,12 @@ export type CardData = PublicProfile & {
   mintedYear: number;
   /** Mastered set from the newest snapshot ≥30 days old, or null when no history reaches back that far. */
   ghostMastered: string[] | null;
+  /** The owner's custom theme to render the card in — ONLY when they opted the card
+   *  in (cardUsesCustomTheme) AND the stored struct re-validates. Null = frozen default. */
+  customTheme: Theme | null;
+  /** Epoch ms of the theme's last write, used to cache-bust the OG image. Null unless
+   *  a customTheme is emitted. */
+  customThemeUpdatedAt: number | null;
 };
 
 /**
@@ -57,6 +64,13 @@ export const getCardData = cache(async (handle: string): Promise<CardData | null
     }),
   ]);
 
+  // Gate on the opt-in AND re-validate the untrusted JSONB through parseTheme
+  // (the trust boundary), so a malformed stored struct can never reach the card.
+  // The clock only exists when a theme actually made it out.
+  const customTheme = row.cardUsesCustomTheme ? parseTheme(row.customTheme) : null;
+  const customThemeUpdatedAt =
+    customTheme && row.customThemeUpdatedAt ? row.customThemeUpdatedAt.getTime() : null;
+
   return {
     handle: row.handle!,
     displayName: row.displayName,
@@ -67,6 +81,8 @@ export const getCardData = cache(async (handle: string): Promise<CardData | null
     serial: row.cardSerial ?? 0,
     mintedYear: row.createdAt.getUTCFullYear(),
     ghostMastered: ghostRow?.mastered ?? null,
+    customTheme,
+    customThemeUpdatedAt,
   };
 });
 
