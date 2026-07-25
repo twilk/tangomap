@@ -4,6 +4,7 @@ import { profile, progress, progressHistory, themePreset } from '@/db/schema';
 import { and, desc, eq, isNotNull, lte } from 'drizzle-orm';
 import { normalizeHandle } from '@/src/lib/handle';
 import { parseTheme, type Theme } from '@/src/lib/theme';
+import { isMissingTable } from '@/src/lib/dbSafe';
 import type { CommunityTheme, PublicProfile } from '@/src/lib/types';
 
 /**
@@ -154,21 +155,30 @@ export async function listPublicProfiles(limit = 60): Promise<PublicProfile[]> {
  * regression that weakens the query. The flags never appear in the returned shape.
  */
 export async function getCommunityThemes(limit = 60): Promise<CommunityTheme[]> {
-  const rows = await db
-    .select({
-      id: themePreset.id,
-      name: themePreset.name,
-      seeds: themePreset.seeds,
-      isShared: themePreset.isShared,
-      isPublic: profile.isPublic,
-      authorHandle: profile.handle,
-      authorDisplayName: profile.displayName,
-    })
-    .from(themePreset)
-    .innerJoin(profile, eq(profile.userId, themePreset.userId))
-    .where(and(eq(themePreset.isShared, true), eq(profile.isPublic, true), isNotNull(profile.handle)))
-    .orderBy(desc(themePreset.updatedAt))
-    .limit(limit);
+  // Deploy-safe: theme_preset ships before migration 0004 runs. While the table is
+  // absent Postgres raises 42P01 — degrade to an empty gallery rather than 500.
+  // Every OTHER error is a real fault and re-throws.
+  let rows;
+  try {
+    rows = await db
+      .select({
+        id: themePreset.id,
+        name: themePreset.name,
+        seeds: themePreset.seeds,
+        isShared: themePreset.isShared,
+        isPublic: profile.isPublic,
+        authorHandle: profile.handle,
+        authorDisplayName: profile.displayName,
+      })
+      .from(themePreset)
+      .innerJoin(profile, eq(profile.userId, themePreset.userId))
+      .where(and(eq(themePreset.isShared, true), eq(profile.isPublic, true), isNotNull(profile.handle)))
+      .orderBy(desc(themePreset.updatedAt))
+      .limit(limit);
+  } catch (err) {
+    if (isMissingTable(err)) return [];
+    throw err;
+  }
 
   return rows.flatMap((r) => {
     // Second line of defense: enforce the gate in JS too, before parsing/shaping.
@@ -196,9 +206,19 @@ export async function getSharedTheme(handle: string): Promise<{
   const prof = await profileRowByHandle(h);
   if (!prof || !prof.isPublic || !prof.handle) return null;
 
-  const row = await db.query.themePreset.findFirst({
-    where: and(eq(themePreset.userId, prof.userId), eq(themePreset.isShared, true)),
-  });
+  // Deploy-safe: theme_preset ships before migration 0004. While the table is absent
+  // Postgres raises 42P01 — this is the query that would otherwise 500 the
+  // server-rendered /u/[handle] page, so degrade to "no shared theme". Real faults
+  // (any other error) still propagate.
+  let row;
+  try {
+    row = await db.query.themePreset.findFirst({
+      where: and(eq(themePreset.userId, prof.userId), eq(themePreset.isShared, true)),
+    });
+  } catch (err) {
+    if (isMissingTable(err)) return null;
+    throw err;
+  }
   if (!row) return null;
 
   const seeds = parseTheme(row.seeds);
