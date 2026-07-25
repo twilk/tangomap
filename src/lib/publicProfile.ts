@@ -116,6 +116,19 @@ export const getCompareTheme = cache(async (handle: string): Promise<Theme | nul
 });
 
 /**
+ * Resolve a mint serial (the L2 AR marker id) back to its public handle. Same
+ * privacy rule as the rest of this module: null for a missing serial or a
+ * private profile, so a scanned marker can never surface a private card.
+ */
+export const getHandleBySerial = cache(async (serial: number): Promise<string | null> => {
+  if (!Number.isInteger(serial) || serial <= 0) return null;
+  const row = await db.query.profile.findFirst({
+    where: and(eq(profile.cardSerial, serial), eq(profile.isPublic, true)),
+  });
+  return row?.handle ?? null;
+});
+
+/**
  * Every public dancer, for the compare directory. Only ever the allow-listed
  * public fields; sorted strongest-first. Private profiles are excluded.
  */
