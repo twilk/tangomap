@@ -212,6 +212,27 @@ describe('presets [id] API', () => {
     expect(conflictArg.set.customThemeUpdatedAt).toBeInstanceOf(Date);
   });
 
+  test('PATCH setActive-ONLY does not bump the preset row (no themePreset update / no updatedAt re-float)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(ownedRow);
+    const res = await (await loadId()).PATCH(patch({ setActive: true }), ctx());
+    expect(res.status).toBe(200);
+    // No preset definition changed → the preset row is NOT rewritten (updatedAt untouched)…
+    expect(mockUpdate).not.toHaveBeenCalled();
+    // …but the profile upsert still applies the active theme.
+    expect(mockInsert).toHaveBeenCalledTimes(1);
+  });
+
+  test('PATCH setActive:true on a preset with corrupt stored seeds returns 422 corrupt_preset (no profile write)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    // Sub-AA seeds: parseTheme(row.seeds) → null at apply time.
+    mockPresetFindFirst.mockResolvedValue({ ...ownedRow, seeds: { v: 1, ground: '#000000', ink: '#010101', accent: '#020202', accent2: '#030303' } });
+    const res = await (await loadId()).PATCH(patch({ setActive: true }), ctx());
+    expect(res.status).toBe(422);
+    expect(await res.json()).toEqual({ error: 'corrupt_preset' });
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+
   test('DELETE 401 unauth (no delete)', async () => {
     mockAuth.mockResolvedValue(null);
     const res = await (await loadId()).DELETE(del(), ctx());

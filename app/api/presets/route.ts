@@ -34,6 +34,8 @@ export async function POST(req: Request) {
   if (!isValidPresetName(body.name)) return Response.json({ error: 'invalid_name' }, { status: 400 });
   const name = sanitizePresetName(body.name as string);
 
+  // TODO: wrap the cap/duplicate check + insert in db.transaction — the read-then-insert
+  // is TOCTOU (a concurrent POST could exceed the cap). Accepted for a single-user app.
   const existing = await db.query.themePreset.findMany({ where: eq(themePreset.userId, userId) });
   const check = canSavePreset(existing.map((e) => e.name), name);
   if (!check.ok) return Response.json({ error: check.reason }, { status: 409 });

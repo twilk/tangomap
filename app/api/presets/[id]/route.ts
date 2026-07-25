@@ -24,7 +24,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
   try { const p = await req.json(); if (!p || typeof p !== 'object' || Array.isArray(p)) throw 0; body = p; }
   catch { return Response.json({ error: 'invalid_body' }, { status: 400 }); }
 
-  const set: Record<string, unknown> = { updatedAt: new Date() };
+  const set: Record<string, unknown> = {};
 
   if (body.name !== undefined) {
     if (!isValidPresetName(body.name)) return Response.json({ error: 'invalid_name' }, { status: 400 });
@@ -37,6 +37,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (body.isShared === true) {
     const prof = await db.query.profile.findFirst({ where: eq(profile.userId, userId) });
     if (!prof?.isPublic || !prof.handle) return Response.json({ error: 'needs_public' }, { status: 409 });
+    // TODO: wrap in db.transaction — the 0-or-1 clear-then-set spans two statements
+    // (sibling-clear here + the main update below). Accepted for a single-user app.
     // 0-or-1 shared per user: clear the others first.
     await db.update(themePreset).set({ isShared: false }).where(and(eq(themePreset.userId, userId), ne(themePreset.id, id)));
     set.isShared = true;
@@ -44,13 +46,22 @@ export async function PATCH(req: Request, { params }: Ctx) {
     set.isShared = false;
   }
 
-  await db.update(themePreset).set(set).where(and(eq(themePreset.id, id), eq(themePreset.userId, userId)));
+  // Only bump the preset row when its DEFINITION actually changed (name/isShared).
+  // A pure {setActive:true} PATCH must NOT touch updatedAt — the Phase 4 gallery sorts
+  // desc(updatedAt), so re-applying your own shared preset must not re-float it.
+  if (Object.keys(set).length > 0) {
+    set.updatedAt = new Date();
+    await db.update(themePreset).set(set).where(and(eq(themePreset.id, id), eq(themePreset.userId, userId)));
+  }
 
   if (body.setActive === true) {
     const seeds = parseTheme(row.seeds);
     if (seeds) {
       await db.insert(profile).values({ userId, customTheme: seeds, customThemeUpdatedAt: new Date() })
         .onConflictDoUpdate({ target: profile.userId, set: { customTheme: seeds, customThemeUpdatedAt: new Date() } });
+    } else {
+      // Stored seeds no longer parse — don't report success while doing nothing.
+      return Response.json({ error: 'corrupt_preset' }, { status: 422 });
     }
   }
   return Response.json({ ok: true });
