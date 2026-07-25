@@ -9,7 +9,7 @@
 // editor. Applying a preset ALSO runs applyCustomTheme locally so the live app
 // re-themes flash-free, and pushCustomTheme mirrors it across devices.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import type { Theme } from '@/src/lib/theme';
 import type { ThemePreset } from '@/src/lib/types';
 import { PRESET_CAP, canSavePreset, presetStyleVars } from '@/src/lib/presets';
@@ -45,10 +45,15 @@ function saveReasonText(reason: 'cap' | 'duplicate' | 'name'): string {
 
 export default function PresetLibrary({ initialActive, isPublic, handle }: Props): React.JSX.Element {
   const [list, setList] = useState<ThemePreset[]>([]);
+  // The active theme drives the "Active" badge. Seeded from initialActive and kept
+  // in sync with it (below), so a theme change from the EDITOR (Apply/Reset moves the
+  // prop) re-points the badge; the library's own Apply also sets it directly so the
+  // badge lands before the parent hears about the change.
   const [activeSeeds, setActiveSeeds] = useState<Theme | null>(initialActive);
 
   // Save-as-preset row.
   const [name, setName] = useState('');
+  const saveHintId = useId();
 
   // Per-row transient UI state (only ever one row at a time).
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -73,6 +78,13 @@ export default function PresetLibrary({ initialActive, isPublic, handle }: Props
     return () => { alive = false; };
   }, []);
 
+  // Follow the active theme when it changes from OUTSIDE the library (the editor's
+  // Apply/Reset move the initialActive prop). The library's own Apply updates
+  // activeSeeds directly without moving the prop, so this never clobbers it.
+  useEffect(() => {
+    setActiveSeeds(initialActive);
+  }, [initialActive]);
+
   const canShare = isPublic && !!handle;
 
   // Save gate: null active → nothing to save; otherwise run the pure cap/name check.
@@ -86,6 +98,7 @@ export default function PresetLibrary({ initialActive, isPublic, handle }: Props
   const saveDisabled = saveHint !== null;
 
   async function onSave(): Promise<void> {
+    setConfirmDeleteId(null);
     if (saveDisabled || !initialActive) return;
     try {
       const res = await fetch('/api/presets', {
@@ -105,6 +118,7 @@ export default function PresetLibrary({ initialActive, isPublic, handle }: Props
   }
 
   async function onApply(p: ThemePreset): Promise<void> {
+    setConfirmDeleteId(null);
     // Local, flash-free apply first so the live app re-themes instantly.
     applyCustomTheme(p.seeds);
     setActiveSeeds(p.seeds);
@@ -121,6 +135,7 @@ export default function PresetLibrary({ initialActive, isPublic, handle }: Props
   }
 
   function startRename(p: ThemePreset): void {
+    setConfirmDeleteId(null);
     setRenamingId(p.id);
     setRenameValue(p.name);
     setRenameError(null);
@@ -152,6 +167,7 @@ export default function PresetLibrary({ initialActive, isPublic, handle }: Props
   }
 
   async function onShare(p: ThemePreset): Promise<void> {
+    setConfirmDeleteId(null);
     // Pre-explain the requirement before the API would 409.
     if (!canShare) {
       setShareHintId(p.id);
@@ -208,12 +224,13 @@ export default function PresetLibrary({ initialActive, isPublic, handle }: Props
           type="button"
           className="tm-save"
           disabled={saveDisabled}
+          aria-describedby={saveHint ? saveHintId : undefined}
           onClick={() => void onSave()}
         >
           Save
         </button>
       </div>
-      {saveHint && <p className="tm-preset-hint" role="status">{saveHint}</p>}
+      {saveHint && <p id={saveHintId} className="tm-preset-hint" role="status">{saveHint}</p>}
 
       {list.length > 0 && (
         <ul className="tm-preset-list">

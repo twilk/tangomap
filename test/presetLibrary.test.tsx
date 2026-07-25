@@ -189,6 +189,55 @@ describe('PresetLibrary', () => {
     expect(rows()[0].textContent).toMatch(/active/i);
   });
 
+  test('the Active badge follows the initialActive prop when the editor changes the theme', async () => {
+    installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/presets') {
+        return { body: [preset('p1', 'Carmesí', A), preset('p2', 'Ocean', B)] };
+      }
+      return {};
+    });
+
+    // A matches p1's seeds → p1 is Active.
+    await render({ initialActive: A, isPublic: true, handle: 'zbig' });
+    expect(rows()[0].textContent).toMatch(/active/i);
+    expect(rows()[1].textContent).not.toMatch(/active/i);
+
+    // The editor applies theme B → the prop moves → the badge must follow to p2.
+    await act(async () => {
+      root.render(<PresetLibrary initialActive={B} isPublic={true} handle="zbig" />);
+    });
+    await act(async () => { await flush(); });
+
+    expect(rows()[0].textContent).not.toMatch(/active/i);
+    expect(rows()[1].textContent).toMatch(/active/i);
+  });
+
+  test('arming Delete then taking another action resets the confirm (two consecutive clicks required)', async () => {
+    const fetchMock = installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/presets') return { body: [preset('p1', 'Carmesí', A)] };
+      if (method === 'PATCH' && url === '/api/presets/p1') return { body: { ok: true } };
+      if (method === 'PUT' && url === '/api/profile') return { body: {} };
+      if (method === 'DELETE' && url === '/api/presets/p1') return { body: { ok: true } };
+      return {};
+    });
+
+    await render({ initialActive: null, isPublic: true, handle: 'zbig' });
+
+    // First Delete click arms the confirm.
+    await act(async () => { buttonIn(rows()[0], 'Delete').click(); await flush(); });
+    expect(buttonIn(rows()[0], 'Confirm')).toBeTruthy();
+
+    // An interposing action (Apply) must clear the armed confirm.
+    await act(async () => { buttonIn(rows()[0], 'Apply').click(); await flush(); });
+    expect(buttonIn(rows()[0], 'Delete')).toBeTruthy();
+
+    // A single Delete click now only re-arms; it must NOT delete the row.
+    await act(async () => { buttonIn(rows()[0], 'Delete').click(); await flush(); });
+    expect(rows()).toHaveLength(1);
+    const deleted = fetchMock.mock.calls.some(([, init]) => (init as RequestInit)?.method === 'DELETE');
+    expect(deleted).toBe(false);
+  });
+
   test('Share on a private profile shows the make-public message and does NOT fetch a PATCH', async () => {
     const fetchMock = installFetch((method, url) => {
       if (method === 'GET' && url === '/api/presets') {
