@@ -1,9 +1,10 @@
 import { cache } from 'react';
 import { db } from '@/db';
-import { profile, progress, progressHistory } from '@/db/schema';
-import { and, eq, isNotNull, lte } from 'drizzle-orm';
+import { profile, progress, progressHistory, themePreset } from '@/db/schema';
+import { and, desc, eq, isNotNull, lte } from 'drizzle-orm';
 import { normalizeHandle } from '@/src/lib/handle';
-import type { PublicProfile } from '@/src/lib/types';
+import { parseTheme, type Theme } from '@/src/lib/theme';
+import type { CommunityTheme, PublicProfile } from '@/src/lib/types';
 
 /**
  * Look up a public profile by handle.
@@ -95,4 +96,61 @@ export async function listPublicProfiles(limit = 60): Promise<PublicProfile[]> {
       mastered: r.mastered ?? [],
     }))
     .sort((a, b) => b.mastered.length - a.mastered.length);
+}
+
+/**
+ * The community gallery read model: every shared preset whose author is public and
+ * has a handle, newest first. Gated three ways at the DB (preset.isShared AND
+ * profile.isPublic AND a non-null handle) and re-validated per row through parseTheme
+ * — a stored seed that no longer clears the legibility floor is dropped, never
+ * returned. Only the allow-listed public fields are selected; no userId, no dates.
+ */
+export async function getCommunityThemes(limit = 60): Promise<CommunityTheme[]> {
+  const rows = await db
+    .select({
+      id: themePreset.id,
+      name: themePreset.name,
+      seeds: themePreset.seeds,
+      authorHandle: profile.handle,
+      authorDisplayName: profile.displayName,
+    })
+    .from(themePreset)
+    .innerJoin(profile, eq(profile.userId, themePreset.userId))
+    .where(and(eq(themePreset.isShared, true), eq(profile.isPublic, true), isNotNull(profile.handle)))
+    .orderBy(desc(themePreset.updatedAt))
+    .limit(limit);
+
+  return rows.flatMap((r) => {
+    const seeds = parseTheme(r.seeds);
+    return seeds && r.authorHandle
+      ? [{ id: r.id, name: r.name, seeds, authorHandle: r.authorHandle, authorDisplayName: r.authorDisplayName }]
+      : [];
+  });
+}
+
+/**
+ * The one theme a single public dancer shares, for the "apply their theme" affordance
+ * on /u/[handle]. Coupled to isPublic: a private profile (or one without a handle, or
+ * with no shared preset, or whose shared seeds no longer validate) returns null. Seeds
+ * pass parseTheme on read — the same trust boundary the gallery uses.
+ */
+export async function getSharedTheme(handle: string): Promise<{
+  name: string;
+  seeds: Theme;
+  authorHandle: string;
+  authorDisplayName: string | null;
+} | null> {
+  const h = normalizeHandle(handle);
+  const prof = await db.query.profile.findFirst({ where: eq(profile.handle, h) });
+  if (!prof || !prof.isPublic || !prof.handle) return null;
+
+  const row = await db.query.themePreset.findFirst({
+    where: and(eq(themePreset.userId, prof.userId), eq(themePreset.isShared, true)),
+  });
+  if (!row) return null;
+
+  const seeds = parseTheme(row.seeds);
+  if (!seeds) return null;
+
+  return { name: row.name, seeds, authorHandle: prof.handle, authorDisplayName: prof.displayName };
 }
