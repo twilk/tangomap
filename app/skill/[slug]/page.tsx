@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import '@/src/styles/knowledge.css';
-import { SKILLS } from '@/src/data/skills';
+import { SKILLS, type Skill } from '@/src/data/skills';
 import { CATEGORIES, iconSvg, catAnchor } from '@/src/lib/dna';
 import { getSkillContent } from '@/src/lib/knowledge';
+import { adjacent, prerequisites, unlocks } from '@/src/lib/skillGraph';
 import { TopNav } from '@/src/components/TopNav';
 import { SkillVideo } from '@/src/components/SkillVideo';
 
@@ -30,6 +31,26 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
   if (!skill) notFound();
   const cat = catOf(skill.tag);
   const c = getSkillContent(slug);
+  const { prev, next } = adjacent(slug);
+  const buildsOn = prerequisites(slug);
+  const leadsTo = unlocks(slug);
+
+  // A related skill as an index-style card (level badge + name + tagline).
+  const card = (s: Skill) => {
+    const cc = getSkillContent(s.slug);
+    return (
+      <li key={s.slug}>
+        <a className="tm-skcard" href={`/skill/${s.slug}`}>
+          <span className="tm-skcard-lvl" aria-label={`Level ${s.level}`}>L{s.level}</span>
+          <span className="tm-skcard-body">
+            <span className="tm-skcard-name">{s.name}</span>
+            {cc?.tagline && <span className="tm-skcard-tag">{cc.tagline}</span>}
+          </span>
+          <span className="tm-skcard-ar" aria-hidden="true">→</span>
+        </a>
+      </li>
+    );
+  };
 
   return (
     <div className="tm-profile">
@@ -101,6 +122,24 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
           <p className="tm-callout">Detailed notes for this skill are coming soon.</p>
         )}
 
+        {(buildsOn.length > 0 || leadsTo.length > 0) && (
+          <section className="tm-sec">
+            <h2 className="tm-sh">Mostly useful with</h2>
+            {buildsOn.length > 0 && (
+              <div className="tm-usefulgrp">
+                <p className="tm-usefulhd">Builds on</p>
+                <ul className="tm-skgrid">{buildsOn.map(card)}</ul>
+              </div>
+            )}
+            {leadsTo.length > 0 && (
+              <div className="tm-usefulgrp">
+                <p className="tm-usefulhd b">Leads to</p>
+                <ul className="tm-skgrid">{leadsTo.map(card)}</ul>
+              </div>
+            )}
+          </section>
+        )}
+
         <div className="tm-skcta">
           <a className="tm-cta ghost" href="/skills">
             <span className="tm-ar" aria-hidden="true">←</span> All skills
@@ -115,6 +154,33 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
             Open the map <span className="tm-ar" aria-hidden="true">→</span>
           </a>
         </div>
+
+        {(prev || next) && (
+          <nav className="tm-skpager" aria-label="Browse skills">
+            {prev ? (
+              <a className="tm-skpager-a" rel="prev" href={`/skill/${prev.slug}`}>
+                <span className="tm-ar" aria-hidden="true">←</span>
+                <span className="tm-skpager-t">
+                  <span className="tm-skpager-k">Previous</span>
+                  <span className="tm-skpager-n">{prev.name}</span>
+                </span>
+              </a>
+            ) : (
+              <span aria-hidden="true" />
+            )}
+            {next ? (
+              <a className="tm-skpager-a next" rel="next" href={`/skill/${next.slug}`}>
+                <span className="tm-skpager-t">
+                  <span className="tm-skpager-k">Next</span>
+                  <span className="tm-skpager-n">{next.name}</span>
+                </span>
+                <span className="tm-ar" aria-hidden="true">→</span>
+              </a>
+            ) : (
+              <span aria-hidden="true" />
+            )}
+          </nav>
+        )}
       </main>
     </div>
   );

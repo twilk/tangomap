@@ -54,3 +54,22 @@
 .tm-vidpart:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
 .tm-skvideo{position:relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; border:1px solid var(--tm-line); background:#000; margin:6px 0 12px}
 .tm-skvideo iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
+
+/* "Mostly useful with" — prerequisites (builds on) + reverse edges (leads to),
+   reusing the /skills index cards (.tm-skgrid/.tm-skcard). */
+.tm-usefulgrp + .tm-usefulgrp{margin-top:18px}
+.tm-usefulhd{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--tm-ember); margin:0 0 10px; font-weight:600}
+.tm-usefulhd.b{color:var(--tm-verd)}
+
+/* Prev/next skill pager (reading order = the /skills index). */
+.tm-skpager{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px}
+.tm-skpager-a{display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px solid var(--tm-line); border-radius:12px; background:var(--tm-panel); text-decoration:none; color:var(--tm-ink); transition:border-color .15s,background .15s; min-width:0}
+.tm-skpager-a:hover{border-color:var(--tm-ember); background:var(--tm-panel2)}
+.tm-skpager-a:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
+.tm-skpager-a.next{justify-content:flex-end; text-align:right}
+.tm-skpager-t{display:flex; flex-direction:column; gap:2px; min-width:0}
+.tm-skpager-k{font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--tm-faint)}
+.tm-skpager-n{font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tm-skpager .tm-ar{color:var(--tm-faint); flex:none}
+.tm-skpager-a:hover .tm-ar{color:var(--tm-ember)}
+@media(max-width:480px){.tm-skpager-n{font-size:13px}}
