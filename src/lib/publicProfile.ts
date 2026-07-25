@@ -83,6 +83,23 @@ export const getCardData = cache(async (handle: string): Promise<CardData | null
 });
 
 /**
+ * The active theme a dancer's compare half renders in: their `profile.customTheme`,
+ * re-validated through `parseTheme` (the trust boundary for stored, untrusted seeds).
+ * Gated only on reachability — `isPublic` — NOT on `cardUsesCustomTheme`: compare is
+ * its own surface, so a public dancer's active theme drives their half regardless of
+ * the card toggle. Returns null for a missing/private profile, or one with no theme /
+ * a stored theme that no longer clears the legibility floor. Routes through the same
+ * cached `profileRowByHandle`, so a compare page needing several getters hits each
+ * profile row once.
+ */
+export const getCompareTheme = cache(async (handle: string): Promise<Theme | null> => {
+  const h = normalizeHandle(handle);
+  const row = await profileRowByHandle(h);
+  if (!row || !row.isPublic) return null;
+  return parseTheme(row.customTheme);
+});
+
+/**
  * Every public dancer, for the compare directory. Only ever the allow-listed
  * public fields; sorted strongest-first. Private profiles are excluded.
  */

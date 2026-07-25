@@ -2,7 +2,9 @@ import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile } from '@/db/schema';
-import { getPublicProfile, listPublicProfiles } from '@/src/lib/publicProfile';
+import { getPublicProfile, getCompareTheme, listPublicProfiles } from '@/src/lib/publicProfile';
+import { reconcileCompare, DEFAULT_THEME } from '@/src/lib/compareTheme';
+import { presetStyleVars } from '@/src/lib/presets';
 import { masteredCount } from '@/src/lib/progress';
 import { perCategoryDetailed, dnaSignature } from '@/src/lib/dna';
 import { DnaRadar } from '@/src/components/DnaRadar';
@@ -42,6 +44,14 @@ export default async function Compare({
   const [pa, pb] = await Promise.all([
     a ? getPublicProfile(a) : Promise.resolve(null),
     b ? getPublicProfile(b) : Promise.resolve(null),
+  ]);
+
+  // Each dancer's compare half renders in their OWN active theme (null = themeless,
+  // which keeps that half byte-identical to the frozen default). Routes through the
+  // same cached profile row getPublicProfile already loaded above.
+  const [themeA, themeB] = await Promise.all([
+    a ? getCompareTheme(a) : Promise.resolve(null),
+    b ? getCompareTheme(b) : Promise.resolve(null),
   ]);
 
   const missing = [
@@ -102,12 +112,29 @@ export default async function Compare({
         {pa && pb && (() => {
           const A = { name: nameOf(pa), cats: perCategoryDetailed(pa.mastered) };
           const B = { name: nameOf(pb), cats: perCategoryDetailed(pb.mastered) };
+          // Frozen default: with two themeless dancers no reconciliation runs and the
+          // radar renders exactly as before. As soon as one side is themed, reconcile
+          // the two blob strokes + seam so the halves stay mutually legible; a themed
+          // half also scopes its own --tm-* palette, a themeless half keeps the page's.
+          const anyThemed = !!(themeA || themeB);
+          const P = anyThemed ? reconcileCompare(themeA ?? DEFAULT_THEME, themeB ?? DEFAULT_THEME) : null;
+          const radar = (
+            <DnaCompareRadar
+              a={A}
+              b={B}
+              aBlob={themeA && P ? P.aBlob : undefined}
+              bBlob={themeB && P ? P.bBlob : undefined}
+              seam={P ? P.seam : undefined}
+              aStyle={themeA ? (presetStyleVars(themeA) as React.CSSProperties) : undefined}
+              bStyle={themeB ? (presetStyleVars(themeB) as React.CSSProperties) : undefined}
+            />
+          );
           return (
             <>
               {verdict}
               <ViewSwitcher
                 views={[
-                  { id: 'radar', label: 'Radar', node: <DnaCompareRadar a={A} b={B} /> },
+                  { id: 'radar', label: 'Radar', node: radar },
                   { id: 'genome', label: 'Genome', node: <DnaGenome series={[A, B]} /> },
                   { id: 'bars', label: 'Strengths', node: <DnaBars series={[A, B]} /> },
                 ]}

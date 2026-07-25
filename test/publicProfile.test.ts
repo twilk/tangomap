@@ -189,6 +189,45 @@ describe('getCommunityThemes', () => {
   });
 });
 
+describe('getCompareTheme', () => {
+  test('unknown handle → null', async () => {
+    profileFindFirst.mockResolvedValue(undefined);
+    const { getCompareTheme } = await load();
+    expect(await getCompareTheme('cmp-nobody')).toBeNull();
+  });
+
+  test('private profile → null (compare theme gated on reachability)', async () => {
+    profileFindFirst.mockResolvedValue({ userId: 'u1', handle: 'cmp-priv', isPublic: false, customTheme: THEME });
+    const { getCompareTheme } = await load();
+    expect(await getCompareTheme('cmp-priv')).toBeNull();
+  });
+
+  test('public profile with a valid customTheme → the parsed (canonical) seeds', async () => {
+    profileFindFirst.mockResolvedValue({
+      userId: 'u1',
+      handle: 'cmp-ana',
+      isPublic: true,
+      // NOT gated on cardUsesCustomTheme — compare is its own surface.
+      cardUsesCustomTheme: false,
+      customTheme: THEME,
+    });
+    const { getCompareTheme } = await load();
+    expect(await getCompareTheme('  CMP-ANA  ')).toEqual(THEME);
+  });
+
+  test('public profile with no customTheme → null', async () => {
+    profileFindFirst.mockResolvedValue({ userId: 'u1', handle: 'cmp-plain', isPublic: true, customTheme: null });
+    const { getCompareTheme } = await load();
+    expect(await getCompareTheme('cmp-plain')).toBeNull();
+  });
+
+  test('a malformed stored customTheme → null (re-validated through parseTheme)', async () => {
+    profileFindFirst.mockResolvedValue({ userId: 'u1', handle: 'cmp-bad', isPublic: true, customTheme: BAD_THEME });
+    const { getCompareTheme } = await load();
+    expect(await getCompareTheme('cmp-bad')).toBeNull();
+  });
+});
+
 describe('getSharedTheme', () => {
   test('private profile → null (no preset lookup)', async () => {
     profileFindFirst.mockResolvedValue({ userId: 'u1', handle: 'priv', isPublic: false, displayName: null });
