@@ -121,4 +121,70 @@ describe('PUT /api/progress', () => {
     expect((await res.json()).theme).toBe('custom');
     expect(mockValues.mock.calls[0][0].theme).toBe('custom');
   });
+
+  // Last-write-wins: a device whose local state is older than what the server holds
+  // must NOT be able to overwrite it. This is the guard against the cross-device
+  // clobber where a stale/second device wiped a fresh device's progress.
+  test('LWW: rejects a stale write and returns the stored row WITHOUT writing', async () => {
+    mockedAuth.mockResolvedValue({ user: { id: 'u1' } } as never);
+    mockFindFirst.mockResolvedValue({
+      mastered: ['mirada-cabeceo', 'posture', 'walking'],
+      theme: 'dark',
+      sel: null,
+      updatedAt: new Date('2026-06-01T00:00:00.000Z'), // server is newer
+    });
+    const req = new Request('http://test/api/progress', {
+      method: 'PUT',
+      body: JSON.stringify({ mastered: ['walking'], theme: 'light', sel: null, updatedAt: '2026-01-01T00:00:00.000Z' }),
+    });
+    const { PUT } = await loadRoute();
+    const res = await PUT(req);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    // authoritative stored state is returned, not the stale client set
+    expect(body.mastered).toEqual(['mirada-cabeceo', 'posture', 'walking']);
+    expect(body.theme).toBe('dark');
+    expect(body.updatedAt).toBe('2026-06-01T00:00:00.000Z');
+    // and crucially: nothing was written — no clobber
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+
+  test('LWW: accepts a write newer than stored, stamped with the client clock', async () => {
+    mockedAuth.mockResolvedValue({ user: { id: 'u1' } } as never);
+    mockFindFirst.mockResolvedValue({
+      mastered: ['walking'],
+      theme: 'light',
+      sel: null,
+      updatedAt: new Date('2026-01-01T00:00:00.000Z'), // server is older
+    });
+    const req = new Request('http://test/api/progress', {
+      method: 'PUT',
+      body: JSON.stringify({ mastered: ['mirada-cabeceo', 'posture'], theme: 'dark', sel: null, updatedAt: '2026-06-01T00:00:00.000Z' }),
+    });
+    const { PUT } = await loadRoute();
+    const res = await PUT(req);
+    const body = await res.json();
+    expect(body.mastered).toEqual(['mirada-cabeceo', 'posture']);
+    expect(body.updatedAt).toBe('2026-06-01T00:00:00.000Z'); // stamped with the client clock, not now
+    expect(mockInsert).toHaveBeenCalled();
+    expect((mockValues.mock.calls[0][0].updatedAt as Date).toISOString()).toBe('2026-06-01T00:00:00.000Z');
+  });
+
+  test('LWW: a tie (equal timestamps) is accepted — the client wins ties', async () => {
+    mockedAuth.mockResolvedValue({ user: { id: 'u1' } } as never);
+    mockFindFirst.mockResolvedValue({
+      mastered: ['walking'],
+      theme: 'light',
+      sel: null,
+      updatedAt: new Date('2026-03-01T00:00:00.000Z'),
+    });
+    const req = new Request('http://test/api/progress', {
+      method: 'PUT',
+      body: JSON.stringify({ mastered: ['posture'], theme: 'dark', sel: null, updatedAt: '2026-03-01T00:00:00.000Z' }),
+    });
+    const { PUT } = await loadRoute();
+    const res = await PUT(req);
+    expect((await res.json()).mastered).toEqual(['posture']);
+    expect(mockInsert).toHaveBeenCalled();
+  });
 });
