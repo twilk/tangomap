@@ -4,6 +4,8 @@ import {
   customPolarity,
   applyCustomTheme,
   clearCustomTheme,
+  cacheCustomTheme,
+  customUpdatedAt,
   cycleMode,
   hasCustomTheme,
   readMode,
@@ -176,4 +178,63 @@ test('currentCustomTheme round-trips the stored struct and is null when absent',
   expect(currentCustomTheme()).toEqual(LIGHT_THEME);
   clearCustomTheme();
   expect(currentCustomTheme()).toBeNull();
+});
+
+// --- sync clock: tsm-custom-updated ------------------------------------------
+
+test('applyCustomTheme writes the sync clock; customUpdatedAt reads it back', () => {
+  expect(customUpdatedAt()).toBe(0); // nothing recorded yet
+  applyCustomTheme(LIGHT_THEME, 1000);
+  expect(localStorage.getItem('tsm-custom-updated')).toBe('1000');
+  expect(customUpdatedAt()).toBe(1000);
+});
+
+test('applyCustomTheme defaults the clock to now when no timestamp is given', () => {
+  const before = Date.now();
+  applyCustomTheme(LIGHT_THEME);
+  expect(customUpdatedAt()).toBeGreaterThanOrEqual(before);
+});
+
+test('clearCustomTheme records WHEN it was cleared and does NOT remove the clock', () => {
+  applyCustomTheme(LIGHT_THEME, 1000);
+  clearCustomTheme(2000);
+  // struct/css/polarity gone, but the clock survives (records the clear time)
+  for (const k of CUSTOM_KEYS) expect(localStorage.getItem(k)).toBeNull();
+  expect(localStorage.getItem('tsm-custom-updated')).toBe('2000');
+  expect(customUpdatedAt()).toBe(2000);
+});
+
+// --- cacheCustomTheme --------------------------------------------------------
+
+test('cacheCustomTheme writes the cache + clock WITHOUT switching data-theme to custom', () => {
+  setMode('light'); // not in custom mode
+  const ok = cacheCustomTheme(LIGHT_THEME, 5000);
+  expect(ok).toBe(true);
+  // the cache is populated…
+  expect(localStorage.getItem('tsm-custom-css')).toContain('--tm-ground:#ffffff');
+  expect(JSON.parse(localStorage.getItem('tsm-custom')!)).toEqual(LIGHT_THEME);
+  expect(customUpdatedAt()).toBe(5000);
+  // …but the user was NOT switched into custom mode
+  expect(readMode()).toBe('light');
+  expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  // and since we're not viewing custom, no live <style> is injected
+  expect(styleEl()).toBeNull();
+});
+
+test('cacheCustomTheme refreshes the live <style> when already in custom mode', () => {
+  applyCustomTheme(DARK_THEME, 1000); // in custom mode, dark palette live
+  expect(readMode()).toBe('custom');
+  const ok = cacheCustomTheme(LIGHT_THEME, 6000);
+  expect(ok).toBe(true);
+  // still custom (never toggled), but the live style now reflects the new palette
+  expect(readMode()).toBe('custom');
+  expect(styleEl()!.textContent).toContain('--tm-ground:#ffffff');
+  expect(customUpdatedAt()).toBe(6000);
+});
+
+test('cacheCustomTheme returns false and writes nothing for an illegible theme', () => {
+  cacheCustomTheme(ILLEGIBLE, 7000);
+  expect(cacheCustomTheme(ILLEGIBLE, 7000)).toBe(false);
+  for (const k of CUSTOM_KEYS) expect(localStorage.getItem(k)).toBeNull();
+  expect(customUpdatedAt()).toBe(0);
 });
