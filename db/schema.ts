@@ -1,5 +1,5 @@
 import {
-  pgTable, text, timestamp, primaryKey, integer, boolean, jsonb,
+  pgTable, text, timestamp, primaryKey, integer, boolean, jsonb, index,
 } from 'drizzle-orm/pg-core';
 import type { Theme } from '../src/lib/theme';
 
@@ -77,3 +77,17 @@ export const profile = pgTable('profile', {
   // Last write to customTheme — the clock for last-write-wins cross-device sync.
   customThemeUpdatedAt: timestamp('customThemeUpdatedAt', { mode: 'date' }),
 });
+
+// A user's saved theme presets (library, ≤5 enforced in the API). The ACTIVE
+// theme still lives in profile.customTheme; a preset is a named, reusable set of
+// seeds. At most one preset per user may be `isShared` (community gallery),
+// enforced in the API. Applying a preset copies its seeds into profile.customTheme.
+export const themePreset = pgTable('theme_preset', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  seeds: jsonb('seeds').$type<Theme>().notNull(),
+  isShared: boolean('isShared').notNull().default(false),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+}, (t) => ({ byUser: index('theme_preset_userId_idx').on(t.userId) }));
