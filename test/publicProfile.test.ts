@@ -133,8 +133,8 @@ describe('getCommunityThemes', () => {
   test('shapes valid rows and drops a malformed-seed one (re-validated through parseTheme)', async () => {
     dbSelect.mockReturnValue(
       selectResolving([
-        { id: 'p1', name: 'Carmesí', seeds: THEME, authorHandle: 'ana', authorDisplayName: 'Ana' },
-        { id: 'p2', name: 'Rotten', seeds: BAD_THEME, authorHandle: 'bob', authorDisplayName: null },
+        { id: 'p1', name: 'Carmesí', seeds: THEME, isShared: true, isPublic: true, authorHandle: 'ana', authorDisplayName: 'Ana' },
+        { id: 'p2', name: 'Rotten', seeds: BAD_THEME, isShared: true, isPublic: true, authorHandle: 'bob', authorDisplayName: null },
       ]),
     );
     const { getCommunityThemes } = await load();
@@ -149,12 +149,34 @@ describe('getCommunityThemes', () => {
       authorHandle: 'ana',
       authorDisplayName: 'Ana',
     });
+    // The privacy flags are NOT leaked into the DTO.
+    expect(list[0]).not.toHaveProperty('isShared');
+    expect(list[0]).not.toHaveProperty('isPublic');
     expect(dbSelect).toHaveBeenCalledTimes(1);
+  });
+
+  test('JS gate (defense-in-depth): from a MIXED set only shared+public+handle rows survive', async () => {
+    dbSelect.mockReturnValue(
+      selectResolving([
+        // the one that should survive
+        { id: 'ok', name: 'Keeper', seeds: THEME, isShared: true, isPublic: true, authorHandle: 'ana', authorDisplayName: 'Ana' },
+        // shared but author PRIVATE — a regression dropping eq(profile.isPublic,true) must still not leak this
+        { id: 'priv', name: 'Private author', seeds: THEME, isShared: true, isPublic: false, authorHandle: 'bob', authorDisplayName: 'Bob' },
+        // NON-shared but public — a regression dropping eq(themePreset.isShared,true) must still not leak this
+        { id: 'unshared', name: 'Not shared', seeds: THEME, isShared: false, isPublic: true, authorHandle: 'cid', authorDisplayName: 'Cid' },
+        // null handle
+        { id: 'nohandle', name: 'No handle', seeds: THEME, isShared: true, isPublic: true, authorHandle: null, authorDisplayName: null },
+      ]),
+    );
+    const { getCommunityThemes } = await load();
+    const list = await getCommunityThemes();
+
+    expect(list.map((t) => t.id)).toEqual(['ok']);
   });
 
   test('drops a row whose author handle is null (defensive) and honours the limit arg', async () => {
     dbSelect.mockReturnValue(
-      selectResolving([{ id: 'p1', name: 'X', seeds: THEME, authorHandle: null, authorDisplayName: null }]),
+      selectResolving([{ id: 'p1', name: 'X', seeds: THEME, isShared: true, isPublic: true, authorHandle: null, authorDisplayName: null }]),
     );
     const { getCommunityThemes } = await load();
     expect(await getCommunityThemes(10)).toEqual([]);

@@ -7,6 +7,17 @@ import { parseTheme, type Theme } from '@/src/lib/theme';
 import type { CommunityTheme, PublicProfile } from '@/src/lib/types';
 
 /**
+ * The raw profile row for an ALREADY-normalized handle, loaded at most once per
+ * request (React `cache`). getPublicProfile and getSharedTheme both route through
+ * this with the same normalized key, so a /u/[handle] view that needs both hits the
+ * profile row a single time instead of twice. Callers must normalize first so the
+ * cache key is shared.
+ */
+const profileRowByHandle = cache((normalizedHandle: string) =>
+  db.query.profile.findFirst({ where: eq(profile.handle, normalizedHandle) }),
+);
+
+/**
  * Look up a public profile by handle.
  * Returns null when no profile matches the (normalized) handle or the profile
  * is not public. Never exposes private fields (dates, `sel`, isPublic, userId).
@@ -14,7 +25,7 @@ import type { CommunityTheme, PublicProfile } from '@/src/lib/types';
  */
 export const getPublicProfile = cache(async (handle: string): Promise<PublicProfile | null> => {
   const h = normalizeHandle(handle);
-  const row = await db.query.profile.findFirst({ where: eq(profile.handle, h) });
+  const row = await profileRowByHandle(h);
   if (!row || !row.isPublic) return null;
 
   const progressRow = await db.query.progress.findFirst({
@@ -103,7 +114,12 @@ export async function listPublicProfiles(limit = 60): Promise<PublicProfile[]> {
  * has a handle, newest first. Gated three ways at the DB (preset.isShared AND
  * profile.isPublic AND a non-null handle) and re-validated per row through parseTheme
  * — a stored seed that no longer clears the legibility floor is dropped, never
- * returned. Only the allow-listed public fields are selected; no userId, no dates.
+ * returned. Only the allow-listed public fields leave in the DTO; no userId, no dates.
+ *
+ * The privacy flags (isShared, isPublic) are also SELECTed and re-checked in JS below
+ * — defense in depth. The SQL WHERE is the primary gate, but it's invisible to a
+ * mocked-`db.select` unit test; the JS gate makes the invariant testable and survives a
+ * regression that weakens the query. The flags never appear in the returned shape.
  */
 export async function getCommunityThemes(limit = 60): Promise<CommunityTheme[]> {
   const rows = await db
@@ -111,6 +127,8 @@ export async function getCommunityThemes(limit = 60): Promise<CommunityTheme[]> 
       id: themePreset.id,
       name: themePreset.name,
       seeds: themePreset.seeds,
+      isShared: themePreset.isShared,
+      isPublic: profile.isPublic,
       authorHandle: profile.handle,
       authorDisplayName: profile.displayName,
     })
@@ -121,8 +139,10 @@ export async function getCommunityThemes(limit = 60): Promise<CommunityTheme[]> 
     .limit(limit);
 
   return rows.flatMap((r) => {
+    // Second line of defense: enforce the gate in JS too, before parsing/shaping.
+    if (!r.isShared || !r.isPublic || !r.authorHandle) return [];
     const seeds = parseTheme(r.seeds);
-    return seeds && r.authorHandle
+    return seeds
       ? [{ id: r.id, name: r.name, seeds, authorHandle: r.authorHandle, authorDisplayName: r.authorDisplayName }]
       : [];
   });
@@ -141,7 +161,7 @@ export async function getSharedTheme(handle: string): Promise<{
   authorDisplayName: string | null;
 } | null> {
   const h = normalizeHandle(handle);
-  const prof = await db.query.profile.findFirst({ where: eq(profile.handle, h) });
+  const prof = await profileRowByHandle(h);
   if (!prof || !prof.isPublic || !prof.handle) return null;
 
   const row = await db.query.themePreset.findFirst({

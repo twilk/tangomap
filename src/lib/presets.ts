@@ -1,4 +1,4 @@
-import { parseTheme, deriveTokens, type Theme } from '@/src/lib/theme';
+import { deriveTokens, type Theme } from '@/src/lib/theme';
 import { cssVar } from '@/design/tokens';
 
 export const PRESET_CAP = 5;
@@ -34,6 +34,3 @@ export function presetStyleVars(theme: Theme): Record<string, string> {
   for (const k of Object.keys(t) as (keyof typeof t)[]) out[cssVar(k)] = t[k];
   return out;
 }
-
-/** Server-side trust boundary re-export for the API layer. */
-export { parseTheme };
