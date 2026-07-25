@@ -3,8 +3,8 @@ import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile } from '@/db/schema';
-import type { ProfileDTO, Style } from '@/src/lib/types';
-import SettingsForm from './SettingsForm';
+import type { Style } from '@/src/lib/types';
+import SettingsForm, { type ProfileFields } from './SettingsForm';
 import ThemeEditor from './ThemeEditor';
 import { DeleteAccount } from '@/src/components/DeleteAccount';
 import { TopNav } from '@/src/components/TopNav';
@@ -24,7 +24,7 @@ export default async function SettingsPage() {
 
   const prof = await db.query.profile.findFirst({ where: eq(profile.userId, uid) });
 
-  const initial: ProfileDTO = {
+  const initial: ProfileFields = {
     handle: prof?.handle ?? null,
     isPublic: prof?.isPublic ?? false,
     displayName: prof?.displayName ?? null,

@@ -1,8 +1,7 @@
 import React, { act } from 'react';
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
-import SettingsForm from '@/app/settings/SettingsForm';
-import type { ProfileDTO } from '@/src/lib/types';
+import SettingsForm, { type ProfileFields } from '@/app/settings/SettingsForm';
 
 // React 19's act() checks this flag; without it, act() logs a warning.
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -10,7 +9,7 @@ import type { ProfileDTO } from '@/src/lib/types';
 let container: HTMLDivElement;
 let root: Root;
 
-const baseInitial: ProfileDTO = {
+const baseInitial: ProfileFields = {
   handle: null,
   isPublic: false,
   displayName: null,
@@ -31,7 +30,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function render(initial: ProfileDTO): Promise<void> {
+async function render(initial: ProfileFields): Promise<void> {
   await act(async () => {
     root.render(<SettingsForm initial={initial} />);
   });
@@ -99,6 +98,12 @@ describe('SettingsForm', () => {
     expect(opts.method).toBe('PUT');
     const body = JSON.parse(opts.body as string);
     expect(body.handle).toBe('newhandle');
+    // Regression: the identity form must NOT PUT theme keys, or a stale page-load
+    // snapshot would clobber a just-applied, synced custom theme (customTheme:null
+    // + customThemeUpdatedAt:null -> new Date(null) = 1970 wins last-write-wins).
+    expect(body).not.toHaveProperty('customTheme');
+    expect(body).not.toHaveProperty('customThemeUpdatedAt');
+    expect(Object.keys(body).sort()).toEqual(['displayName', 'handle', 'isPublic', 'style']);
   });
 
   test('shows an inline "taken" error when the API responds 409', async () => {

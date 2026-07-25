@@ -1,4 +1,6 @@
-export type Theme = 'light' | 'dark';
+import type { Theme as CustomThemeStruct } from '@/src/lib/theme';
+
+export type Theme = 'light' | 'dark' | 'custom';
 export type Style = 'salon' | 'milonguero' | 'nuevo';
 
 export type Progress = {
@@ -14,6 +16,10 @@ export type ProfileDTO = {
   isPublic: boolean;
   displayName: string | null;
   style: Style | null;
+  customTheme: CustomThemeStruct | null;
+  cardUsesCustomTheme: boolean;
+  themeShared: boolean;
+  customThemeUpdatedAt: string | null; // ISO, or null
 };
 export type ProfileInput = Partial<ProfileDTO>;
 
