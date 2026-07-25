@@ -2,20 +2,26 @@ import { describe, test, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { MAP_NODES } from '@/src/data/mapNodes';
+import { SKILLS } from '@/src/data/skills';
 
 /**
- * Parity lock for the three places tango skill data lives.
+ * Parity lock for the places tango skill data lives.
  *
+ *   (0) src/data/mapNodes.ts   — THE AUTHORITY. The typed source of truth the
+ *                                app and (eventually) the map both read from.
  *   (a) public/tango-data.js   — the ES-module fallback the bundle `import()`s
  *                                when window.__TANGO_DATA is absent.
  *   (b) public/tangomap.html   — the generated SPA bundle; its inline script sets
  *                                window.__TANGO_DATA = { LEVELS, TAGS, NODES }.
- *   (c) src/data/skills.ts     — the Next app's own SKILLS list (1-indexed levels).
+ *   (c) src/data/skills.ts     — the app's SKILLS list, a 1-indexed projection of
+ *                                mapNodes.ts.
  *
- * Everything is read from disk at test time and parsed textually on purpose:
- * the bundle payload is a JSON-encoded HTML document, and tango-data.js is only
- * ever loaded by the browser. If a regeneration of any one source drifts, this
- * fails loudly instead of shipping a map that disagrees with the app.
+ * The two generated artifacts (a, b) are read from disk and parsed textually on
+ * purpose — the bundle payload is a JSON-encoded HTML document and tango-data.js
+ * is only ever loaded by the browser. mapNodes.ts and skills.ts are imported at
+ * runtime (they are the app's real modules). If any source drifts, this fails
+ * loudly instead of shipping a map that disagrees with the app.
  */
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -25,8 +31,7 @@ const EXPECTED_COUNT = 62;
 /** Level offset: skills.ts is 1-indexed, the map data is 0-indexed. */
 const LEVEL_OFFSET = 1;
 
-type MapNode = { id: string; name: string; level: number; tag: string; deps: string[] };
-type SkillEntry = { slug: string; name: string; level: number; tag: string; deps: string[] };
+type MapNodeLite = { id: string; name: string; level: number; tag: string; deps: string[] };
 
 /** Pull the quoted slugs out of a `deps:[…]` body (single- or double-quoted). */
 const slugsIn = (body: string | undefined): string[] =>
@@ -40,7 +45,7 @@ function readRepoFile(relPath: string): string {
  * Parse `{ id:'x', name:'X', level:0, tag:'TAG', ... }` object literals
  * (single quotes, unquoted keys) from the region after the `NODES = [` marker.
  */
-function parseNodes(source: string, label: string): MapNode[] {
+function parseNodes(source: string, label: string): MapNodeLite[] {
   const marker = /\bNODES\s*=\s*\[/.exec(source);
   if (!marker) throw new Error(`${label}: no "NODES = [" marker found`);
 
@@ -48,7 +53,7 @@ function parseNodes(source: string, label: string): MapNode[] {
   const re =
     /\{\s*id:\s*'([^']+)'\s*,\s*name:\s*'([^']*)'\s*,\s*level:\s*(\d+)\s*,\s*tag:\s*'([^']+)'(?:\s*,\s*deps:\s*\[([^\]]*)\])?/g;
 
-  const nodes: MapNode[] = [];
+  const nodes: MapNodeLite[] = [];
   let m: RegExpExecArray | null;
   while ((m = re.exec(region)) !== null) {
     nodes.push({ id: m[1], name: m[2], level: Number(m[3]), tag: m[4], deps: slugsIn(m[5]) });
@@ -75,43 +80,53 @@ function decodeBundleTemplate(html: string): string {
   return decoded;
 }
 
-/** Parse `{ slug: "x", name: "X", level: 1, tag: "TAG" }` entries from skills.ts. */
-function parseSkills(source: string): SkillEntry[] {
-  const re =
-    /\{\s*slug:\s*"([^"]+)"\s*,\s*name:\s*"([^"]*)"\s*,\s*level:\s*(\d+)\s*,\s*tag:\s*"([^"]+)"(?:\s*,\s*deps:\s*\[([^\]]*)\])?\s*\}/g;
-
-  const skills: SkillEntry[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(source)) !== null) {
-    skills.push({ slug: m[1], name: m[2], level: Number(m[3]), tag: m[4], deps: slugsIn(m[5]) });
-  }
-  return skills;
-}
-
+/** The authority (mapNodes.ts), reduced to the five parity-locked fields. */
+const authorityNodes: MapNodeLite[] = MAP_NODES.map((n) => ({
+  id: n.id,
+  name: n.name,
+  level: n.level,
+  tag: n.tag,
+  deps: n.deps,
+}));
 const dataFileNodes = parseNodes(readRepoFile('public/tango-data.js'), 'public/tango-data.js');
 const bundleNodes = parseNodes(
   decodeBundleTemplate(readRepoFile('public/tangomap.html')),
   'public/tangomap.html (inline bundle)',
 );
-const skills = parseSkills(readRepoFile('src/data/skills.ts'));
 
-const byId = (nodes: MapNode[]) => new Map(nodes.map((n) => [n.id, n]));
+const byId = (nodes: MapNodeLite[]) => new Map(nodes.map((n) => [n.id, n]));
 
 describe('map data parity', () => {
-  test('all three sources have exactly 62 entries', () => {
+  test('all sources have exactly 62 entries', () => {
+    expect(authorityNodes.length, 'src/data/mapNodes.ts MAP_NODES').toBe(EXPECTED_COUNT);
     expect(dataFileNodes.length, 'public/tango-data.js NODES').toBe(EXPECTED_COUNT);
     expect(bundleNodes.length, 'tangomap.html inline NODES').toBe(EXPECTED_COUNT);
-    expect(skills.length, 'src/data/skills.ts SKILLS').toBe(EXPECTED_COUNT);
+    expect(SKILLS.length, 'src/data/skills.ts SKILLS').toBe(EXPECTED_COUNT);
   });
 
   test('ids are unique within each source', () => {
+    expect(new Set(authorityNodes.map((n) => n.id)).size, 'mapNodes.ts ids').toBe(authorityNodes.length);
     expect(new Set(dataFileNodes.map((n) => n.id)).size, 'public/tango-data.js ids').toBe(
       dataFileNodes.length,
     );
     expect(new Set(bundleNodes.map((n) => n.id)).size, 'tangomap.html inline ids').toBe(
       bundleNodes.length,
     );
-    expect(new Set(skills.map((s) => s.slug)).size, 'src/data/skills.ts slugs').toBe(skills.length);
+    expect(new Set(SKILLS.map((s) => s.slug)).size, 'src/data/skills.ts slugs').toBe(SKILLS.length);
+  });
+
+  test('mapNodes.ts (the authority) matches public/tango-data.js exactly', () => {
+    expect(
+      authorityNodes.map((n) => n.id),
+      'id order/content differs between src/data/mapNodes.ts and public/tango-data.js',
+    ).toEqual(dataFileNodes.map((n) => n.id));
+
+    const fileById = byId(dataFileNodes);
+    for (const node of authorityNodes) {
+      const fileNode = fileById.get(node.id);
+      expect(fileNode, `"${node.id}" is in mapNodes.ts but missing from public/tango-data.js`).toBeDefined();
+      expect(fileNode, `"${node.id}" differs between mapNodes.ts and public/tango-data.js`).toEqual(node);
+    }
   });
 
   test('public/tango-data.js NODES match the bundle inline NODES exactly', () => {
@@ -132,7 +147,7 @@ describe('map data parity', () => {
 
   test('bundle node ids and skills.ts slugs are the same set', () => {
     const bundleIds = new Set(bundleNodes.map((n) => n.id));
-    const skillSlugs = new Set(skills.map((s) => s.slug));
+    const skillSlugs = new Set(SKILLS.map((s) => s.slug));
 
     const missingFromSkills = [...bundleIds].filter((id) => !skillSlugs.has(id));
     const extraInSkills = [...skillSlugs].filter((slug) => !bundleIds.has(slug));
@@ -145,7 +160,7 @@ describe('map data parity', () => {
 
   test('per-id name and tag match between the map data and skills.ts', () => {
     const nodes = byId(bundleNodes);
-    for (const skill of skills) {
+    for (const skill of SKILLS) {
       const node = nodes.get(skill.slug);
       expect(node, `"${skill.slug}" has no matching map node`).toBeDefined();
       if (!node) continue;
@@ -160,8 +175,8 @@ describe('map data parity', () => {
     // Every skills.ts dep set equals the map node's, and every dep points at a
     // real skill — so the graph the "builds on / leads to" UI walks can't drift
     // from the map, and can't reference a slug that doesn't exist.
-    const slugs = new Set(skills.map((s) => s.slug));
-    for (const skill of skills) {
+    const slugs = new Set(SKILLS.map((s) => s.slug));
+    for (const skill of SKILLS) {
       const node = nodes.get(skill.slug);
       if (!node) continue;
       expect([...skill.deps].sort(), `deps drift for "${skill.slug}"`).toEqual([...node.deps].sort());
@@ -172,7 +187,7 @@ describe('map data parity', () => {
 
   test(`skills.ts level === map data level + ${LEVEL_OFFSET} for every id`, () => {
     const nodes = byId(bundleNodes);
-    for (const skill of skills) {
+    for (const skill of SKILLS) {
       const node = nodes.get(skill.slug);
       expect(node, `"${skill.slug}" has no matching map node`).toBeDefined();
       if (!node) continue;
