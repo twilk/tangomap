@@ -108,4 +108,17 @@ describe('PUT /api/progress', () => {
     // snapshot rows carry a YYYY-MM-DD day key
     expect((mockValues.mock.calls[1][0] as unknown as { day: string }).day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
+
+  test("accepts and persists theme:'custom' (does not null it)", async () => {
+    mockedAuth.mockResolvedValue({ user: { id: 'u1' } } as never);
+    const { PUT } = await loadRoute();
+    const req = new Request('http://test/api/progress', {
+      method: 'PUT',
+      body: JSON.stringify({ mastered: [], theme: 'custom', sel: null }),
+    });
+    const res = await PUT(req);
+    expect(res.status).toBe(200);
+    expect((await res.json()).theme).toBe('custom');
+    expect(mockValues.mock.calls[0][0].theme).toBe('custom');
+  });
 });
