@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-// First-visit welcome modal — a native React port of public/onboarding.js. Shows once,
-// gated by localStorage['tsm-onboarded'] (the exact key the bundle used, so a visitor
-// who already dismissed the injected version is not shown it again). Dismissing (button,
+// First-visit welcome modal — a native React port of the bundle's first-visit overlay.
+// Shows once, gated by localStorage['tsm-onboarded'] (the exact key the bundle used, so a
+// visitor who already dismissed the injected version is not shown it again). Dismissing (button,
 // backdrop, or Escape) sets the flag. Focus moves to the primary action on open, Tab is
 // trapped inside the dialog, and Escape closes — the standard modal a11y contract.
 

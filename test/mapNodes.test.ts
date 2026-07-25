@@ -3,8 +3,7 @@ import { MAP_NODES, LEVELS, TAGS, type MapNode } from '@/src/data/mapNodes';
 import { SKILLS } from '@/src/data/skills';
 
 // src/data/mapNodes.ts is the authoritative map data. These tests guard its
-// internal integrity and the SKILLS projection derived from it. Parity with the
-// legacy public/tango-data.js and the bundle lives in test/mapData.test.ts.
+// internal integrity and the SKILLS projection derived from it.
 
 describe('mapNodes data integrity', () => {
   test('exactly 62 nodes with unique ids', () => {

@@ -2,8 +2,8 @@
 // Strategy: network-first for same-origin GETs, fall back to cache when offline.
 // Never serves stale content while online, and never touches /api (auth/session
 // /progress must always hit the network). Bump CACHE to invalidate old entries.
-const CACHE = 'tangomap-v1';
-const CORE = ['/', '/tangomap.html'];
+const CACHE = 'tangomap-v2';
+const CORE = ['/'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 // The "Next up" home card — fills the idle Skill Details panel when nothing is
-// selected. A native React port of public/map-home.js: instead of a MutationObserver
+// selected. A native React port of the bundle's home card: instead of a MutationObserver
 // appending to the aside, this renders inside the panel's empty slot. Data comes from
 // GET /api/next ({ signedIn, mastered, total, next:[{name,slug,level,reason}] }); the
 // fetch is guarded, so a pending or errored request falls back to the phase-3 hint

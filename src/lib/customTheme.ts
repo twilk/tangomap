@@ -15,8 +15,8 @@ import { parseHex, relativeLuminance } from '@/src/lib/color';
  *  once a custom theme has been configured (see hasCustomTheme). */
 export type Mode = 'light' | 'dark' | 'custom';
 
-/** localStorage keys — the shared contract with the no-flash script in app/layout.tsx
- *  and public/theme-sync.js. Do not rename without updating both. */
+/** localStorage keys — the shared contract with the no-flash script in app/layout.tsx.
+ *  Do not rename without updating it too. */
 const KEY_THEME = 'tsm-theme';
 const KEY_CUSTOM = 'tsm-custom';
 const KEY_CSS = 'tsm-custom-css';

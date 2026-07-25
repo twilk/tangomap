@@ -33,9 +33,9 @@ const pageMargin = (w: number) => Math.max(12, Math.min(22, w * 0.018));
 // 0 there, so without this every pill would wrap onto its own row.
 const FALLBACK_WIDTH = 1024;
 
-// localStorage contract, shared with the bundle + public/sync.js (which reconciles
-// `tsm-mastered` across devices). `tsm-mastered` is a JSON string array of node ids;
-// `tsm-sel` is the raw selected node id.
+// localStorage contract, shared with MapSync (which reconciles `tsm-mastered` across
+// devices). `tsm-mastered` is a JSON string array of node ids; `tsm-sel` is the raw
+// selected node id.
 const MASTERED_KEY = 'tsm-mastered';
 const SEL_KEY = 'tsm-sel';
 
@@ -88,13 +88,13 @@ export function TangoMap() {
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [isDesktop, setIsDesktop] = useState(true);
 
-  // Category navigator (public/map-categories.js): pinned = the persistent filter,
+  // Category navigator (MapCategoryNav): pinned = the persistent filter,
   // catHover = the transient hover preview. The pinned category always wins, matching
   // the bundle (hovering another row while one is pinned does nothing).
   const [catPinned, setCatPinned] = useState<string | null>(null);
   const [catHover, setCatHover] = useState<string | null>(null);
 
-  // Slugs the viewer may see a lesson video for (public/map-skilllink.js). Empty until
+  // Slugs the viewer may see a lesson video for (the SkillDetailPanel badges). Empty until
   // /api/teacher-videos resolves, and stays empty for non-teachers or on error.
   const [videoSlugs, setVideoSlugs] = useState<Set<string>>(() => new Set());
 
@@ -442,7 +442,7 @@ export function TangoMap() {
         </div>
       )}
 
-      {/* First-visit welcome (public/onboarding.js), self-gated on localStorage. */}
+      {/* First-visit welcome (MapOnboarding), self-gated on localStorage. */}
       <MapOnboarding />
     </div>
   );

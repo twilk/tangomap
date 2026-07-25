@@ -11,10 +11,9 @@ import { MapHomeCard } from '@/src/components/MapHomeCard';
 // in TangoMap; this renders it and calls back.
 //
 // This phase also re-hosts three injected enhancements natively: the idle-panel home
-// card (public/map-home.js, via MapHomeCard when nothing is selected), the "Read the
-// guide →" link + teacher video badge (public/map-skilllink.js — slug === node id, so
-// no /api/skill-index round-trip is needed), and the dialog focus-on-open a11y from the
-// template's inline glue.
+// card (via MapHomeCard when nothing is selected), the "Read the guide →" link +
+// teacher video badge (slug === node id, so no /api/skill-index round-trip is needed),
+// and the dialog focus-on-open a11y from the template's inline glue.
 
 // role code -> the badge label shown when a skill is role-typical.
 const ROLE_LABEL: Record<'L' | 'F', string> = { L: 'Leader', F: 'Follower' };
@@ -115,7 +114,7 @@ export function SkillDetailPanel({ node, levels, mastered, videoSlugs, onSelect,
         )}
         <p className="tsm-panel-desc">{node.desc}</p>
 
-        {/* Skill-guide link + teacher video badge (public/map-skilllink.js). */}
+        {/* Skill-guide link + teacher video badge. */}
         <div className="tsm-guide">
           <a className="tsm-guide-link" href={`/skill/${node.id}`}>
             Read the guide <span aria-hidden="true">→</span>

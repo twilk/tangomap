@@ -2,7 +2,7 @@
 
 import { CATEGORIES, iconSvg, catAnchor } from '@/src/lib/dna';
 
-// The "Browse by category" navigator — a native React port of public/map-categories.js.
+// The "Browse by category" navigator — a native React port of the bundle's category rail.
 // It lists the 13 Tango DNA categories (the authoritative CATEGORIES from src/lib/dna.ts,
 // NOT a hand-copied list). Hovering a row previews its member nodes on the map; clicking
 // pins it (dims everything else); the parent owns that state. Each row also links to the

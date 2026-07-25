@@ -1,8 +1,8 @@
 // The authoritative Tango Skill Map data — 62 nodes across 10 levels, built from
 // the Partyka course programs (01 Beginners, 02 Intermediate, 03 Advanced,
 // 04 Intermediate 2026). This module is the single source of truth for the map:
-// public/tango-data.js (the legacy browser-global copy) and src/data/skills.ts
-// (the app's SKILLS projection) mirror it, and test/mapData.test.ts locks parity.
+// src/data/skills.ts (the app's SKILLS projection) mirrors it, and
+// test/mapNodes.test.ts locks its integrity.
 //
 // role: 'L' leader-typical, 'F' follower-typical, omitted = both roles.
 // taught: where the skill appears in the actual course programs.
