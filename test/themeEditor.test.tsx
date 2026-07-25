@@ -122,6 +122,30 @@ describe('ThemeEditor', () => {
     expect(document.documentElement.getAttribute('data-theme')).not.toBe('custom');
   });
 
+  test('the card toggle PUTs /api/profile with ONLY cardUsesCustomTheme', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      status: 200,
+      json: async () => ({ cardUsesCustomTheme: false }),
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    await render();
+
+    const toggle = q<HTMLInputElement>('[aria-label="cardUsesCustomTheme"]');
+    await act(async () => {
+      toggle.click(); // flips false → true and fires React onChange
+    });
+
+    // The mount GET is a bare fetch; the toggle write is the PUT — isolate it.
+    const putCall = fetchMock.mock.calls.find(([, opts]) => (opts as RequestInit | undefined)?.method === 'PUT');
+    expect(putCall).toBeTruthy();
+    const body = JSON.parse((putCall![1] as RequestInit).body as string);
+    // ONLY the flag — never the theme itself (disjoint-writer discipline).
+    expect(body).toEqual({ cardUsesCustomTheme: true });
+    expect(body).not.toHaveProperty('customTheme');
+    expect(body).not.toHaveProperty('customThemeUpdatedAt');
+  });
+
   test('prefills the seeds from an already-stored custom theme', async () => {
     localStorage.setItem(
       'tsm-custom',

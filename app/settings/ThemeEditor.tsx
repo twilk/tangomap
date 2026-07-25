@@ -49,6 +49,9 @@ export default function ThemeEditor(): React.JSX.Element {
   // Effect-backed so SSR/first render never diverge from the server markup:
   // false on the server and on first client paint, then set once mounted.
   const [hasCustom, setHasCustom] = useState(false);
+  // "Use my theme on my card" — optimistic local state (off), hydrated from the
+  // server on mount. Persisted on its own, never bundled with the theme write.
+  const [cardUsesTheme, setCardUsesTheme] = useState(false);
 
   useEffect(() => {
     const t = currentCustomTheme();
@@ -56,6 +59,26 @@ export default function ThemeEditor(): React.JSX.Element {
       setSeeds({ ground: t.ground, ink: t.ink, accent: t.accent, accent2: t.accent2 });
     }
     if (t !== null || readMode() === 'custom') setHasCustom(true);
+  }, []);
+
+  // Hydrate the card toggle from the profile (best-effort; signed-out/offline/
+  // no-fetch all just keep the optimistic "off"). The try/catch also absorbs a
+  // synchronous throw when fetch is unavailable.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const r = await fetch('/api/profile');
+        if (r.status !== 200) return;
+        const dto = await r.json();
+        if (alive && dto) setCardUsesTheme(dto.cardUsesCustomTheme === true);
+      } catch {
+        /* signed-out / offline / no fetch — leave the optimistic default */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   // Derived fresh each render — the single source of truth for validity + feedback.
@@ -109,6 +132,21 @@ export default function ThemeEditor(): React.JSX.Element {
       setHasCustom(true);
       // Mirror to the server so the theme follows the user across devices.
       void pushCustomTheme();
+    }
+  }
+
+  function onToggleCard(next: boolean): void {
+    setCardUsesTheme(next); // optimistic
+    // ONLY this flag — never customTheme — so a card toggle can't clobber a
+    // just-applied, synced theme (the disjoint-writer trap ThemeEditor + sync own).
+    try {
+      void fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ cardUsesCustomTheme: next }),
+      }).catch(() => {});
+    } catch {
+      /* no fetch available — the optimistic state still reflects the choice */
     }
   }
 
@@ -209,6 +247,24 @@ export default function ThemeEditor(): React.JSX.Element {
           </p>
         )}
       </div>
+
+      <label className="tm-toggle">
+        <input
+          type="checkbox"
+          name="cardUsesCustomTheme"
+          aria-label="cardUsesCustomTheme"
+          checked={cardUsesTheme}
+          onChange={(e) => onToggleCard(e.target.checked)}
+        />
+        <span className="tm-sw2" aria-hidden="true" />
+        <span className="tm-tx">
+          <span className="a">
+            Use my theme on my card —{' '}
+            {cardUsesTheme ? <span className="on-txt">On</span> : <span className="off-txt">Off</span>}
+          </span>
+          <span className="b">Your dancer card and its share image render in your custom colours. Off keeps the classic dark card.</span>
+        </span>
+      </label>
 
       {hasCustom && (
         <div className="tm-reset-row">

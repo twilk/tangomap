@@ -10,6 +10,7 @@ import { dnaSignature, perCategory } from '@/src/lib/dna';
 import { recommend } from '@/src/lib/recommend';
 import { furthestTier, TIER_NAME } from '@/src/lib/levels';
 import { DancerCard } from '@/src/components/DancerCard';
+import { cardPaletteFor } from '@/src/lib/cardTheme';
 import { TopNav } from '@/src/components/TopNav';
 
 // Same rule as /u/[handle]: live DB read so a profile flipped to private
@@ -23,7 +24,16 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
   const name = data.displayName ?? data.handle;
   const title = `${name}'s dancer card — Tango Map`;
   const description = `${masteredCount(data.mastered)}/62 mastered · ${dnaSignature(data.mastered)} · Nº ${String(data.serial).padStart(4, '0')}.`;
-  return { title, description, openGraph: { title, description }, twitter: { card: 'summary_large_image', title, description } };
+  // Cache-bust the OG image on the theme's clock so external caches (Slack, iMessage,
+  // Twitter) refetch when the owner re-themes their card. Satori ignores unknown params.
+  const ogUrl = `/u/${encodeURIComponent(handle)}/card/opengraph-image?v=${data.customThemeUpdatedAt ?? 0}`;
+  const images = [{ url: ogUrl, width: 1200, height: 630 }];
+  return {
+    title,
+    description,
+    openGraph: { title, description, images },
+    twitter: { card: 'summary_large_image', title, description, images },
+  };
 }
 
 export default async function Page({ params }: { params: Promise<{ handle: string }> }) {
@@ -57,6 +67,7 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
       <main className="tm-wrap">
         <TopNav back={`/u/${encodeURIComponent(data.handle)}`} />
         <DancerCard
+          palette={cardPaletteFor(data.customTheme)}
           name={name}
           handle={data.handle}
           style={data.style}

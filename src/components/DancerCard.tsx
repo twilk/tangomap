@@ -1,9 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { smoothPathD, type Pt } from '@/src/lib/radarPath';
 import { CATEGORIES, iconSvg } from '@/src/lib/dna';
 import { ArPlaceCard } from './ArPlaceCard';
+import { FROZEN_CARD, type CardPalette } from '@/src/lib/cardTheme';
+import { parseHex, rgba, type RGB } from '@/src/lib/color';
 
 // qrcode is only needed after an explicit user action (badge / story export),
 // so it stays out of the card's initial bundle.
@@ -38,6 +40,9 @@ export type DancerCardProps = {
   ghostDna: { label: string; pct: number }[] | null;
   /** Top "what's next" recommendations, shown on the card back. */
   recs: CardRec[];
+  /** The palette the card paints in. Optional so existing callers/tests keep the
+   *  exact frozen look; the card page passes cardPaletteFor(customTheme). */
+  palette?: CardPalette;
 };
 
 // Radar geometry (viewBox units). The blob uses the app radar's soft tension
@@ -47,17 +52,20 @@ const R = 76;
 // Category icons ring the radar just outside the outer grid ring, so each spike
 // is legible as a category — the same 13 icons the app's DNA radar shows.
 const ICON_R = 90;
-// The dark value of the app's --tm-muted, so the card's axis icons read as the
-// same treatment as the /me radar and genome icons (and match the card's own
-// muted text). The card is dark in both themes, so this stays a fixed literal.
-const AXICON = '#9E907E';
 // The card's `dna` arrives in CATEGORIES order, but match by label so the icon
 // can never end up on the wrong spike if that ever changes.
 const ICON_BY_LABEL: Record<string, string> = Object.fromEntries(CATEGORIES.map((c) => [c.label, c.icon]));
 // Icon as a colour-baked data URL for the canvas story export (canvas can't read
-// currentColor). Mirrors the app DNA radar's approach.
-const axIconUrl = (inner: string) =>
-  'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(inner, 24).replace(/currentColor/g, AXICON));
+// currentColor). The axis icons take the palette's muted tone — the same treatment
+// as the /me radar and genome icons (frozen: the app's dark --tm-muted #9E907E).
+const axIconUrl = (inner: string, color: string) =>
+  'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg(inner, 24).replace(/currentColor/g, color));
+
+// QR polarity is intentionally theme-independent: both the badge and the story
+// export always render dark modules on a light field (the frozen gradMid/ink
+// pair) — a light custom theme would otherwise invert them into an unscannable
+// light-on-dark code. Shared so the two QRs can never diverge.
+export const QR_COLORS = { dark: FROZEN_CARD.gradMid, light: FROZEN_CARD.ink };
 
 function radarPoints(dna: { pct: number }[], r = R): Pt[] {
   const N = dna.length;
@@ -83,6 +91,43 @@ const pad4 = (n: number) => String(n).padStart(4, '0');
  * story-image export, and a full-screen QR badge mode for milongas.
  */
 export function DancerCard(props: DancerCardProps) {
+  // The palette the card paints in. Default = the frozen set, so a card with no
+  // custom theme renders byte-identical to before. `frozen` lets the alpha values
+  // that don't round-trip through rgba() (ink is #F2EADC = 242,234,220 but the old
+  // hairlines used 241,233,220) fall back to the exact old literal strings.
+  const palette = props.palette ?? FROZEN_CARD;
+  const frozen = palette === FROZEN_CARD;
+  // Parses memoised on `palette` so downloadStory's useCallback deps stay stable
+  // (fresh objects each render would defeat its memo).
+  const inkRGB: RGB = useMemo(() => parseHex(palette.ink) ?? { r: 242, g: 234, b: 220 }, [palette]);
+  const accentRGB: RGB = useMemo(() => parseHex(palette.ember) ?? { r: 229, g: 140, b: 68 }, [palette]);
+  const carmRGB: RGB = useMemo(() => parseHex(palette.carmine) ?? { r: 230, g: 65, b: 92 }, [palette]);
+  const verdRGB: RGB = useMemo(() => parseHex(palette.verd) ?? { r: 97, g: 171, b: 149 }, [palette]);
+  // Radar strokes: rings come straight from the palette; spoke/ghost/star are
+  // composed from the same ink/carmine — but frozen keeps the exact old literals.
+  const spokeStroke = frozen ? 'rgba(241,233,220,.05)' : rgba(inkRGB, 0.05);
+  const ghostStroke = frozen ? 'rgba(241,233,220,.30)' : rgba(inkRGB, 0.30);
+  const starSoft = frozen ? 'rgba(230,65,92,.22)' : rgba(carmRGB, 0.22);
+  // The --tm-card-* overrides the .tm-card* CSS reads (fallbacks there equal these
+  // frozen values, so an unset var and a frozen var render the same pixel). The
+  // glow/mono/verd entries theme the card's decorative tints; frozen keeps the
+  // exact old literals.
+  const cardVars: Record<string, string> = {
+    '--tm-card-ink': palette.ink,
+    '--tm-card-muted': palette.muted,
+    '--tm-card-faint': palette.faint,
+    '--tm-card-ember': palette.ember,
+    '--tm-card-carmine': palette.carmine,
+    '--tm-card-grad-from': palette.gradFrom,
+    '--tm-card-grad-mid': palette.gradMid,
+    '--tm-card-ember-14': frozen ? 'rgba(229,140,68,.14)' : rgba(accentRGB, 0.14),
+    '--tm-card-ember-55': frozen ? 'rgba(229,140,68,.55)' : rgba(accentRGB, 0.55),
+    '--tm-card-line': frozen ? 'rgba(241,233,220,.11)' : rgba(inkRGB, 0.11),
+    '--tm-card-glow-ember': frozen ? 'rgba(229,140,68,.16)' : rgba(accentRGB, 0.16),
+    '--tm-card-glow-verd': frozen ? 'rgba(97,171,149,.13)' : rgba(verdRGB, 0.13),
+    '--tm-card-mono': frozen ? 'rgba(229,140,68,.07)' : rgba(accentRGB, 0.07),
+  };
+
   const wrapRef = useRef<HTMLDivElement>(null);
   const [flipped, setFlipped] = useState(false);
   const [badge, setBadge] = useState(false);
@@ -204,7 +249,7 @@ export function DancerCard(props: DancerCardProps) {
   useEffect(() => {
     if (!badge || qr) return;
     loadQR()
-      .then((QRCode) => QRCode.toDataURL(profileUrl, { width: 480, margin: 4, color: { dark: '#110D09', light: '#F2EADC' } }))
+      .then((QRCode) => QRCode.toDataURL(profileUrl, { width: 480, margin: 4, color: QR_COLORS }))
       .then(setQr)
       .catch(() => {});
   }, [badge, qr, profileUrl]);
@@ -335,19 +380,19 @@ export function DancerCard(props: DancerCardProps) {
     if (!ctx) return;
 
     const bg = ctx.createLinearGradient(0, 0, W * 0.4, H);
-    bg.addColorStop(0, '#221B14');
-    bg.addColorStop(0.6, '#110D09');
-    bg.addColorStop(1, '#0c0906');
+    bg.addColorStop(0, palette.gradFrom);
+    bg.addColorStop(0.6, palette.gradMid);
+    bg.addColorStop(1, palette.gradTo);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
     const halo = ctx.createRadialGradient(W / 2, 700, 60, W / 2, 700, 520);
-    halo.addColorStop(0, 'rgba(229,140,68,.30)');
-    halo.addColorStop(1, 'rgba(229,140,68,0)');
+    halo.addColorStop(0, palette.emberSoft);
+    halo.addColorStop(1, frozen ? 'rgba(229,140,68,0)' : rgba(accentRGB, 0));
     ctx.fillStyle = halo;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = '#9E907E';
+    ctx.fillStyle = palette.muted;
     ctx.font = '600 34px ui-monospace, Menlo, monospace';
     ctx.textAlign = 'center';
     ctx.fillText('T A N G O   M A P', W / 2, 170);
@@ -360,17 +405,17 @@ export function DancerCard(props: DancerCardProps) {
     for (let k = 1; k <= 4; k++) {
       ctx.beginPath();
       ctx.arc(W / 2, 700, R * scale * (k / 4), 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(241,233,220,.09)';
+      ctx.strokeStyle = palette.ring;
       ctx.lineWidth = 2;
       ctx.stroke();
     }
     const blob = new Path2D(smoothPathD(pts, 0.9));
     const fill = ctx.createRadialGradient(W / 2, 640, 40, W / 2, 700, 340);
-    fill.addColorStop(0, 'rgba(229,140,68,.5)');
-    fill.addColorStop(1, 'rgba(230,65,92,.14)');
+    fill.addColorStop(0, frozen ? 'rgba(229,140,68,.5)' : rgba(accentRGB, 0.5));
+    fill.addColorStop(1, frozen ? 'rgba(230,65,92,.14)' : rgba(carmRGB, 0.14));
     ctx.fillStyle = fill;
     ctx.fill(blob);
-    ctx.strokeStyle = '#E58C44';
+    ctx.strokeStyle = palette.ember;
     ctx.lineWidth = 5;
     ctx.lineJoin = 'round';
     ctx.stroke(blob);
@@ -388,7 +433,7 @@ export function DancerCard(props: DancerCardProps) {
             const im = new Image();
             im.onload = () => res(im);
             im.onerror = () => res(null);
-            im.src = axIconUrl(inner);
+            im.src = axIconUrl(inner, palette.muted);
           }),
       ),
     );
@@ -398,10 +443,10 @@ export function DancerCard(props: DancerCardProps) {
       ctx.drawImage(im, ox + v.x * scale - iconPx / 2, oy + v.y * scale - iconPx / 2, iconPx, iconPx);
     });
 
-    ctx.fillStyle = '#F2EADC';
+    ctx.fillStyle = palette.ink;
     ctx.font = '600 130px ui-monospace, Menlo, monospace';
     ctx.fillText(String(props.count), W / 2, 745);
-    ctx.fillStyle = '#9E907E';
+    ctx.fillStyle = palette.muted;
     ctx.font = '400 40px ui-monospace, Menlo, monospace';
     ctx.fillText('/ 62', W / 2, 800);
 
@@ -414,16 +459,16 @@ export function DancerCard(props: DancerCardProps) {
       return `${t.trimEnd()}…`;
     };
     const SAFE_W = W - 120;
-    ctx.fillStyle = '#F2EADC';
+    ctx.fillStyle = palette.ink;
     ctx.font = '600 96px Iowan Old Style, Georgia, serif';
     ctx.fillText(fit(props.name, SAFE_W), W / 2, 1210);
-    ctx.fillStyle = '#9E907E';
+    ctx.fillStyle = palette.muted;
     ctx.font = '400 40px ui-monospace, Menlo, monospace';
     ctx.fillText(fit(`@${props.handle}${props.style ? ` · ${props.style}` : ''}`, SAFE_W), W / 2, 1280);
     ctx.font = 'italic 46px Iowan Old Style, Georgia, serif';
     ctx.fillText(fit(props.signature, SAFE_W), W / 2, 1370);
     if (props.milestonesDone > 0) {
-      ctx.fillStyle = '#E58C44';
+      ctx.fillStyle = palette.ember;
       ctx.font = '400 44px serif';
       ctx.fillText('✦ '.repeat(props.milestonesDone).trim(), W / 2, 1445);
     }
@@ -432,7 +477,8 @@ export function DancerCard(props: DancerCardProps) {
       // Standard dark-on-light with a real quiet zone — inverted QR codes fail
       // in many scanner apps, which defeats the whole point of a story image.
       const QRCode = await loadQR();
-      const qrData = await QRCode.toDataURL(profileUrl, { width: 300, margin: 4, color: { dark: '#110D09', light: '#F2EADC' } });
+      // Fixed dark-on-light QR (see QR_COLORS) — theme-independent for scannability.
+      const qrData = await QRCode.toDataURL(profileUrl, { width: 300, margin: 4, color: QR_COLORS });
       const img = new Image();
       await new Promise<void>((res, rej) => {
         img.onload = () => res();
@@ -440,11 +486,11 @@ export function DancerCard(props: DancerCardProps) {
         img.src = qrData;
       });
       ctx.drawImage(img, W / 2 - 90, 1560, 180, 180);
-      ctx.fillStyle = '#6C5F50';
+      ctx.fillStyle = palette.faint;
       ctx.font = '400 30px ui-monospace, Menlo, monospace';
       ctx.fillText(profileUrl.replace(/^https?:\/\//, ''), W / 2, 1795);
     } catch {}
-    ctx.fillStyle = '#6C5F50';
+    ctx.fillStyle = palette.faint;
     ctx.font = '400 28px ui-monospace, Menlo, monospace';
     ctx.fillText(`Nº ${pad4(props.serial)} · ${props.mintedYear}`, W / 2, 1855);
 
@@ -456,7 +502,7 @@ export function DancerCard(props: DancerCardProps) {
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     }, 'image/png');
-  }, [props, profileUrl]);
+  }, [props, profileUrl, palette, frozen, accentRGB, carmRGB]);
 
   const N = props.dna.length;
   const blobD = smoothPathD(radarPoints(props.dna), 0.9);
@@ -467,7 +513,7 @@ export function DancerCard(props: DancerCardProps) {
   const tierClass = props.tier ? ` t-${props.tier}` : '';
 
   return (
-    <div className="tm-cardstage">
+    <div className="tm-cardstage" style={cardVars as React.CSSProperties}>
       {/* Full text twin of the visual card for screen readers (the pieces below are decorative). */}
       <p className="tm-sr">
         {props.name} (@{props.handle}){props.style ? `, style ${props.style}` : ''} — Tango Map dancer card
@@ -498,27 +544,27 @@ export function DancerCard(props: DancerCardProps) {
               <svg viewBox="0 0 200 200">
                 <defs>
                   <radialGradient id="tmCardBlob" cx="50%" cy="42%" r="65%">
-                    <stop offset="0%" stopColor="#E58C44" stopOpacity=".55" />
-                    <stop offset="72%" stopColor="#E58C44" stopOpacity=".22" />
-                    <stop offset="100%" stopColor="#E6415C" stopOpacity=".14" />
+                    <stop offset="0%" stopColor={palette.ember} stopOpacity=".55" />
+                    <stop offset="72%" stopColor={palette.ember} stopOpacity=".22" />
+                    <stop offset="100%" stopColor={palette.carmine} stopOpacity=".14" />
                   </radialGradient>
                 </defs>
                 {[0.25, 0.5, 0.75, 1].map((k) => (
-                  <circle key={k} cx={C} cy={C} r={R * k} fill="none" stroke="rgba(241,233,220,.09)" strokeWidth="1" />
+                  <circle key={k} cx={C} cy={C} r={R * k} fill="none" stroke={palette.ring} strokeWidth="1" />
                 ))}
                 {spokes.map((p, i) => (
-                  <line key={i} x1={C} y1={C} x2={p.x} y2={p.y} stroke="rgba(241,233,220,.05)" strokeWidth="1" />
+                  <line key={i} x1={C} y1={C} x2={p.x} y2={p.y} stroke={spokeStroke} strokeWidth="1" />
                 ))}
                 {ghostD && (
-                  <path className="tm-card-ghost" d={ghostD} fill="none" stroke="rgba(241,233,220,.30)" strokeWidth="1.2" strokeDasharray="3 3" strokeLinejoin="round" />
+                  <path className="tm-card-ghost" d={ghostD} fill="none" stroke={ghostStroke} strokeWidth="1.2" strokeDasharray="3 3" strokeLinejoin="round" />
                 )}
-                <path className="tm-card-blob" d={blobD} pathLength={1} fill="url(#tmCardBlob)" stroke="#E58C44" strokeWidth="1.6" strokeLinejoin="round" />
+                <path className="tm-card-blob" d={blobD} pathLength={1} fill="url(#tmCardBlob)" stroke={palette.ember} strokeWidth="1.6" strokeLinejoin="round" />
                 {stars.map(
                   (p, i) =>
                     p && (
                       <g key={i} className="tm-card-star" style={{ ['--d' as string]: `${i * 0.35}s` }}>
-                        <circle cx={p.x} cy={p.y} r="5.5" fill="rgba(230,65,92,.22)" />
-                        <circle cx={p.x} cy={p.y} r="2.1" fill="#E6415C" />
+                        <circle cx={p.x} cy={p.y} r="5.5" fill={starSoft} />
+                        <circle cx={p.x} cy={p.y} r="2.1" fill={palette.carmine} />
                       </g>
                     ),
                 )}
@@ -531,7 +577,7 @@ export function DancerCard(props: DancerCardProps) {
                     <g
                       key={`ax-${i}`}
                       transform={`translate(${p.x - s / 2} ${p.y - s / 2})`}
-                      style={{ color: AXICON }}
+                      style={{ color: palette.muted }}
                       dangerouslySetInnerHTML={{ __html: iconSvg(inner, s) }}
                     />
                   );
