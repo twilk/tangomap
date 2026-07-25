@@ -70,7 +70,10 @@ export type ComparePalettes = {
   /** B's blob stroke: B's accent (or its 2nd accent if it clashed with A's),
    *  made legible on the shared ground AND ≥ COMPARE_MIN apart from aBlob. */
   bBlob: string;
-  /** Divider that reads on BOTH grounds. */
+  /** Divider colour, nudged toward the best legibility available against both
+   *  grounds. Best-effort, not a hard guarantee: when both grounds sit at mid
+   *  luminance no single colour clears COMPARE_MIN on both, so the seam takes the
+   *  highest-min-contrast value `ensureAgainst` can find. */
   seam: string;
 };
 
@@ -109,8 +112,50 @@ export function reconcileCompare(a: Theme, b: Theme): ComparePalettes {
     bBlob = ensureAgainst(bBase, [aBlobRGB], COMPARE_MIN);
   }
 
-  // The seam divides the two halves, so it must read on either ground.
+  // The seam divides the two halves, so it aims to read on either ground — best
+  // legibility available (see `ensureAgainst`), not a hard guarantee.
   const seam = ensureAgainst(parseHex(ta.ink)!, [groundA, groundB], COMPARE_MIN);
 
   return { a: ta, b: tb, aBlob, bBlob, seam };
+}
+
+/**
+ * The per-half compare-view decisions, resolved from each dancer's active theme
+ * (null = themeless). Pure so the page stays declarative and this logic is testable.
+ *
+ * Frozen default: two themeless dancers → every field is `undefined`, so each
+ * consumer keeps its current `--tm-*` literal and the page renders byte-identical.
+ *
+ * One-sided or two-sided: `reconcileCompare` runs (the themeless side stands in as
+ * `DEFAULT_THEME`), and BOTH reconciled blob strokes are returned so they're applied
+ * to BOTH halves — even a themeless half's blob shifts just enough to stay
+ * ≥ COMPARE_MIN from the other (the frozen literal alone could land too close). Only
+ * a THEMED half gets its own `--tm-*` palette scoped (`aTokens`/`bTokens`); a
+ * themeless half keeps the page palette (so it never repaints under the page's own
+ * light/dark ground).
+ */
+export type CompareHalves = {
+  /** Reconciled A blob stroke, or undefined when both dancers are themeless. */
+  aBlob?: string;
+  /** Reconciled B blob stroke, or undefined when both dancers are themeless. */
+  bBlob?: string;
+  /** Reconciled seam, or undefined when both dancers are themeless. */
+  seam?: string;
+  /** A's own derived palette to scope onto its half — only when A is themed. */
+  aTokens?: DerivedTokens;
+  /** B's own derived palette to scope onto its half — only when B is themed. */
+  bTokens?: DerivedTokens;
+};
+
+export function compareHalves(themeA: Theme | null, themeB: Theme | null): CompareHalves {
+  // Frozen default: nothing themed → no overrides at all.
+  if (!themeA && !themeB) return {};
+  const P = reconcileCompare(themeA ?? DEFAULT_THEME, themeB ?? DEFAULT_THEME);
+  return {
+    aBlob: P.aBlob,
+    bBlob: P.bBlob,
+    seam: P.seam,
+    aTokens: themeA ? P.a : undefined,
+    bTokens: themeB ? P.b : undefined,
+  };
 }

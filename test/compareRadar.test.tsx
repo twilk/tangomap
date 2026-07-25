@@ -2,6 +2,8 @@ import React, { act } from 'react';
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import { DnaCompareRadar } from '@/src/components/DnaCompareRadar';
+import { DnaGenome } from '@/src/components/DnaGenome';
+import { DnaBars } from '@/src/components/DnaBars';
 import type { CategoryDetail } from '@/src/lib/dna';
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -102,5 +104,35 @@ describe('DnaCompareRadar per-half theming', () => {
     const keys = [...container.querySelectorAll<HTMLElement>('.tm-key')];
     expect(keys[0].style.getPropertyValue('--tm-ground')).toBe('#123456');
     expect(keys[1].style.getPropertyValue('--tm-ground')).toBe('#654321');
+  });
+});
+
+describe('DnaGenome / DnaBars per-half theming (Genome + Strengths tabs)', () => {
+  async function renderNode(node: React.ReactElement) {
+    await act(async () => root.render(node));
+  }
+
+  test('Genome FROZEN default: no colour props → no inline style (byte-identical)', async () => {
+    await renderNode(<DnaGenome series={[A, B]} />);
+    expect(container.querySelector('.tm-genome')?.getAttribute('style')).toBeNull();
+  });
+
+  test('Genome THEMED: aColor/bColor override the two series accents at the root', async () => {
+    await renderNode(<DnaGenome series={[A, B]} aColor="rgb(17, 34, 51)" bColor="rgb(200, 120, 40)" />);
+    const el = container.querySelector<HTMLElement>('.tm-genome')!;
+    expect(el.style.getPropertyValue('--tm-ember')).toBe('rgb(17, 34, 51)');
+    expect(el.style.getPropertyValue('--tm-verd')).toBe('rgb(200, 120, 40)');
+  });
+
+  test('Strengths FROZEN default: no colour props → no inline style (byte-identical)', async () => {
+    await renderNode(<DnaBars series={[A, B]} />);
+    expect(container.querySelector('.tm-dbars')?.getAttribute('style')).toBeNull();
+  });
+
+  test('Strengths THEMED: aColor/bColor override the two series accents at the root', async () => {
+    await renderNode(<DnaBars series={[A, B]} aColor="rgb(17, 34, 51)" bColor="rgb(200, 120, 40)" />);
+    const el = container.querySelector<HTMLElement>('.tm-dbars')!;
+    expect(el.style.getPropertyValue('--tm-ember')).toBe('rgb(17, 34, 51)');
+    expect(el.style.getPropertyValue('--tm-verd')).toBe('rgb(200, 120, 40)');
   });
 });

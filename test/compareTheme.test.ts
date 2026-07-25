@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { reconcileCompare, COMPARE_MIN, DEFAULT_THEME } from '@/src/lib/compareTheme';
+import { reconcileCompare, compareHalves, COMPARE_MIN, DEFAULT_THEME } from '@/src/lib/compareTheme';
 import { parseHex, contrastRatio, mix } from '@/src/lib/color';
 import { deriveTokens, type Theme } from '@/src/lib/theme';
 
@@ -65,5 +65,42 @@ describe('reconcileCompare', () => {
     expect(t.verd).toBe('#7a8a5e');
     expect(t.ground).toBe('#f5ead8');
     expect(t.ink).toBe('#201e1d');
+  });
+});
+
+describe('compareHalves (per-half decisions)', () => {
+  test('two themeless dancers → every field undefined (frozen default)', () => {
+    expect(compareHalves(null, null)).toEqual({});
+  });
+
+  test('themeA-only → BOTH blobs applied (B not left as the frozen literal) and ≥ COMPARE_MIN apart', () => {
+    const H = compareHalves(PLUM, null);
+    // The B half receives a reconciled stroke, not undefined — so it can shift off
+    // the frozen verd to stay legible against A.
+    expect(H.aBlob).toBeDefined();
+    expect(H.bBlob).toBeDefined();
+    expect(cr(H.aBlob!, H.bBlob!)).toBeGreaterThanOrEqual(COMPARE_MIN);
+    // Only the themed (A) half is palette-scoped; the themeless (B) half keeps the page palette.
+    expect(H.aTokens).toEqual(deriveTokens(PLUM));
+    expect(H.bTokens).toBeUndefined();
+    expect(H.seam).toBeDefined();
+  });
+
+  test('themeB-only → symmetric: both blobs applied, only B palette-scoped', () => {
+    const H = compareHalves(null, DARK);
+    expect(H.aBlob).toBeDefined();
+    expect(H.bBlob).toBeDefined();
+    expect(cr(H.aBlob!, H.bBlob!)).toBeGreaterThanOrEqual(COMPARE_MIN);
+    expect(H.aTokens).toBeUndefined();
+    expect(H.bTokens).toEqual(deriveTokens(DARK));
+  });
+
+  test('both themed → both palettes scoped, both blobs + seam present', () => {
+    const H = compareHalves(LIGHT, DARK);
+    expect(H.aTokens).toEqual(deriveTokens(LIGHT));
+    expect(H.bTokens).toEqual(deriveTokens(DARK));
+    expect(H.aBlob).toBeDefined();
+    expect(H.bBlob).toBeDefined();
+    expect(H.seam).toBeDefined();
   });
 });

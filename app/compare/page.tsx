@@ -3,8 +3,8 @@ import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile } from '@/db/schema';
 import { getPublicProfile, getCompareTheme, listPublicProfiles } from '@/src/lib/publicProfile';
-import { reconcileCompare, DEFAULT_THEME } from '@/src/lib/compareTheme';
-import { presetStyleVars } from '@/src/lib/presets';
+import { compareHalves } from '@/src/lib/compareTheme';
+import { tokenStyleVars } from '@/src/lib/presets';
 import { masteredCount } from '@/src/lib/progress';
 import { perCategoryDetailed, dnaSignature } from '@/src/lib/dna';
 import { DnaRadar } from '@/src/components/DnaRadar';
@@ -112,21 +112,24 @@ export default async function Compare({
         {pa && pb && (() => {
           const A = { name: nameOf(pa), cats: perCategoryDetailed(pa.mastered) };
           const B = { name: nameOf(pb), cats: perCategoryDetailed(pb.mastered) };
-          // Frozen default: with two themeless dancers no reconciliation runs and the
-          // radar renders exactly as before. As soon as one side is themed, reconcile
-          // the two blob strokes + seam so the halves stay mutually legible; a themed
-          // half also scopes its own --tm-* palette, a themeless half keeps the page's.
-          const anyThemed = !!(themeA || themeB);
-          const P = anyThemed ? reconcileCompare(themeA ?? DEFAULT_THEME, themeB ?? DEFAULT_THEME) : null;
+          // Resolve per-half theming once, shared across all three views so switching
+          // tabs stays consistent. Frozen default: two themeless dancers → every field
+          // is undefined → each view keeps its --tm-* literals (byte-identical). When
+          // themed, BOTH reconciled blobs apply to BOTH halves (so a themeless half's
+          // stroke still shifts enough to stay legible against the other); only a themed
+          // half gets its own palette scoped onto the radar legend.
+          const H = compareHalves(themeA, themeB);
+          const aStyle = H.aTokens ? (tokenStyleVars(H.aTokens) as React.CSSProperties) : undefined;
+          const bStyle = H.bTokens ? (tokenStyleVars(H.bTokens) as React.CSSProperties) : undefined;
           const radar = (
             <DnaCompareRadar
               a={A}
               b={B}
-              aBlob={themeA && P ? P.aBlob : undefined}
-              bBlob={themeB && P ? P.bBlob : undefined}
-              seam={P ? P.seam : undefined}
-              aStyle={themeA ? (presetStyleVars(themeA) as React.CSSProperties) : undefined}
-              bStyle={themeB ? (presetStyleVars(themeB) as React.CSSProperties) : undefined}
+              aBlob={H.aBlob}
+              bBlob={H.bBlob}
+              seam={H.seam}
+              aStyle={aStyle}
+              bStyle={bStyle}
             />
           );
           return (
@@ -135,8 +138,8 @@ export default async function Compare({
               <ViewSwitcher
                 views={[
                   { id: 'radar', label: 'Radar', node: radar },
-                  { id: 'genome', label: 'Genome', node: <DnaGenome series={[A, B]} /> },
-                  { id: 'bars', label: 'Strengths', node: <DnaBars series={[A, B]} /> },
+                  { id: 'genome', label: 'Genome', node: <DnaGenome series={[A, B]} aColor={H.aBlob} bColor={H.bBlob} /> },
+                  { id: 'bars', label: 'Strengths', node: <DnaBars series={[A, B]} aColor={H.aBlob} bColor={H.bBlob} /> },
                 ]}
               />
             </>

@@ -1,4 +1,4 @@
-import { deriveTokens, type Theme } from '@/src/lib/theme';
+import { deriveTokens, type Theme, type DerivedTokens } from '@/src/lib/theme';
 import { cssVar } from '@/design/tokens';
 
 export const PRESET_CAP = 5;
@@ -26,11 +26,17 @@ export function canSavePreset(existingNames: string[], name: string): SaveCheck 
   return { ok: true };
 }
 
+/** Map an ALREADY-derived token set onto its inline `--tm-*` custom properties.
+ *  Lets a caller that already has `DerivedTokens` (e.g. `reconcileCompare`'s `P.a`/
+ *  `P.b`) paint a self-preview without deriving a second time. */
+export function tokenStyleVars(tokens: DerivedTokens): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of Object.keys(tokens) as (keyof DerivedTokens)[]) out[cssVar(k)] = tokens[k];
+  return out;
+}
+
 /** Inline CSS custom properties that paint a control in a preset's OWN colors —
  *  the "self-preview". Same mapping the editor live-preview and customStyleText use. */
 export function presetStyleVars(theme: Theme): Record<string, string> {
-  const t = deriveTokens(theme);
-  const out: Record<string, string> = {};
-  for (const k of Object.keys(t) as (keyof typeof t)[]) out[cssVar(k)] = t[k];
-  return out;
+  return tokenStyleVars(deriveTokens(theme));
 }
