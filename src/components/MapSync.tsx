@@ -22,6 +22,11 @@ const KEY_M = 'tsm-mastered';
 const KEY_T = 'tsm-theme';
 const KEY_TS = 'tsm-updated';
 
+/** Fired on `window` by the map whenever the mastered set changes (mark OR unmark),
+ *  so MapSync pushes deterministically instead of relying on incidental DOM churn.
+ *  The shared contract with src/components/TangoMap.tsx. */
+export const MASTERED_CHANGE_EVENT = 'tsm-mastered-change';
+
 type ServerProgress = {
   mastered?: unknown;
   theme?: string | null;
@@ -87,6 +92,7 @@ export function startMapSync(): () => void {
 
   let observer: MutationObserver | null = null;
   let onStorage: ((e: StorageEvent) => void) | null = null;
+  let onMastered: (() => void) | null = null;
 
   function adopt(s: ServerProgress): void {
     lset(KEY_M, JSON.stringify(serverMastered(s)));
@@ -166,6 +172,10 @@ export function startMapSync(): () => void {
       if (e.key === KEY_M || e.key === KEY_T) scheduleCheck();
     };
     window.addEventListener('storage', onStorage);
+    // Same-tab mark/unmark: the map dispatches this so an unmark (which produces no
+    // childList mutation) is never missed. runCheck still no-ops if nothing changed.
+    onMastered = () => scheduleCheck();
+    window.addEventListener(MASTERED_CHANGE_EVENT, onMastered);
   }
 
   fetch('/api/progress', { credentials: 'same-origin' })
@@ -216,6 +226,7 @@ export function startMapSync(): () => void {
     if (timer) clearTimeout(timer);
     if (observer) observer.disconnect();
     if (onStorage) window.removeEventListener('storage', onStorage);
+    if (onMastered) window.removeEventListener(MASTERED_CHANGE_EVENT, onMastered);
   };
 }
 

@@ -45,19 +45,21 @@ Fill three values in `.env.local`:
 
 ## How it works
 
-The `/` route serves the existing self-contained map bundle (`public/tangomap.html`); two tiny
-injected scripts bridge its `localStorage` (`tsm-mastered`/`tsm-theme`) to the server and add a
-sign-in control. Auth.js (Google) + Supabase Postgres via Drizzle handle accounts, progress, and
-profiles. Full design and rationale: **[SPEC.md](SPEC.md)**.
+The `/` route is a source React map (`app/page.tsx` → `src/components/TangoMap.tsx`), built from
+`src/data/mapNodes.ts` through pure layout engines (`src/lib/mapLayout.ts`, `explorerLayout.ts`)
+and styled on the app's own `--tm-*` tokens, so it inherits light/dark/custom theming for free.
+`MapSync` mirrors progress (`tsm-mastered`) to the server. Auth.js (Google) + Supabase Postgres
+via Drizzle handle accounts, progress, and profiles. Full design and rationale: **[SPEC.md](SPEC.md)**.
 
 ## Layout
 
 ```
 app/            Next.js routes (api/auth, api/progress, api/profile, api/account, settings, u/[handle])
 db/             Drizzle schema + client
-src/lib/        pure libs (progress, handle, publicProfile, injectScript)
-src/data/       62-skill data (generated from the bundle by scripts/extract-skills.mjs)
-public/         the map bundle + injected sync.js / auth-ui.js
+src/lib/        pure libs (progress, handle, publicProfile, mapLayout, explorerLayout, mapGraph)
+src/data/       62-skill data — mapNodes.ts is authoritative; skills.ts derives from it
+src/components/  the source map (TangoMap, MapExplorer, MapSync, detail/search/category/home/onboarding)
+public/         PWA service worker + static assets
 test/           Vitest suites (mock @/db and @/auth)
 ```
 

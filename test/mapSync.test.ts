@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { startMapSync } from '@/src/components/MapSync';
+import { startMapSync, MASTERED_CHANGE_EVENT } from '@/src/components/MapSync';
 
 // The React port of the bundle's old progress-sync script. startMapSync() reads
 // globalThis fetch / localStorage / document / window exactly as the IIFE did, so we
@@ -139,6 +139,25 @@ describe('MapSync progress sync (last-write-wins)', () => {
     expect(localStorage.getItem('tsm-mastered')).toBeNull();
     expect(localStorage.getItem('tsm-theme')).toBeNull();
     expect(puts(m).length).toBe(0);
+  });
+
+  // THE de-bundle regression test: once in sync, an UNMARK (a set change with no
+  // childList DOM churn and no toast) must still push the REDUCED set. The bundle's
+  // MutationObserver missed this — the map now dispatches MASTERED_CHANGE_EVENT.
+  test('(h) an unmark (set change + MASTERED_CHANGE_EVENT) pushes the reduced set', async () => {
+    localStorage.setItem('tsm-mastered', JSON.stringify(['x', 'y']));
+    localStorage.setItem('tsm-updated', ms('2026-07-22T00:00:00.000Z')); // equal → in sync
+    const m = mockApi({ mastered: ['x', 'y'], theme: 'light', sel: null, updatedAt: '2026-07-22T00:00:00.000Z' });
+    run();
+    await flush();
+    expect(puts(m).length).toBe(0); // in sync, nothing pushed yet
+    // Unmark 'y': write the reduced set (as toggleMastered does) and fire the event.
+    localStorage.setItem('tsm-mastered', JSON.stringify(['x']));
+    window.dispatchEvent(new Event(MASTERED_CHANGE_EVENT));
+    vi.advanceTimersByTime(1000); // debounce
+    await flush();
+    expect(puts(m).length).toBeGreaterThan(0);
+    expect(putBody(m).mastered).toEqual(['x']); // the unmark reached the server
   });
 
   test('(g) the pushed theme is the normalised mode from readMode() (tsm-theme)', async () => {

@@ -9,6 +9,7 @@ import { MapSearch } from '@/src/components/MapSearch';
 import { MapExplorer } from '@/src/components/MapExplorer';
 import { MapCategoryNav } from '@/src/components/MapCategoryNav';
 import { MapOnboarding } from '@/src/components/MapOnboarding';
+import { MASTERED_CHANGE_EVENT } from '@/src/components/MapSync';
 
 // The whole-map view, ported from the decoded bundle's `buildMap` (template.html
 // ~L1090–1220) onto the app's --tm-* design tokens. This is the render half; the pure
@@ -216,6 +217,11 @@ export function TangoMap() {
       else next.delete(id);
       try {
         localStorage.setItem(MASTERED_KEY, JSON.stringify([...next]));
+        // Deterministically wake MapSync on BOTH mark and unmark. The old bundle
+        // relied on the map's incidental DOM churn (a childList mutation) to trip a
+        // MutationObserver — which an unmark (attribute-only re-render, no toast)
+        // never produced, silently dropping the unmark from cross-device sync.
+        window.dispatchEvent(new Event(MASTERED_CHANGE_EVENT));
       } catch {
         /* ignore */
       }

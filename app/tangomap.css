@@ -1,12 +1,13 @@
 /* ============================================================
-   TANGO MAP — whole-map view (app/mapview, TEMPORARY preview route).
-   The React port of the bundle's map canvas. Everything is scoped
-   under .tsm-map and consumes ONLY the app's --tm-* tokens (plus
-   --serif/--sans/--mono), which the enclosing .tm-profile supplies,
-   so the map reads as one product with the rest of the app.
+   TANGO MAP — the landing page (app/page.tsx, served at /).
+   The source React map that replaced the generated bundle. Everything
+   is scoped under .tsm-map and consumes ONLY the app's --tm-* tokens
+   (plus --serif/--sans/--mono), which the enclosing .tm-profile
+   supplies, so the map reads as one product with the rest of the app
+   and inherits light/dark/custom theming for free.
    ============================================================ */
 
-/* full-viewport preview page shell */
+/* full-viewport map page shell */
 .tsm-page { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
 .tsm-topbar { flex: none; padding: 12px clamp(14px, 3vw, 22px) 0; }
 /* the shared top bar carries a 22px bottom margin of its own; nothing to add here */
