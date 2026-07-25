@@ -73,8 +73,11 @@ describe('ThemeEditor', () => {
 
   test('renders 4 colour inputs and 4 hex inputs from the default seeds', async () => {
     await render();
-    expect(container.querySelectorAll('input[type="color"]').length).toBe(4);
-    expect(container.querySelectorAll('input[type="text"]').length).toBe(4);
+    // Scope to the seed grid: the editor now also mounts the preset library below
+    // it (which has its own text input), so a page-global selector would over-count.
+    const grid = q('.tm-seedgrid');
+    expect(grid.querySelectorAll('input[type="color"]').length).toBe(4);
+    expect(grid.querySelectorAll('input[type="text"]').length).toBe(4);
   });
 
   test('an illegible ink seed disables Apply and warns about contrast', async () => {

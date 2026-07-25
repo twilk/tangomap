@@ -1,4 +1,4 @@
-import type { Theme as CustomThemeStruct } from '@/src/lib/theme';
+import type { Theme as CustomThemeStruct, Theme as ThemeSeeds } from '@/src/lib/theme';
 
 export type Theme = 'light' | 'dark' | 'custom';
 export type Style = 'salon' | 'milonguero' | 'nuevo';
@@ -31,4 +31,21 @@ export type PublicProfile = {
   displayName: string | null;
   style: Style | null;
   mastered: string[];
+};
+
+export type ThemePreset = {
+  id: string;
+  name: string;
+  seeds: ThemeSeeds;
+  isShared: boolean;
+  updatedAt: string; // ISO
+};
+export type ThemePresetInput = { name: string; seeds: ThemeSeeds };
+/** Public read model for the community gallery — never any private field. */
+export type CommunityTheme = {
+  id: string;
+  name: string;
+  seeds: ThemeSeeds;
+  authorHandle: string;
+  authorDisplayName: string | null;
 };

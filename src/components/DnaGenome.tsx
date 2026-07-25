@@ -8,13 +8,29 @@ export type Series = { name?: string; cats: CategoryDetail[] };
  * bar per skill. Bar height encodes the skill's level (1–10), fill encodes
  * mastery. One series → a single strip; two series → stacked A/B bands sharing
  * the same columns, so a head-to-head reads as two aligned sequences.
+ *
+ * Per-half theming (optional): `aColor`/`bColor` override the two series accents
+ * (`.s0`/`.s1`, which resolve `--tm-ember`/`--tm-verd`) with reconciled, mutually
+ * legible strokes. Each defaults to its current `--tm-*` var, so an omitted prop is
+ * byte-identical (frozen default for two themeless dancers).
  */
-export function DnaGenome({ series }: { series: Series[] }) {
+export function DnaGenome({ series, aColor, bColor }: { series: Series[]; aColor?: string; bColor?: string }) {
   const cmp = series.length > 1;
   const cats = series[0].cats;
 
+  // Override only the series accents, and only when themed — the shared ground/ink
+  // stay the page palette (the two series interleave in one strip, so there is no
+  // separable "A panel" to scope). Omitted props leave the frozen --tm-* untouched.
+  const accent =
+    aColor !== undefined || bColor !== undefined
+      ? ({
+          ...(aColor !== undefined ? { '--tm-ember': aColor } : {}),
+          ...(bColor !== undefined ? { '--tm-verd': bColor } : {}),
+        } as React.CSSProperties)
+      : undefined;
+
   return (
-    <div className={`tm-genome${cmp ? ' cmp' : ''}`}>
+    <div className={`tm-genome${cmp ? ' cmp' : ''}`} style={accent}>
       {cmp && (
         <div className="tm-ghead">
           {series.map((s, si) => (

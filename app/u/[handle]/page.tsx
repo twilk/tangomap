@@ -4,10 +4,11 @@ import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile } from '@/db/schema';
-import { getPublicProfile } from '@/src/lib/publicProfile';
+import { getPublicProfile, getSharedTheme } from '@/src/lib/publicProfile';
 import { sanitizeMastered, masteredCount } from '@/src/lib/progress';
 import { dnaSignature } from '@/src/lib/dna';
 import { ProfileSections } from '@/src/components/ProfileSections';
+import ApplySharedTheme from '@/src/components/ApplySharedTheme';
 import { TopNav } from '@/src/components/TopNav';
 
 // Live DB read: never statically cache, or a profile flipped to private would
@@ -49,6 +50,10 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
   const name = data.displayName ?? data.handle;
   const initial = (name.trim()[0] ?? '·').toUpperCase();
 
+  // A public dancer may share one theme (coupled to isPublic); when present, offer to
+  // apply it. Seeds are already re-validated in getSharedTheme, and again on click.
+  const shared = await getSharedTheme(data.handle);
+
   return (
     <div className="tm-profile">
       <main className="tm-wrap">
@@ -79,6 +84,10 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
             </p>
           </div>
         </header>
+
+        {shared && (
+          <ApplySharedTheme theme={shared.seeds} name={shared.name} handle={data.handle} />
+        )}
 
         <ProfileSections mastered={mastered} />
 

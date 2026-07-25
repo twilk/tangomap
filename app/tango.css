@@ -635,3 +635,45 @@ body { margin: 0; }
 .tm-reset:hover{border-color:var(--tm-carmine); color:var(--tm-ink)}
 .tm-reset:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
 .tm-reset.confirm{color:var(--tm-carmine); border-color:var(--tm-carmine); font-weight:600}
+
+/* --- Preset library + community gallery: self-previewing controls -----------
+   Each .tm-preset-row / .tm-community-btn carries inline --tm-* vars from
+   presetStyleVars(seeds), so every control paints in its OWN theme; outside a
+   self-preview these var() calls fall back to the page theme. */
+.tm-preset-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--tm-line);background:var(--tm-ground);color:var(--tm-ink)}
+.tm-preset-row .name{font-weight:600;color:var(--tm-ink)}
+.tm-preset-row .badge{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;border:1px solid var(--tm-line);border-radius:999px;padding:1px 7px;color:var(--tm-ember)}
+.tm-preset-row .chip{width:44px;height:14px;border-radius:4px;background:linear-gradient(90deg,var(--tm-ground) 25%,var(--tm-ink) 25% 50%,var(--tm-ember) 50% 75%,var(--tm-verd) 75%)}
+.tm-preset-row button:focus-visible{outline:2px solid var(--tm-focus);outline-offset:2px}
+.tm-community-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.tm-community-btn{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:12px;border:1px solid var(--tm-line);background:var(--tm-ground);color:var(--tm-ink);cursor:pointer;text-align:left}
+.tm-community-btn .by{color:var(--tm-muted);font-size:11px}
+.tm-community-btn:focus-visible{outline:2px solid var(--tm-focus);outline-offset:2px}
+
+/* Library layout scaffolding (page-themed, not self-previewed) — the rows above
+   provide the self-preview; these wrappers lay them out and follow the page. */
+.tm-preset-library{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+.tm-preset-save{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tm-preset-name-input{flex:1;min-width:160px;background:var(--tm-panel2);border:1px solid var(--tm-line);border-radius:10px;padding:9px 13px;color:var(--tm-ink);font-family:var(--mono);font-size:14px}
+.tm-preset-name-input:focus-visible{outline:none;border-color:var(--tm-ember)}
+.tm-preset-hint{margin:0;font-size:12.5px;color:var(--tm-muted)}
+.tm-preset-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tm-preset-actions{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.tm-preset-actions button{font-family:var(--sans);font-size:12px;color:var(--tm-ink);background:transparent;border:1px solid var(--tm-line);border-radius:8px;padding:5px 10px;cursor:pointer;transition:border-color .15s}
+.tm-preset-actions button:hover{border-color:var(--tm-ember)}
+.tm-preset-rowhint{flex-basis:100%;margin:2px 0 0;font-size:12px;color:var(--tm-muted)}
+
+/* Community gallery scaffolding (page-themed) — the buttons above self-preview;
+   this wrapper, heading, save affordance and notes follow the page theme. */
+.tm-community{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+.tm-community-h{margin:0;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--tm-muted)}
+.tm-community-btn .name{font-weight:600;color:var(--tm-ink)}
+.tm-community-item{display:flex;flex-direction:column;gap:6px}
+.tm-community-save{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tm-community-save button{font-family:var(--sans);font-size:12px;color:var(--tm-ink);background:transparent;border:1px solid var(--tm-line);border-radius:8px;padding:5px 10px;cursor:pointer;transition:border-color .15s}
+.tm-community-save button:hover{border-color:var(--tm-ember)}
+.tm-community-save button:focus-visible{outline:2px solid var(--tm-ember);outline-offset:2px}
+.tm-community-note{margin:0;font-size:12px;color:var(--tm-muted)}
+
+/* Apply-shared-theme affordance on a public profile (/u/[handle]). */
+.tm-apply-shared{display:flex;flex-direction:column;gap:8px;margin:14px 0}

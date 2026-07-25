@@ -15,8 +15,31 @@ type Side = { name: string; cats: CategoryDetail[] };
  * ember, side B in verdigris), plus a "tape" reading every category. Hovering a
  * tape row lights that axis on the radar; clicking expands it (accordion — one
  * open at a time) to reveal the per-skill comparison between the two dancers.
+ *
+ * Per-half theming (optional): each dancer's half can render in its OWN theme.
+ * `aBlob`/`bBlob` override the two blob strokes (and their legend swatch + minibar)
+ * with reconciled, mutually-legible accents; `seam` colours the row divider so it
+ * reads on both grounds; `aStyle`/`bStyle` scope each half's `--tm-*` palette. When
+ * a prop is omitted, that element keeps its current `--tm-*` value — so a compare
+ * with two themeless dancers renders byte-identical to before (frozen default).
  */
-export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
+export function DnaCompareRadar({
+  a,
+  b,
+  aBlob,
+  bBlob,
+  seam,
+  aStyle,
+  bStyle,
+}: {
+  a: Side;
+  b: Side;
+  aBlob?: string;
+  bBlob?: string;
+  seam?: string;
+  aStyle?: React.CSSProperties;
+  bStyle?: React.CSSProperties;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progRef = useRef(0);
   const hiRef = useRef(-1);
@@ -29,6 +52,10 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
   const aCount = a.cats.reduce((n, c) => n + c.done, 0);
   const bCount = b.cats.reduce((n, c) => n + c.done, 0);
   const total = a.cats.reduce((n, c) => n + c.total, 0);
+  // DOM accent for each half: the reconciled stroke when themed, else the frozen
+  // --tm-* literal (so a themeless half is byte-identical to before).
+  const aCol = aBlob ?? 'var(--tm-ember)';
+  const bCol = bBlob ?? 'var(--tm-verd)';
 
   const draw = useCallback(() => {
     const cv = canvasRef.current;
@@ -51,8 +78,10 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
     const gv = (n: string) => getComputedStyle(cv).getPropertyValue(n).trim() || '#888';
     const line = gv('--tm-line');
     const faint = gv('--tm-faint');
-    const ember = gv('--tm-ember');
-    const verd = gv('--tm-verd');
+    // Each blob draws in its dancer's own reconciled accent when themed, else the
+    // page's --tm-ember/--tm-verd (frozen default for a themeless half).
+    const ember = aBlob ?? gv('--tm-ember');
+    const verd = bBlob ?? gv('--tm-verd');
     const muted = gv('--tm-muted');
     const focus = gv('--tm-focus');
     // Two icon sets: muted for idle axes, focus-coloured for the hovered/pinned
@@ -167,7 +196,7 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
         }
       }
     }
-  }, [a.cats, b.cats, cats.length]);
+  }, [a.cats, b.cats, cats.length, aBlob, bBlob]);
 
   useEffect(() => {
     redrawRef.current = draw;
@@ -244,12 +273,12 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
           />
         </div>
         <div className="tm-keys">
-          <span className="tm-key">
-            <i style={{ background: 'var(--tm-ember)' }} />
+          <span className="tm-key" style={aStyle}>
+            <i style={{ background: aCol }} />
             {a.name} · <b>{aCount}</b>
           </span>
-          <span className="tm-key">
-            <i style={{ background: 'var(--tm-verd)' }} />
+          <span className="tm-key" style={bStyle}>
+            <i style={{ background: bCol }} />
             {b.name} · <b>{bCount}</b>
           </span>
         </div>
@@ -299,13 +328,13 @@ export function DnaCompareRadar({ a, b }: { a: Side; b: Side }) {
                 <span className={`a${aw ? ' win' : ''}`}>
                   <b>{c.done}</b>/{c.total}
                   <span className="tm-minibar">
-                    <i style={{ width: `${c.pct}%`, background: 'var(--tm-ember)' }} />
+                    <i style={{ width: `${c.pct}%`, background: aCol }} />
                   </span>
                 </span>
-                <span className="mid">{c.done === bc.done ? '=' : aw ? '◂' : '▸'}</span>
+                <span className="mid" style={seam ? { color: seam } : undefined}>{c.done === bc.done ? '=' : aw ? '◂' : '▸'}</span>
                 <span className={`b${bw ? ' win' : ''}`}>
                   <span className="tm-minibar">
-                    <i style={{ width: `${bc.pct}%`, background: 'var(--tm-verd)' }} />
+                    <i style={{ width: `${bc.pct}%`, background: bCol }} />
                   </span>
                   <b>{bc.done}</b>/{bc.total}
                 </span>
