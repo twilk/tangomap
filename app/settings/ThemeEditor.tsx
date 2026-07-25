@@ -13,6 +13,7 @@ import { parseHex, contrastRatio } from '@/src/lib/color';
 import { applyCustomTheme, clearCustomTheme, currentCustomTheme, readMode } from '@/src/lib/customTheme';
 import { pushCustomTheme } from '@/src/lib/themeSync';
 import PresetLibrary from '@/src/components/PresetLibrary';
+import CommunityThemes from '@/src/components/CommunityThemes';
 
 /** Share-gate context threaded from the Settings page (the profile row it already
  *  loads). The library pre-explains the public-profile requirement before the API 409. */
@@ -238,7 +239,10 @@ export default function ThemeEditor({ isPublic = false, handle = null }: ThemeEd
       )}
 
       {mounted && (
-        <PresetLibrary initialActive={activeTheme} isPublic={isPublic} handle={handle} />
+        <>
+          <PresetLibrary initialActive={activeTheme} isPublic={isPublic} handle={handle} />
+          <CommunityThemes />
+        </>
       )}
     </div>
   );
