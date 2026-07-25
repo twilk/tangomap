@@ -1,7 +1,6 @@
 import {
   pgTable, text, timestamp, primaryKey, integer, boolean, jsonb,
 } from 'drizzle-orm/pg-core';
-import type { Theme } from '../src/lib/theme';
 
 // --- Auth.js (@auth/drizzle-adapter) standard Postgres schema ---
 export const users = pgTable('user', {
@@ -65,15 +64,4 @@ export const profile = pgTable('profile', {
   // Minted once (DB sequence default; see migration 0002), never recomputed —
   // deleting other accounts must not renumber anyone's card.
   cardSerial: integer('cardSerial').unique(),
-  // Custom theme: the four-seed Theme struct ({v,ground,ink,accent,accent2}),
-  // validated by parseTheme on every write. Null = no custom theme.
-  customTheme: jsonb('customTheme').$type<Theme>(),
-  // Whether the dancer card renders in this custom theme (step 5).
-  cardUsesCustomTheme: boolean('cardUsesCustomTheme').notNull().default(false),
-  // Whether the custom theme is offered on the public profile for others to
-  // apply (step 6). Independent of isPublic — you can share a theme without a
-  // public DNA page, or vice-versa.
-  themeShared: boolean('themeShared').notNull().default(false),
-  // Last write to customTheme — the clock for last-write-wins cross-device sync.
-  customThemeUpdatedAt: timestamp('customThemeUpdatedAt', { mode: 'date' }),
 });

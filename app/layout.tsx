@@ -10,7 +10,6 @@ import { Figtree } from 'next/font/google';
 // src/styles/generated/tokens.css.
 import '@/src/styles/generated/tokens.css';
 import './tango.css';
-import { ThemeSync } from '@/src/components/ThemeSync';
 
 // The map bundle at / renders its body copy in Figtree (the "Organic" design
 // system). next/font self-hosts it at build time — no CDN link, no font files —
@@ -49,7 +48,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-theme="light" className={figtree.variable} suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-        <ThemeSync />
         {children}
         {/* Register the service worker for offline / installable PWA (public/sw.js). */}
         <script src="/sw-register.js" defer />

@@ -29,8 +29,7 @@ export async function PUT(req: Request) {
     return Response.json({ error: 'invalid_body' }, { status: 400 });
   }
   const mastered = sanitizeMastered(input.mastered);
-  const theme =
-    input.theme === 'dark' || input.theme === 'light' || input.theme === 'custom' ? input.theme : null;
+  const theme = input.theme === 'dark' || input.theme === 'light' ? input.theme : null;
   const sel = typeof input.sel === 'string' ? input.sel : null;
   const now = new Date();
   await db.insert(progress).values({ userId: session.user.id, mastered, theme, sel, updatedAt: now })

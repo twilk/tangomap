@@ -11,7 +11,6 @@ import type { ThemeTokens } from '@/design/tokens';
 import { cssVar } from '@/design/tokens';
 import { parseHex, contrastRatio } from '@/src/lib/color';
 import { applyCustomTheme, clearCustomTheme, currentCustomTheme, readMode } from '@/src/lib/customTheme';
-import { pushCustomTheme } from '@/src/lib/themeSync';
 
 /** The four colour seeds a theme is built from — each a `#rrggbb` string the user edits. */
 export type Seeds = { ground: string; ink: string; accent: string; accent2: string };
@@ -107,8 +106,6 @@ export default function ThemeEditor(): React.JSX.Element {
     if (applyCustomTheme({ v: 1, ...seeds })) {
       setApplied(true);
       setHasCustom(true);
-      // Mirror to the server so the theme follows the user across devices.
-      void pushCustomTheme();
     }
   }
 
@@ -122,8 +119,6 @@ export default function ThemeEditor(): React.JSX.Element {
     setApplied(false);
     setConfirming(false);
     setHasCustom(false);
-    // Propagate the cleared state so other devices drop the theme too.
-    void pushCustomTheme();
   }
 
   return (

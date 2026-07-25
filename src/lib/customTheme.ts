@@ -21,9 +21,6 @@ const KEY_THEME = 'tsm-theme';
 const KEY_CUSTOM = 'tsm-custom';
 const KEY_CSS = 'tsm-custom-css';
 const KEY_POLARITY = 'tsm-custom-polarity';
-/** Epoch-ms (as a string) of the last custom-theme write OR clear — the sync clock
- *  for last-write-wins cross-device merge. Survives a clear on purpose. */
-const KEY_UPDATED = 'tsm-custom-updated';
 
 /** The single <style> element the custom palette lives in, injected into <head>. */
 const STYLE_ID = 'tm-custom-theme';
@@ -122,61 +119,30 @@ export function setMode(m: Mode): void {
 
 /** Validate untrusted input into a Theme, then make it the active custom theme:
  *  cache the struct, its pre-built CSS and its polarity, inject the <style>, and
- *  switch to custom mode. Records the write time (`updatedAt`, default now) as the
- *  sync clock. Returns false (writing nothing) if the input is not a legible theme. */
-export function applyCustomTheme(input: unknown, updatedAt?: number): boolean {
+ *  switch to custom mode. Returns false (writing nothing) if the input is not a
+ *  legible theme. */
+export function applyCustomTheme(input: unknown): boolean {
   const theme = parseTheme(input);
   if (!theme) return false;
   const css = customStyleText(deriveTokens(theme));
   setItem(KEY_CUSTOM, JSON.stringify(theme));
   setItem(KEY_CSS, css);
   setItem(KEY_POLARITY, customPolarity(theme));
-  setItem(KEY_UPDATED, String(updatedAt ?? Date.now()));
   injectStyle(css);
   setMode('custom');
   return true;
 }
 
-/** Forget the custom theme entirely: drop the cached struct/CSS/polarity and the
- *  <style>, and if we were in custom mode, fall back to the polarity the custom
- *  ground implied. Records WHEN it was cleared (`updatedAt`, default now) into the
- *  sync clock — that key is deliberately NOT removed, so a cleared state can win a
- *  last-write-wins merge against a stale device. */
-export function clearCustomTheme(updatedAt?: number): void {
+/** Forget the custom theme entirely: drop the three cached keys and the <style>, and
+ *  if we were in custom mode, fall back to the polarity the custom ground implied. */
+export function clearCustomTheme(): void {
   const polarity = getItem(KEY_POLARITY) === 'dark' ? 'dark' : 'light';
   const wasCustom = readMode() === 'custom';
   removeItem(KEY_CUSTOM);
   removeItem(KEY_CSS);
   removeItem(KEY_POLARITY);
   removeStyle();
-  setItem(KEY_UPDATED, String(updatedAt ?? Date.now()));
   if (wasCustom) setMode(polarity);
-}
-
-/** The epoch-ms of the last custom-theme write or clear (the sync clock), or 0 if
- *  none has ever been recorded / the value is unparseable. */
-export function customUpdatedAt(): number {
-  const raw = getItem(KEY_UPDATED);
-  if (raw == null) return 0;
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : 0;
-}
-
-/** Cache a custom theme pulled from the server WITHOUT switching the user into custom
- *  mode: validate + derive + write the struct/CSS/polarity, stamp the sync clock with
- *  the server's timestamp, and — only if the user is ALREADY viewing custom — refresh
- *  the live <style> so the palette updates in place. Never calls setMode. Returns
- *  false (writing nothing) if the input is not a legible theme. */
-export function cacheCustomTheme(input: unknown, updatedAt: number): boolean {
-  const theme = parseTheme(input);
-  if (!theme) return false;
-  const css = customStyleText(deriveTokens(theme));
-  setItem(KEY_CUSTOM, JSON.stringify(theme));
-  setItem(KEY_CSS, css);
-  setItem(KEY_POLARITY, customPolarity(theme));
-  setItem(KEY_UPDATED, String(updatedAt));
-  if (readMode() === 'custom') injectStyle(css);
-  return true;
 }
 
 /** Advance the one shared toggle one step: dark → light → (custom, if configured) →
