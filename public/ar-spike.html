@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>L2 AR optics spike — Tango Map</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #0c0906; color: #F2EADC;
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header { padding: 16px 18px; border-bottom: 1px solid rgba(241,233,220,.14); }
+  h1 { margin: 0 0 4px; font-size: 17px; letter-spacing: .3px; }
+  .warn { color: #E58C44; font-size: 12.5px; margin: 6px 0 0; }
+  main { padding: 18px; max-width: 720px; margin: 0 auto; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  button {
+    appearance: none; border: 1px solid rgba(241,233,220,.28); background: #191309;
+    color: #F2EADC; border-radius: 12px; padding: 12px 16px; font-size: 15px; font-weight: 600;
+    cursor: pointer;
+  }
+  button.primary { background: #E58C44; border-color: #E58C44; color: #1a1206; }
+  button:disabled { opacity: .5; }
+  label { font-size: 13px; color: #9E907E; display: inline-flex; align-items: center; gap: 6px; }
+  input, select { background: #110D09; color: #F2EADC; border: 1px solid rgba(241,233,220,.28); border-radius: 8px; padding: 7px 9px; font-size: 14px; }
+  .panel { margin-top: 18px; }
+  .hidden { display: none !important; }
+  .scanwrap { position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden; }
+  video, #overlay { display: block; width: 100%; }
+  #overlay { position: absolute; inset: 0; }
+  #hud {
+    margin-top: 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat { background: #191309; border: 1px solid rgba(241,233,220,.14); border-radius: 10px; padding: 10px 12px; }
+  .stat b { display: block; font-size: 22px; }
+  .stat span { font-size: 11.5px; color: #9E907E; text-transform: uppercase; letter-spacing: .6px; }
+  .verdict { margin-top: 12px; padding: 12px; border-radius: 10px; background: #191309; border: 1px solid rgba(241,233,220,.14); font-size: 13.5px; }
+  #err { margin-top: 14px; padding: 12px; border-radius: 10px; background: #3a1512; border: 1px solid #E6415C; color: #ffd9d9; font-size: 13px; white-space: pre-wrap; }
+  #markerStage { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  #markerCanvas { image-rendering: pixelated; background: #fff; width: min(86vw, 520px); height: auto; border-radius: 4px; }
+  code { background: #110D09; padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  ol { padding-left: 20px; } li { margin: 4px 0; }
+  a { color: #E58C44; }
+</style>
+</head>
+<body>
+<header>
+  <h1>L2 AR optics viability spike</h1>
+  <div class="warn">⚠️ Throwaway de-risking tool — UNTESTED by its author (no camera/2 phones in CI). It answers one question: does an on-screen fiducial detect off another phone's camera, and is the pose stable enough to look "placed"? If a red error appears, copy it back and it'll be fixed.</div>
+</header>
+<main>
+  <div class="row">
+    <button id="btnShow" class="primary">📱 Show marker (phone A)</button>
+    <button id="btnScan" class="primary">🎥 Scan (phone B)</button>
+  </div>
+
+  <!-- SHOW (phone A) -->
+  <section id="showPanel" class="panel hidden">
+    <div class="row" style="align-items:center">
+      <label>Marker ID <input id="markerId" type="number" min="0" max="1023" value="0" style="width:84px" /></label>
+      <button id="btnFull">Fullscreen + max brightness</button>
+    </div>
+    <div id="markerStage" style="margin-top:14px">
+      <canvas id="markerCanvas" width="140" height="140"></canvas>
+      <div style="font-size:12.5px;color:#9E907E;text-align:center">Original-ArUco marker. Turn screen brightness to max, hold steady, let phone B point at it.</div>
+    </div>
+  </section>
+
+  <!-- SCAN (phone B) -->
+  <section id="scanPanel" class="panel hidden">
+    <div class="row" style="align-items:center;margin-bottom:10px">
+      <label>Marker size (mm) <input id="markerMM" type="number" min="10" max="400" value="90" style="width:76px" /></label>
+      <label><input id="chkStop" type="checkbox" /> freeze</label>
+    </div>
+    <div class="scanwrap">
+      <video id="video" playsinline muted></video>
+      <canvas id="overlay"></canvas>
+    </div>
+    <div id="hud">
+      <div class="stat"><b id="sDet">–</b><span>detection rate</span></div>
+      <div class="stat"><b id="sFps">–</b><span>fps</span></div>
+      <div class="stat"><b id="sDist">–</b><span>distance</span></div>
+      <div class="stat"><b id="sJit">–</b><span>jitter (pose)</span></div>
+    </div>
+    <div class="verdict" id="verdict">Point at phone A's marker. Sweep distance &amp; tilt. <b>GO</b> if detection stays high and jitter reads low across a table's distance; <b>NO-GO</b> if it drops out or the pose visibly swims.</div>
+  </section>
+
+  <section id="intro" class="panel">
+    <p style="color:#9E907E">Two phones, same page:</p>
+    <ol style="color:#9E907E">
+      <li>Phone A → <b>Show marker</b>, go fullscreen, brightness to max.</li>
+      <li>Phone B → <b>Scan</b>, allow the camera, point at phone A across a table.</li>
+      <li>Watch <b>detection rate</b> and <b>jitter</b> as you vary distance, angle, and glare.</li>
+    </ol>
+  </section>
+
+  <div id="err" class="hidden"></div>
+</main>
+
+<!-- classic js-aruco (single original-ArUco dictionary) -->
+<script src="https://cdn.jsdelivr.net/gh/jcmellado/js-aruco/src/cv.js" onerror="window.__arErr='cv.js'"></script>
+<script src="https://cdn.jsdelivr.net/gh/jcmellado/js-aruco/src/aruco.js" onerror="window.__arErr='aruco.js'"></script>
+<script src="https://cdn.jsdelivr.net/gh/jcmellado/js-aruco/src/svd.js" onerror="window.__arErr='svd.js'"></script>
+<script src="https://cdn.jsdelivr.net/gh/jcmellado/js-aruco/src/posit1.js" onerror="window.__arErr='posit1.js'"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function fail(msg) {
+    var e = $('err'); e.classList.remove('hidden');
+    e.textContent = 'ERROR: ' + msg;
+  }
+
+  // ---- library sanity ----
+  if (window.__arErr) { fail('Failed to load ' + window.__arErr + ' from the CDN. The marker library did not load — the spike cannot run.'); return; }
+  if (typeof AR === 'undefined' || !AR.Detector) { fail('js-aruco (AR.Detector) not available after script load.'); return; }
+  var hasPosit = (typeof POS !== 'undefined' && POS.Posit);
+
+  // ---- original-ArUco marker generator (robust by construction) ----
+  // Each inner row is one of the 4 valid codewords, so any id renders a marker
+  // the detector accepts (the ID label may differ if bit-order is flipped, which
+  // does not matter for an optics test — a valid, stable marker is the point).
+  var WORDS = { '00': [1,0,0,0,0], '01': [1,0,1,1,1], '10': [0,1,0,0,1], '11': [0,1,1,1,0] };
+  function markerGrid(id) {
+    var bits = (id & 1023).toString(2);
+    while (bits.length < 10) bits = '0' + bits;
+    var g = []; for (var r = 0; r < 7; r++) g.push([0,0,0,0,0,0,0]); // black border
+    for (var row = 0; row < 5; row++) {
+      var w = WORDS[bits.substr(row * 2, 2)];
+      for (var col = 0; col < 5; col++) g[row + 1][col + 1] = w[col]; // 1 = white
+    }
+    return g;
+  }
+  function drawMarker(id) {
+    var g = markerGrid(id), n = 7, quiet = 1, total = n + quiet * 2, cell = 40;
+    var cv = $('markerCanvas'); cv.width = total * cell; cv.height = total * cell;
+    var c = cv.getContext('2d');
+    c.fillStyle = '#fff'; c.fillRect(0, 0, cv.width, cv.height); // white quiet zone
+    for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
+      c.fillStyle = g[y][x] ? '#fff' : '#000';
+      c.fillRect((x + quiet) * cell, (y + quiet) * cell, cell, cell);
+    }
+  }
+
+  // ---- mode switching ----
+  function show(which) {
+    $('intro').classList.add('hidden');
+    $('showPanel').classList.toggle('hidden', which !== 'show');
+    $('scanPanel').classList.toggle('hidden', which !== 'scan');
+  }
+  $('btnShow').onclick = function () { show('show'); drawMarker(parseInt($('markerId').value, 10) || 0); };
+  $('markerId').oninput = function () { drawMarker(parseInt($('markerId').value, 10) || 0); };
+  $('btnFull').onclick = function () {
+    var el = $('markerCanvas');
+    if (el.requestFullscreen) el.requestFullscreen().catch(function(){});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  };
+
+  // ---- scan pipeline ----
+  var video = $('video'), overlay = $('overlay'), octx = overlay.getContext('2d');
+  var PW = 480, PH = 360; // processing resolution (downscaled)
+  var proc = document.createElement('canvas'), pctx;
+  var detector = new AR.Detector();
+  var posit = null;
+  var running = false, frames = 0, lastT = 0, fps = 0;
+  var detWin = [], DET_N = 60;            // rolling detection window
+  var tzHist = [], cxHist = [], HIST = 30; // pose/jitter history
+
+  function std(a) {
+    if (a.length < 2) return 0;
+    var m = a.reduce(function (s, v) { return s + v; }, 0) / a.length;
+    var v = a.reduce(function (s, x) { return s + (x - m) * (x - m); }, 0) / a.length;
+    return Math.sqrt(v);
+  }
+
+  $('btnScan').onclick = function () {
+    show('scan');
+    if (running) return;
+    navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+    }).then(function (stream) {
+      video.srcObject = stream;
+      return video.play();
+    }).then(function () {
+      var vw = video.videoWidth || 1280, vh = video.videoHeight || 720;
+      PH = Math.round(PW * vh / vw);
+      proc.width = PW; proc.height = PH; pctx = proc.getContext('2d', { willReadFrequently: true });
+      overlay.width = PW; overlay.height = PH; // overlay in processing coords, CSS-scaled
+      if (hasPosit) posit = new POS.Posit(parseFloat($('markerMM').value) || 90, PW);
+      running = true; requestAnimationFrame(loop);
+    }).catch(function (e) {
+      fail('Camera error: ' + (e && e.name ? e.name + ' — ' + e.message : e) +
+           '\nNeeds HTTPS + camera permission. On iOS, permissions reset often — reload and re-allow.');
+    });
+  };
+
+  $('markerMM').oninput = function () {
+    if (hasPosit) posit = new POS.Posit(parseFloat($('markerMM').value) || 90, PW);
+  };
+
+  function loop(t) {
+    if (!running) return;
+    requestAnimationFrame(loop);
+    if ($('chkStop').checked) return;
+    if (t - lastT >= 500) { fps = Math.round(frames * 1000 / (t - lastT)); frames = 0; lastT = t; }
+    frames++;
+
+    pctx.drawImage(video, 0, 0, PW, PH);
+    var img = pctx.getImageData(0, 0, PW, PH);
+    var markers = [];
+    try { markers = detector.detect(img); } catch (e) { /* keep going */ }
+
+    detWin.push(markers.length ? 1 : 0); if (detWin.length > DET_N) detWin.shift();
+    var detRate = Math.round(100 * detWin.reduce(function (s, v) { return s + v; }, 0) / detWin.length);
+
+    octx.clearRect(0, 0, PW, PH);
+    var dist = null, jit = null;
+    if (markers.length) {
+      var m = markers[0];
+      octx.strokeStyle = '#E58C44'; octx.lineWidth = 2; octx.beginPath();
+      m.corners.forEach(function (c, i) { i ? octx.lineTo(c.x, c.y) : octx.moveTo(c.x, c.y); });
+      octx.closePath(); octx.stroke();
+      var cx = m.corners.reduce(function (s, c) { return s + c.x; }, 0) / 4;
+      var cy = m.corners.reduce(function (s, c) { return s + c.y; }, 0) / 4;
+      octx.fillStyle = '#E58C44'; octx.font = '16px monospace';
+      octx.fillText('id ' + m.id, cx - 16, cy);
+
+      if (posit) {
+        var corners = m.corners.map(function (c) { return { x: c.x - PW / 2, y: PH / 2 - c.y }; });
+        var pose = posit.pose(corners);
+        if (pose && pose.bestTranslation) {
+          var tz = Math.abs(pose.bestTranslation[2]);
+          dist = tz;
+          tzHist.push(tz); if (tzHist.length > HIST) tzHist.shift();
+          cxHist.push(cx); if (cxHist.length > HIST) cxHist.shift();
+          // jitter as % of distance (translation noise) + pixel wobble of centre
+          jit = std(tzHist);
+        }
+      }
+    } else { tzHist = []; cxHist = []; }
+
+    $('sDet').textContent = detRate + '%';
+    $('sFps').textContent = fps || '–';
+    $('sDist').textContent = dist == null ? '–' : Math.round(dist) + ' mm';
+    $('sJit').textContent = jit == null ? '–' : ('±' + jit.toFixed(1) + ' mm / ±' + std(cxHist).toFixed(1) + 'px');
+  }
+
+  drawMarker(0);
+})();
+</script>
+</body>
+</html>
