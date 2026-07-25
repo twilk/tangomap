@@ -31,8 +31,13 @@ vi.mock('@/db', () => ({
 }));
 
 const load = () => import('@/app/api/presets/route');
+const loadId = () => import('@/app/api/presets/[id]/route');
 const post = (b: unknown) => new Request('http://localhost/api/presets', { method: 'POST', body: JSON.stringify(b) });
+const patch = (b: unknown) => new Request('http://localhost/api/presets/p1', { method: 'PATCH', body: JSON.stringify(b) });
+const del = () => new Request('http://localhost/api/presets/p1', { method: 'DELETE' });
+const ctx = (id = 'p1') => ({ params: Promise.resolve({ id }) });
 const valid = { v: 1, ground: '#1b1327', ink: '#f2e8d8', accent: '#e59ac2', accent2: '#8fd4b0' };
+const ownedRow = { id: 'p1', userId: 'u1', name: 'Carmesí', seeds: valid, isShared: false, updatedAt: new Date(0) };
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -120,5 +125,114 @@ describe('presets API', () => {
     expect(body[0]).toMatchObject({ id: 'p1', name: 'Good', isShared: false });
     expect(body[0].seeds).toEqual(valid);
     expect(typeof body[0].updatedAt).toBe('string');
+  });
+});
+
+describe('presets [id] API', () => {
+  test('PATCH 401 unauth (no write)', async () => {
+    mockAuth.mockResolvedValue(null);
+    const res = await (await loadId()).PATCH(patch({ name: 'X' }), ctx());
+    expect(res.status).toBe(401);
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  test('PATCH on a row owned by another user returns 404', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(undefined); // owned() finds nothing for this user
+    const res = await (await loadId()).PATCH(patch({ name: 'Nope' }), ctx());
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'not_found' });
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  test('PATCH invalid name returns 400 invalid_name (no write)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(ownedRow);
+    const res = await (await loadId()).PATCH(patch({ name: 'a' }), ctx());
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: 'invalid_name' });
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  test('PATCH name that duplicates a sibling returns 409 duplicate (case-insensitive, no write)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue({ ...ownedRow, name: 'Old' });
+    mockFindMany.mockResolvedValue([{ name: 'Taken' }]); // sibling presets
+    const res = await (await loadId()).PATCH(patch({ name: 'taken' }), ctx());
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({ error: 'duplicate' });
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  test('PATCH name (valid, unique) persists the sanitized name', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue({ ...ownedRow, name: 'Old' });
+    mockFindMany.mockResolvedValue([]); // no siblings
+    const res = await (await loadId()).PATCH(patch({ name: '  Neon  Nights ' }), ctx());
+    expect(res.status).toBe(200);
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ name: 'Neon Nights' }));
+  });
+
+  test('PATCH isShared:true on a PRIVATE profile returns 409 needs_public (share gate fires before any write)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(ownedRow);
+    mockProfileFindFirst.mockResolvedValue({ isPublic: false, handle: null });
+    const res = await (await loadId()).PATCH(patch({ isShared: true }), ctx());
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({ error: 'needs_public' });
+    expect(mockUpdate).not.toHaveBeenCalled();  // no sibling-clear, no main write
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+
+  test('PATCH isShared:true public+handle clears siblings then sets this one (0-or-1 per user)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(ownedRow);
+    mockProfileFindFirst.mockResolvedValue({ isPublic: true, handle: 'ana' });
+    const res = await (await loadId()).PATCH(patch({ isShared: true }), ctx());
+    expect(res.status).toBe(200);
+    // First update clears the OTHER presets' isShared; the main update sets this one.
+    expect(mockSet.mock.calls[0][0]).toEqual({ isShared: false });
+    expect(mockSet.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ isShared: true }));
+  });
+
+  test('PATCH setActive:true upserts profile.customTheme = this.seeds, setting ONLY customTheme+customThemeUpdatedAt', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(ownedRow);
+    const res = await (await loadId()).PATCH(patch({ setActive: true }), ctx());
+    expect(res.status).toBe(200);
+    // profile upsert happened
+    expect(mockInsert).toHaveBeenCalledTimes(1);
+    const values = mockValues.mock.calls[0][0];
+    expect(values.customTheme).toEqual(valid);
+    expect(values.customThemeUpdatedAt).toBeInstanceOf(Date);
+    // The onConflict SET must touch EXACTLY these two columns — never clobber handle/isPublic/etc.
+    const conflictArg = mockOnConflict.mock.calls[0][0];
+    expect(Object.keys(conflictArg.set).sort()).toEqual(['customTheme', 'customThemeUpdatedAt']);
+    expect(conflictArg.set.customTheme).toEqual(valid);
+    expect(conflictArg.set.customThemeUpdatedAt).toBeInstanceOf(Date);
+  });
+
+  test('DELETE 401 unauth (no delete)', async () => {
+    mockAuth.mockResolvedValue(null);
+    const res = await (await loadId()).DELETE(del(), ctx());
+    expect(res.status).toBe(401);
+    expect(mockDelete).not.toHaveBeenCalled();
+  });
+
+  test('DELETE on a row owned by another user returns 404 (no delete)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(undefined);
+    const res = await (await loadId()).DELETE(del(), ctx());
+    expect(res.status).toBe(404);
+    expect(mockDelete).not.toHaveBeenCalled();
+  });
+
+  test('DELETE an owned row removes it', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(ownedRow);
+    const res = await (await loadId()).DELETE(del(), ctx());
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+    expect(mockDelete).toHaveBeenCalledTimes(1);
   });
 });
