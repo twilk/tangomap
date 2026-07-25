@@ -47,7 +47,7 @@ export default async function SettingsPage() {
         <section className="tm-sec">
           <h2 className="tm-sh">Theme</h2>
           <p className="tm-lead" style={{ marginTop: '-6px' }}>Pick four colours; the app checks they stay legible, then themes everything to match. Only you see it — until you share it.</p>
-          <ThemeEditor />
+          <ThemeEditor isPublic={initial.isPublic} handle={initial.handle} />
         </section>
 
         <div className="tm-cta-row">

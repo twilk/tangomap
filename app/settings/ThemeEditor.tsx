@@ -6,12 +6,17 @@
 // (src/lib/theme, src/lib/customTheme); there is no server call and no schema.
 
 import React, { useEffect, useState } from 'react';
-import { parseTheme, deriveTokens, AA_CONTRAST, AA_UI_CONTRAST } from '@/src/lib/theme';
+import { parseTheme, deriveTokens, AA_CONTRAST, AA_UI_CONTRAST, type Theme } from '@/src/lib/theme';
 import type { ThemeTokens } from '@/design/tokens';
 import { cssVar } from '@/design/tokens';
 import { parseHex, contrastRatio } from '@/src/lib/color';
 import { applyCustomTheme, clearCustomTheme, currentCustomTheme, readMode } from '@/src/lib/customTheme';
 import { pushCustomTheme } from '@/src/lib/themeSync';
+import PresetLibrary from '@/src/components/PresetLibrary';
+
+/** Share-gate context threaded from the Settings page (the profile row it already
+ *  loads). The library pre-explains the public-profile requirement before the API 409. */
+export type ThemeEditorProps = { isPublic?: boolean; handle?: string | null };
 
 /** The four colour seeds a theme is built from — each a `#rrggbb` string the user edits. */
 export type Seeds = { ground: string; ink: string; accent: string; accent2: string };
@@ -42,13 +47,18 @@ function ratioOf(fg: string, bg: string): number | null {
   return a && b ? contrastRatio(a, b) : null;
 }
 
-export default function ThemeEditor(): React.JSX.Element {
+export default function ThemeEditor({ isPublic = false, handle = null }: ThemeEditorProps): React.JSX.Element {
   const [seeds, setSeeds] = useState<Seeds>(DEFAULT);
   const [applied, setApplied] = useState(false);
   const [confirming, setConfirming] = useState(false);
   // Effect-backed so SSR/first render never diverge from the server markup:
   // false on the server and on first client paint, then set once mounted.
   const [hasCustom, setHasCustom] = useState(false);
+  // The active theme + a mounted flag, both effect-backed for the same no-flash
+  // reason: the preset library only renders (and only learns the active seeds) on
+  // the client, so its markup can never diverge from the server's.
+  const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const t = currentCustomTheme();
@@ -56,6 +66,8 @@ export default function ThemeEditor(): React.JSX.Element {
       setSeeds({ ground: t.ground, ink: t.ink, accent: t.accent, accent2: t.accent2 });
     }
     if (t !== null || readMode() === 'custom') setHasCustom(true);
+    setActiveTheme(t);
+    setMounted(true);
   }, []);
 
   // Derived fresh each render — the single source of truth for validity + feedback.
@@ -104,9 +116,11 @@ export default function ThemeEditor(): React.JSX.Element {
   }
 
   function onApply(): void {
-    if (applyCustomTheme({ v: 1, ...seeds })) {
+    if (candidate && applyCustomTheme(candidate)) {
       setApplied(true);
       setHasCustom(true);
+      // Keep the library's "Save current as preset" gate in step with the live theme.
+      setActiveTheme(candidate);
       // Mirror to the server so the theme follows the user across devices.
       void pushCustomTheme();
     }
@@ -122,6 +136,7 @@ export default function ThemeEditor(): React.JSX.Element {
     setApplied(false);
     setConfirming(false);
     setHasCustom(false);
+    setActiveTheme(null);
     // Propagate the cleared state so other devices drop the theme too.
     void pushCustomTheme();
   }
@@ -220,6 +235,10 @@ export default function ThemeEditor(): React.JSX.Element {
             {confirming ? 'Click again to clear your custom theme' : 'Reset to default theme'}
           </button>
         </div>
+      )}
+
+      {mounted && (
+        <PresetLibrary initialActive={activeTheme} isPublic={isPublic} handle={handle} />
       )}
     </div>
   );
