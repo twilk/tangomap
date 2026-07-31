@@ -40,3 +40,41 @@ export function prerequisites(slug: string): Skill[] {
 export function unlocks(slug: string): Skill[] {
   return SKILLS.filter((s) => s.deps.includes(slug)).sort((a, b) => a.level - b.level);
 }
+
+/**
+ * The longest prerequisite chain ending at `slug`, inclusive of `slug` itself —
+ * the slug-space mirror of mapGraph's `longestPrereqPath` (kept self-contained here
+ * so the statically-generated /skill pages never reach into the id-space module).
+ * Deepest root first, `slug` last. Memoized and cycle-safe: a back-edge into the
+ * active stack terminates that branch instead of looping. Because slug === id
+ * throughout this codebase, this agrees key-for-key with the id-space version.
+ *
+ * `pathSteps` (below) is this chain's length — the "path steps" depth: 1 for a
+ * bedrock skill (just itself), growing by one for each prerequisite level beneath it.
+ */
+const PATH_MEMO = new Map<string, string[]>();
+export function longestPrereqPath(slug: string): string[] {
+  const stack = new Set<string>();
+  const go = (sl: string): string[] => {
+    const cached = PATH_MEMO.get(sl);
+    if (cached) return cached;
+    if (stack.has(sl)) return [sl]; // cycle guard: don't re-descend into the active path
+    stack.add(sl);
+    const s = bySlug.get(sl);
+    let best: string[] = [];
+    for (const dep of s ? s.deps : []) {
+      const p = go(dep);
+      if (p.length > best.length) best = p;
+    }
+    const chain = [...best, sl];
+    PATH_MEMO.set(sl, chain);
+    stack.delete(sl);
+    return chain;
+  };
+  return go(slug);
+}
+
+/** The "path steps" depth: number of skills in the longest prerequisite chain (>= 1). */
+export function pathSteps(slug: string): number {
+  return longestPrereqPath(slug).length;
+}
