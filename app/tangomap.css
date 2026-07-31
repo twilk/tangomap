@@ -158,6 +158,12 @@
   font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: var(--tm-ember);
 }
+.tsm-panel-cat {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .04em; color: var(--tm-muted);
+}
+.tsm-panel-cat-icon { display: inline-flex; color: var(--tm-ember); }
+.tsm-panel-cat-icon svg { display: block; }
 .tsm-panel-name { margin: 5px 0 0; font-family: var(--serif); font-size: 25px; line-height: 1.15; color: var(--tm-ink); font-weight: 600; }
 .tsm-panel-gloss { margin-top: 3px; font-size: 13.5px; font-style: italic; color: var(--tm-muted); }
 .tsm-panel-role {

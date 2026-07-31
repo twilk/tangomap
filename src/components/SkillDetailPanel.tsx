@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import type { MapNode } from '@/src/data/mapNodes';
 import { NODE_BY_ID, dependentsOf, pathSteps } from '@/src/lib/mapGraph';
+import { CATEGORIES, iconSvg } from '@/src/lib/dna';
 import { MapHomeCard } from '@/src/components/MapHomeCard';
 
 // The skill detail panel — the aside beside the map that opens when a node is
@@ -98,6 +99,9 @@ export function SkillDetailPanel({ node, levels, mastered, videoSlugs, onSelect,
   const unlocks = dependentsOf(node.id);
   const done = mastered.has(node.id);
   const hasVideo = videoSlugs.has(node.id);
+  // The skill's Tango-DNA category (icon + human label), so the panel names the
+  // family the skill belongs to. Guard: an unknown tag renders nothing.
+  const cat = CATEGORIES.find((c) => c.tag === node.tag);
 
   return (
     <aside className="tsm-panel" role="dialog" aria-labelledby={titleId} tabIndex={-1} ref={asideRef}>
@@ -105,6 +109,16 @@ export function SkillDetailPanel({ node, levels, mastered, videoSlugs, onSelect,
         <div className="tsm-panel-kicker">
           LEVEL {node.level + 1} · {(levels[node.level] ?? '').toUpperCase()}
         </div>
+        {cat && (
+          <div className="tsm-panel-cat">
+            <span
+              className="tsm-panel-cat-icon"
+              aria-hidden="true"
+              dangerouslySetInnerHTML={{ __html: iconSvg(cat.icon, 15) }}
+            />
+            <span className="tsm-panel-cat-label">{cat.label}</span>
+          </div>
+        )}
         <h2 id={titleId} className="tsm-panel-name">
           {node.name}
         </h2>

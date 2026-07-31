@@ -475,6 +475,22 @@ describe('TangoMap — re-hosted enhancements', () => {
     expect(container.querySelector('.tsm-guide-badge')).toBeNull();
   });
 
+  test('the selected panel names the skill category (icon + label)', async () => {
+    await render();
+
+    // ocho-adelante is tagged ROTATION → the "Turns" category
+    await clickNode('ocho-adelante');
+    const cat = container.querySelector('.tsm-panel-cat');
+    expect(cat).not.toBeNull();
+    expect(cat!.textContent).toContain('Turns');
+    // the category icon is rendered inline (currentColor SVG)
+    expect(container.querySelector('.tsm-panel-cat-icon svg')).not.toBeNull();
+
+    // selecting a STEP skill re-labels the category to "Footwork"
+    await clickNode('cross');
+    expect(container.querySelector('.tsm-panel-cat')!.textContent).toContain('Footwork');
+  });
+
   test('the onboarding modal shows on first visit and hides after dismiss (setting the flag)', async () => {
     localStorage.removeItem('tsm-onboarded');
     await render();
