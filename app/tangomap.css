@@ -69,20 +69,16 @@
 .tsm-node.kid { border-color: var(--tm-verd); }
 .tsm-node.kid .tsm-node-dot { background: var(--tm-verd); }
 
-/* selected (persistent) — the focal point. A halo ring (ember, set off from the
-   pill by a ground-coloured gap) plus elevation, a slight lift and bolder text
-   make the picked node unmistakably the one in focus — clearly stronger than the
-   hover, prereq and category treatments so it never blends in with them. */
+/* selected (persistent) */
 .tsm-node.on {
   border-color: var(--tm-ember); background: var(--tm-ember-s);
-  box-shadow: 0 0 0 2px var(--tm-ground), 0 0 0 4px var(--tm-ember), var(--tm-elev);
-  transform: scale(1.06); font-weight: 700; z-index: 5;
+  box-shadow: 0 0 0 1px var(--tm-ember); z-index: 4;
 }
 
 /* mastered → a verd "done" fill; the left accent becomes a check tick */
 .tsm-node.done { border-color: var(--tm-verd); background: var(--tm-verd-s); }
 .tsm-node.done .tsm-node-dot { background: var(--tm-verd); }
-.tsm-node.done.on { box-shadow: 0 0 0 2px var(--tm-ground), 0 0 0 4px var(--tm-verd), var(--tm-elev); }
+.tsm-node.done.on { box-shadow: 0 0 0 1px var(--tm-verd); }
 
 /* everything unrelated to the focused node dims back */
 .tsm-node.dim { opacity: .25; }
