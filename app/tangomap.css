@@ -295,6 +295,8 @@
 }
 .tsm-ex-node.center .tsm-ex-name { font-family: var(--serif); font-size: 18px; font-weight: 600; }
 .tsm-ex-node.center .tsm-ex-meta { color: var(--tm-ember); }
+/* depth caption — the longest-prereq-chain length, muted under the centre node's meta */
+.tsm-ex-depth { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--tm-faint); }
 
 .tsm-ex-node.done { border-color: var(--tm-verd); }
 .tsm-ex-badge {

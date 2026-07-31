@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { NODE_BY_ID } from '@/src/lib/mapGraph';
+import { NODE_BY_ID, pathSteps } from '@/src/lib/mapGraph';
 import { layeredLayout, radialLayout, type ExplorerLayout } from '@/src/lib/explorerLayout';
 
 // The EXPLORER canvas — the dependency-graph view for one selected skill, a sibling
@@ -158,6 +158,9 @@ export function MapExplorer({ centerId, onSelect, onExitToMap, mastered }: Props
                     {n.tag ? ` · ${n.tag}` : ''}
                   </span>
                 )}
+                {/* Depth = longest prerequisite chain to this skill. Shown on the
+                    shared centre element, so it rides both sub-layouts. */}
+                {isCenter && <span className="tsm-ex-depth">Depth {pathSteps(box.id)}</span>}
               </button>
             );
           })}
