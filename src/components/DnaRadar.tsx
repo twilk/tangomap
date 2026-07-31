@@ -294,7 +294,13 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
                 {c.skills.map((s) => (
                   <li key={s.slug} className={`tm-skill${s.on ? ' on' : ''}`}>
                     <span className="tm-dot" aria-hidden="true" />
-                    <span>{s.name}</span>
+                    {/* The skill name links to its guide. When the accordion is
+                        collapsed the panel is height:0 + aria-hidden, but an <a>
+                        stays keyboard-focusable (focus trap); pull it out of the
+                        tab order until its category is the open one. */}
+                    <a className="tm-skill-name" href={`/skill/${s.slug}`} title={s.name} tabIndex={open === i ? undefined : -1}>
+                      {s.name}
+                    </a>
                     {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
                   </li>
                 ))}
