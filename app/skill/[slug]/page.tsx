@@ -4,7 +4,7 @@ import '@/src/styles/knowledge.css';
 import { SKILLS, type Skill } from '@/src/data/skills';
 import { CATEGORIES, iconSvg, catAnchor } from '@/src/lib/dna';
 import { getSkillContent } from '@/src/lib/knowledge';
-import { adjacent, prerequisites, unlocks } from '@/src/lib/skillGraph';
+import { adjacent, prerequisites, unlocks, longestPrereqPath, pathSteps } from '@/src/lib/skillGraph';
 import { TopNav } from '@/src/components/TopNav';
 import { SkillVideo } from '@/src/components/SkillVideo';
 
@@ -34,6 +34,12 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
   const { prev, next } = adjacent(slug);
   const buildsOn = prerequisites(slug);
   const leadsTo = unlocks(slug);
+  // "The path here": the longest prerequisite chain, deepest root → this skill.
+  // slug === id, so pathSteps here matches the map's "path steps" stat exactly.
+  const steps = pathSteps(slug);
+  const pathChain = longestPrereqPath(slug)
+    .map(skillOf)
+    .filter((s): s is Skill => s !== undefined);
 
   // A related skill as an index-style card (level badge + name + tagline).
   const card = (s: Skill) => {
@@ -48,6 +54,35 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
           </span>
           <span className="tm-skcard-ar" aria-hidden="true">→</span>
         </a>
+      </li>
+    );
+  };
+
+  // One rung of "The path here": the same index card, but the final rung is the
+  // current skill — rendered in place (no link) and marked "you are here".
+  const chainItem = (s: Skill, isCurrent: boolean) => {
+    const cc = getSkillContent(s.slug);
+    const inner = (
+      <>
+        <span className="tm-skcard-lvl" aria-label={`Level ${s.level}`}>L{s.level}</span>
+        <span className="tm-skcard-body">
+          <span className="tm-skcard-name">{s.name}</span>
+          {cc?.tagline && <span className="tm-skcard-tag">{cc.tagline}</span>}
+        </span>
+        {isCurrent ? (
+          <span className="tm-skcard-here">You are here</span>
+        ) : (
+          <span className="tm-skcard-ar" aria-hidden="true">→</span>
+        )}
+      </>
+    );
+    return (
+      <li key={s.slug}>
+        {isCurrent ? (
+          <div className="tm-skcard current" aria-current="page">{inner}</div>
+        ) : (
+          <a className="tm-skcard" href={`/skill/${s.slug}`}>{inner}</a>
+        )}
       </li>
     );
   };
@@ -121,6 +156,18 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
         ) : (
           <p className="tm-callout">Detailed notes for this skill are coming soon.</p>
         )}
+
+        <section className="tm-sec">
+          <h2 className="tm-sh">The path here</h2>
+          <p className="tm-pathsub">
+            {steps === 1
+              ? 'A foundational skill — no prerequisites.'
+              : `${steps} steps from the roots.`}
+          </p>
+          <ol className="tm-pathchain">
+            {pathChain.map((s, i) => chainItem(s, i === pathChain.length - 1))}
+          </ol>
+        </section>
 
         {(buildsOn.length > 0 || leadsTo.length > 0) && (
           <section className="tm-sec">
