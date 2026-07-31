@@ -3,7 +3,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import { TangoMap } from '@/src/components/TangoMap';
 import { MAP_NODES } from '@/src/data/mapNodes';
-import { NODE_BY_ID, dependentsOf } from '@/src/lib/mapGraph';
+import { NODE_BY_ID, dependentsOf, pathSteps } from '@/src/lib/mapGraph';
 
 // React 19's act() checks this flag; without it, act() logs a warning.
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -324,6 +324,23 @@ describe('TangoMap — explorer view', () => {
     expect(container.querySelectorAll('svg.tsm-ex-edges path.tsm-ex-arrow').length).toBe(expected);
     // the centre node is the selection
     expect(container.querySelector('.tsm-ex-node.center')!.getAttribute('data-id')).toBe('cross');
+  });
+
+  test('the centre node carries a "Depth N" caption in both sub-modes', async () => {
+    await render();
+    await clickNode('cross');
+    await clickView('explorer');
+
+    // layered (default sub-mode): the depth caption sits on the centre node
+    const depth = () => container.querySelector('.tsm-ex-node.center .tsm-ex-depth');
+    expect(depth()).not.toBeNull();
+    expect(depth()!.textContent).toBe(`Depth ${pathSteps('cross')}`); // Depth 6
+
+    // switching to radial keeps the caption on the shared centre element
+    const radial = container.querySelector<HTMLButtonElement>('.tsm-ex-mode[data-mode="radial"]')!;
+    await act(async () => radial.click());
+    expect(depth()).not.toBeNull();
+    expect(depth()!.textContent).toBe(`Depth ${pathSteps('cross')}`);
   });
 
   test('the layered/radial control switches the sub-layout', async () => {

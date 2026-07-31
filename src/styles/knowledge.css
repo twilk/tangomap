@@ -61,6 +61,14 @@
 .tm-usefulhd{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--tm-ember); margin:0 0 10px; font-weight:600}
 .tm-usefulhd.b{color:var(--tm-verd)}
 
+/* "The path here" — the longest prerequisite chain, deepest root → this skill,
+   as a vertical run of index cards (.tm-skcard). The final rung is the current
+   skill: rendered in place (no link) and marked "you are here". */
+.tm-pathsub{font-size:13.5px; line-height:1.5; color:var(--tm-muted); margin:0 0 12px}
+.tm-pathchain{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+.tm-skcard.current{border-color:var(--tm-ember); background:var(--tm-panel2); cursor:default}
+.tm-skcard-here{font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--tm-ember); font-weight:600; flex:none}
+
 /* Prev/next skill pager (reading order = the /skills index). */
 .tm-skpager{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px}
 .tm-skpager-a{display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px solid var(--tm-line); border-radius:12px; background:var(--tm-panel); text-decoration:none; color:var(--tm-ink); transition:border-color .15s,background .15s; min-width:0}
