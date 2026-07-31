@@ -69,16 +69,22 @@
 .tsm-node.kid { border-color: var(--tm-verd); }
 .tsm-node.kid .tsm-node-dot { background: var(--tm-verd); }
 
-/* selected (persistent) */
+/* selected (persistent) — soft ember glow + flat emphasis (an ember ring with a
+   diffuse ember halo, plus the pill's label goes ember + heavy). No scale, so the
+   pill doesn't jump; the glow and the coloured label make it clearly the focal
+   node, distinct from the hover/prereq/category borders. */
 .tsm-node.on {
   border-color: var(--tm-ember); background: var(--tm-ember-s);
-  box-shadow: 0 0 0 1px var(--tm-ember); z-index: 4;
+  box-shadow: 0 0 0 1px var(--tm-ember), 0 0 15px 1px color-mix(in srgb, var(--tm-ember) 45%, transparent);
+  z-index: 5;
 }
+.tsm-node.on .tsm-node-name { color: var(--tm-ember); font-weight: 800; }
 
 /* mastered → a verd "done" fill; the left accent becomes a check tick */
 .tsm-node.done { border-color: var(--tm-verd); background: var(--tm-verd-s); }
 .tsm-node.done .tsm-node-dot { background: var(--tm-verd); }
-.tsm-node.done.on { box-shadow: 0 0 0 1px var(--tm-verd); }
+.tsm-node.done.on { box-shadow: 0 0 0 1px var(--tm-verd), 0 0 15px 1px color-mix(in srgb, var(--tm-verd) 45%, transparent); }
+.tsm-node.done.on .tsm-node-name { color: var(--tm-verd); }
 
 /* everything unrelated to the focused node dims back */
 .tsm-node.dim { opacity: .25; }
