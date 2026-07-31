@@ -107,6 +107,37 @@ describe('DnaCompareRadar per-half theming', () => {
   });
 });
 
+describe('DnaCompareRadar skill links', () => {
+  const links = () => [...container.querySelectorAll<HTMLAnchorElement>('a.tm-cskill-name')];
+
+  test('each skill name is an <a href="/skill/<slug>"> to its guide', async () => {
+    await render();
+    const hrefs = links().map((a) => a.getAttribute('href'));
+    // row 0 = PARTNER (embrace), row 1 = STEP (walk)
+    expect(hrefs).toContain('/skill/embrace');
+    expect(hrefs).toContain('/skill/walk');
+    // the accessible name is the skill name (and doubles as the title tooltip)
+    const embrace = links().find((a) => a.getAttribute('href') === '/skill/embrace')!;
+    expect(embrace.textContent).toBe('Embrace');
+    expect(embrace.getAttribute('title')).toBe('Embrace');
+  });
+
+  test('collapsed-row links are pulled out of the tab order; opening a row restores it', async () => {
+    await render();
+    // nothing open → every link is tabIndex -1 (no focus trap on hidden content)
+    for (const a of links()) expect(a.getAttribute('tabindex')).toBe('-1');
+
+    // open the first tape row; its links become focusable, the rest stay guarded
+    const row0 = container.querySelector<HTMLButtonElement>('.tm-tr')!;
+    await act(async () => row0.click());
+
+    const embrace = links().find((a) => a.getAttribute('href') === '/skill/embrace')!;
+    const walk = links().find((a) => a.getAttribute('href') === '/skill/walk')!;
+    expect(embrace.getAttribute('tabindex')).toBeNull(); // undefined → attribute removed
+    expect(walk.getAttribute('tabindex')).toBe('-1'); // still-collapsed row stays guarded
+  });
+});
+
 describe('DnaGenome / DnaBars per-half theming (Genome + Strengths tabs)', () => {
   async function renderNode(node: React.ReactElement) {
     await act(async () => root.render(node));

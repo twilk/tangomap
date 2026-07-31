@@ -350,7 +350,12 @@ export function DnaCompareRadar({
                     return (
                       <div className="tm-cskill" key={s.slug}>
                         <span className={`tm-dot a${s.on ? ' on' : ''}`} aria-hidden="true" />
-                        <span className="tm-cskill-name">{s.name}</span>
+                        {/* Name links to the skill guide. Collapsed rows are
+                            height:0 + aria-hidden, so drop the <a> out of the tab
+                            order until its category is open (no hidden focus trap). */}
+                        <a className="tm-cskill-name" href={`/skill/${s.slug}`} title={s.name} tabIndex={open === i ? undefined : -1}>
+                          {s.name}
+                        </a>
                         <span className={`tm-dot b${bOn ? ' on' : ''}`} aria-hidden="true" />
                       </div>
                     );
