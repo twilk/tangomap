@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 type State = 'unknown' | 'in' | 'out';
 
@@ -41,20 +42,20 @@ export function NavAuth() {
 
   if (state === 'out') {
     return (
-      <a className="tm-link" href="/signin">
+      <Link className="tm-link" href="/signin">
         Sign in
-      </a>
+      </Link>
     );
   }
 
   return (
     <>
-      <a className="tm-link" href="/me">Profile</a>
+      <Link className="tm-link" href="/me">Profile</Link>
       {/* /me/card is the canonical "my card" route — it resolves the handle, so
           the menu never has to know it. */}
-      <a className="tm-link" href="/me/card">Card</a>
-      <a className="tm-link" href="/settings">Settings</a>
-      <a className="tm-link" href="/signout">Sign out</a>
+      <Link className="tm-link" href="/me/card">Card</Link>
+      <Link className="tm-link" href="/settings">Settings</Link>
+      <Link className="tm-link" href="/signout">Sign out</Link>
     </>
   );
 }

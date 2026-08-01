@@ -170,3 +170,27 @@ describe('computeMapLayout — determinism', () => {
     expect(a).not.toEqual(b); // density actually matters
   });
 });
+
+describe('computeMapLayout — touch sizing', () => {
+  const touchAt = (width: number) =>
+    computeMapLayout(MAP_NODES, LEVELS, { width, measureText: measure, density: 'compact', touch: true });
+
+  test('on a coarse pointer every pill meets the 44px minimum tap target', () => {
+    const { nodes } = touchAt(390);
+    expect(nodes.length).toBe(MAP_NODES.length);
+    for (const b of nodes) expect(b.h).toBeGreaterThanOrEqual(44);
+  });
+
+  test('touch sizing is opt-in — the default (mouse) layout is byte-identical to before', () => {
+    // Guards the purity contract: adding the touch branch must not move a single
+    // pixel for existing non-touch callers.
+    expect(computeMapLayout(MAP_NODES, LEVELS, { width: 1100, measureText: measure, density: 'compact' })).toEqual(
+      layoutAt(1100, 'compact'),
+    );
+  });
+
+  test('touch layout is still deterministic and taller than the mouse one', () => {
+    expect(touchAt(390)).toEqual(touchAt(390));
+    expect(touchAt(390).height).toBeGreaterThan(layoutAt(390, 'compact').height);
+  });
+});

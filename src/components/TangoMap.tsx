@@ -9,7 +9,7 @@ import { MapSearch } from '@/src/components/MapSearch';
 import { MapExplorer } from '@/src/components/MapExplorer';
 import { MapCategoryNav } from '@/src/components/MapCategoryNav';
 import { MapOnboarding } from '@/src/components/MapOnboarding';
-import { MASTERED_CHANGE_EVENT } from '@/src/components/MapSync';
+import { MASTERED_CHANGE_EVENT, MASTERED_ADOPTED_EVENT } from '@/src/components/MapSync';
 
 // The whole-map view, ported from the decoded bundle's `buildMap` (template.html
 // ~L1090–1220) onto the app's --tm-* design tokens. This is the render half; the pure
@@ -28,6 +28,9 @@ const PILL_FONT_WEIGHT = 600;
 // `mapDensity ?? 'compact'`). The left page margin `m` is recomputed here from the
 // same formula the layout uses, so the level-band labels sit flush with the pills.
 const DENSITY = 'compact' as const;
+
+/** Pointer type that needs 44px tap targets (finger, stylus) rather than a cursor. */
+const COARSE_POINTER = '(pointer: coarse)';
 const pageMargin = (w: number) => Math.max(12, Math.min(22, w * 0.018));
 
 // Fallback width for environments with no layout (jsdom in tests): clientWidth is
@@ -120,6 +123,15 @@ export function TangoMap() {
     const el = scrollRef.current;
     if (!el) return;
     const width = el.clientWidth || el.getBoundingClientRect().width || FALLBACK_WIDTH;
+    // Finger or mouse? The pills are the map's primary control, so on a coarse
+    // pointer they lay out at the 44px tap-target size. Guarded: no matchMedia
+    // (jsdom/older browsers) simply means the mouse layout, as before.
+    let touch = false;
+    try {
+      touch = typeof matchMedia === 'function' && matchMedia(COARSE_POINTER).matches;
+    } catch {
+      /* no matchMedia — keep the mouse layout */
+    }
 
     let ctx = ctxRef.current;
     if (!ctx) {
@@ -136,7 +148,7 @@ export function TangoMap() {
       return ctx.measureText(text).width;
     };
 
-    setLayout(computeMapLayout(MAP_NODES, LEVELS, { width, measureText, density: DENSITY }));
+    setLayout(computeMapLayout(MAP_NODES, LEVELS, { width, measureText, density: DENSITY, touch }));
   }, []);
 
   useEffect(() => {
@@ -146,6 +158,23 @@ export function TangoMap() {
     const ro = new ResizeObserver(() => recompute());
     ro.observe(el);
     return () => ro.disconnect();
+  }, [recompute]);
+
+  // Re-lay-out if the pointer type itself changes (2-in-1 detaching its keyboard,
+  // a tablet picking up a mouse) so tap targets follow the input device. Guarded:
+  // no matchMedia, or the legacy no-addEventListener form, is simply a no-op.
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return;
+    let mq: MediaQueryList;
+    try {
+      mq = matchMedia(COARSE_POINTER);
+    } catch {
+      return;
+    }
+    if (typeof mq.addEventListener !== 'function') return;
+    const onChange = () => recompute();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
   }, [recompute]);
 
   // Restore persisted state on mount: the mastered set, and the last selection
@@ -162,6 +191,27 @@ export function TangoMap() {
     } catch {
       /* ignore */
     }
+  }, []);
+
+  // Stay live when the mastered set changes OUTSIDE this component — so the map never
+  // shows a stale count and nothing ever needs a manual refresh. Two sources:
+  //   • `storage` — another TAB of this browser wrote the shared key (the browser only
+  //     fires this in the *other* tabs, so it can never echo our own write).
+  //   • MASTERED_ADOPTED_EVENT — MapSync pulled newer state from another DEVICE and
+  //     adopted it. (This replaced a location.reload().)
+  // Both just re-read the single source of truth, so they are idempotent and order-free.
+  useEffect(() => {
+    const resync = () => setMastered(readMastered());
+    const onStorage = (e: StorageEvent) => {
+      // A null key means the whole store was cleared — that concerns us too.
+      if (e.key === null || e.key === MASTERED_KEY) resync();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener(MASTERED_ADOPTED_EVENT, resync);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(MASTERED_ADOPTED_EVENT, resync);
+    };
   }, []);
 
   // Smooth-scroll a pending node into view once the layout can place it. Cleared

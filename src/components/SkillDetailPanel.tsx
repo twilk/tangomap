@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import type { MapNode } from '@/src/data/mapNodes';
 import { NODE_BY_ID, dependentsOf, pathSteps } from '@/src/lib/mapGraph';
 import { CATEGORIES, iconSvg } from '@/src/lib/dna';
@@ -130,9 +131,9 @@ export function SkillDetailPanel({ node, levels, mastered, videoSlugs, onSelect,
 
         {/* Skill-guide link + teacher video badge. */}
         <div className="tsm-guide">
-          <a className="tsm-guide-link" href={`/skill/${node.id}`}>
+          <Link className="tsm-guide-link" href={`/skill/${node.id}`}>
             Read the guide <span aria-hidden="true">→</span>
-          </a>
+          </Link>
           {hasVideo && (
             <span className="tsm-guide-badge" aria-label="Lesson video available">
               <span aria-hidden="true">▶</span> video

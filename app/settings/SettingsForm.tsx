@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import type { ProfileDTO, Style } from '@/src/lib/types';
 
 /** The identity fields this form owns. The custom theme (customTheme /
@@ -159,7 +160,7 @@ export default function SettingsForm({ initial }: { initial: ProfileFields }) {
 
       {showPublicUrl ? (
         <p className="tm-hint">
-          Live at <a className="tm-publink" href={`/u/${state.handle}`}>partykamap.vercel.app/u/{state.handle}</a> · turn the
+          Live at <Link className="tm-publink" href={`/u/${state.handle}`}>partykamap.vercel.app/u/{state.handle}</Link> · turn the
           switch off and the page 404s instantly.
         </p>
       ) : null}

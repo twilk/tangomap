@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { iconSvg, catAnchor, type CategoryDetail } from '@/src/lib/dna';
 import '@/src/styles/wiring.css';
 
@@ -44,7 +45,7 @@ export function DnaGenome({ series, aColor, bColor }: { series: Series[]; aColor
 
       <div className="tm-gseq" role="img" aria-label={`Tango DNA sequence across ${cats.length} categories`}>
         {cats.map((c, ci) => (
-          <a className="tm-gcol" href={`/skills#${catAnchor(c.tag)}`} key={c.tag} title={`Learn ${c.label} → · ${c.done}/${c.total}`}>
+          <Link className="tm-gcol" href={`/skills#${catAnchor(c.tag)}`} key={c.tag} title={`Learn ${c.label} → · ${c.done}/${c.total}`}>
             {series.map((s, si) => {
               const col = s.cats[ci];
               return (
@@ -61,7 +62,7 @@ export function DnaGenome({ series, aColor, bColor }: { series: Series[]; aColor
               );
             })}
             <span className="tm-gaxc" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(c.icon, 15) }} />
-          </a>
+          </Link>
         ))}
       </div>
 

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { recommend } from '@/src/lib/recommend';
 import { iconSvg } from '@/src/lib/dna';
 import '@/src/styles/wiring.css';
@@ -26,7 +27,7 @@ export function Recommendations({ mastered }: { mastered: string[] }) {
       <ul className="tm-recs">
         {recs.map((r) => (
           <li key={r.slug}>
-            <a className={`tm-rec k-${r.kind}`} href={`/skill/${r.slug}`}>
+            <Link className={`tm-rec k-${r.kind}`} href={`/skill/${r.slug}`}>
               <span className="tm-rec-ico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(r.icon, 18) }} />
               <span className="tm-rec-body">
                 <span className="tm-rec-name">{r.name}</span>
@@ -34,11 +35,11 @@ export function Recommendations({ mastered }: { mastered: string[] }) {
               </span>
               <span className="tm-rec-tag">{KIND_TAG[r.kind] ?? r.kind}</span>
               <span className="tm-rec-lvl" aria-label={`Level ${r.level}`}>L{r.level}</span>
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
-      <a className="tm-link-inline" href="/">Open the map and work on these →</a>
+      <Link className="tm-link-inline" href="/">Open the map and work on these →</Link>
     </section>
   );
 }

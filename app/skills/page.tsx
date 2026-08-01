@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import '@/src/styles/knowledge.css';
 import { SKILLS } from '@/src/data/skills';
 import { CATEGORIES, iconSvg, catAnchor } from '@/src/lib/dna';
@@ -36,7 +37,7 @@ export default function SkillsIndex() {
                   const c = getSkillContent(s.slug);
                   return (
                     <li key={s.slug}>
-                      <a className={`tm-skcard${hasSkillContent(s.slug) ? '' : ' soon'}`} href={`/skill/${s.slug}`} data-skill-slug={s.slug}>
+                      <Link className={`tm-skcard${hasSkillContent(s.slug) ? '' : ' soon'}`} href={`/skill/${s.slug}`} data-skill-slug={s.slug}>
                         <span className="tm-skcard-lvl" aria-label={`Level ${s.level}`}>L{s.level}</span>
                         <span className="tm-skcard-body">
                           <span className="tm-skcard-name">
@@ -46,7 +47,7 @@ export default function SkillsIndex() {
                           {c?.tagline && <span className="tm-skcard-tag">{c.tagline}</span>}
                         </span>
                         <span className="tm-skcard-ar" aria-hidden="true">→</span>
-                      </a>
+                      </Link>
                     </li>
                   );
                 })}

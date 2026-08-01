@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
@@ -64,7 +65,7 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
         {isOwner && (
           <div className="tm-owner">
             <span><span className="dot" aria-hidden="true" />You’re viewing your public profile — this is what others see.</span>
-            <a className="tm-link-inline" href="/settings">Edit in Settings →</a>
+            <Link className="tm-link-inline" href="/settings">Edit in Settings →</Link>
           </div>
         )}
 
@@ -94,12 +95,12 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
         <ProfileSections mastered={mastered} />
 
         <div className="tm-cta-row" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <a className="tm-cta" href={`/compare?a=${encodeURIComponent(data.handle)}`}>
+          <Link className="tm-cta" href={`/compare?a=${encodeURIComponent(data.handle)}`}>
             Compare with another dancer <span className="tm-ar" aria-hidden="true">→</span>
-          </a>
-          <a className="tm-cta ghost" href={`/u/${encodeURIComponent(data.handle)}/card`}>
+          </Link>
+          <Link className="tm-cta ghost" href={`/u/${encodeURIComponent(data.handle)}/card`}>
             Dancer card <span className="tm-ar" aria-hidden="true">→</span>
-          </a>
+          </Link>
         </div>
       </main>
     </div>

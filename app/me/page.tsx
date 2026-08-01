@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
@@ -66,7 +67,7 @@ export default async function MePage() {
         {mastered.length === 0 ? (
           <div className="tm-callout">
             You haven’t marked any skills yet — your Tango DNA fills in as you go.{' '}
-            <a className="tm-link-inline" href="/">Open the map and start your climb →</a>
+            <Link className="tm-link-inline" href="/">Open the map and start your climb →</Link>
           </div>
         ) : isPublic && handle ? (
           <section className="tm-share" aria-label="Share your profile">
@@ -74,24 +75,24 @@ export default async function MePage() {
                 card (/me/card resolves the handle) — the card *is* the thing
                 being shared, and routing through the public profile first made
                 it three clicks from the map. */}
-            <a className="tm-ogthumb" href="/me/card">
+            <Link className="tm-ogthumb" href="/me/card">
               {/* eslint-disable-next-line @next/next/no-img-element -- dynamic OG route, not a static asset */}
               <img src={`/u/${handle}/opengraph-image`} alt={`Share card for @${handle}`} loading="lazy" width={1200} height={630} />
-            </a>
+            </Link>
             <div className="tm-share-body">
               <div className="tm-share-label">Your profile is live — share your DNA</div>
               <div className="tm-share-url num">partykamap.vercel.app/u/{handle}</div>
               <div className="tm-share-actions">
                 <CopyButton text={`https://partykamap.vercel.app/u/${handle}`} label="Copy link" />
-                <a className="tm-cta ghost" href="/me/card">Open your card <span className="tm-ar" aria-hidden="true">→</span></a>
-                <a className="tm-link-inline" href={`/u/${handle}`}>See how others see it →</a>
-                <a className="tm-link-inline" href="/settings">Manage visibility →</a>
+                <Link className="tm-cta ghost" href="/me/card">Open your card <span className="tm-ar" aria-hidden="true">→</span></Link>
+                <Link className="tm-link-inline" href={`/u/${handle}`}>See how others see it →</Link>
+                <Link className="tm-link-inline" href="/settings">Manage visibility →</Link>
               </div>
             </div>
           </section>
         ) : (
           <div className="tm-callout">
-            This is your private view — only you can see it. <a className="tm-link-inline" href="/settings">Publish it in Settings →</a>
+            This is your private view — only you can see it. <Link className="tm-link-inline" href="/settings">Publish it in Settings →</Link>
           </div>
         )}
 
@@ -103,9 +104,9 @@ export default async function MePage() {
 
         {handle && (
           <div className="tm-cta-row">
-            <a className="tm-cta" href={`/compare?a=${encodeURIComponent(handle)}`}>
+            <Link className="tm-cta" href={`/compare?a=${encodeURIComponent(handle)}`}>
               Compare with another dancer <span className="tm-ar" aria-hidden="true">→</span>
-            </a>
+            </Link>
           </div>
         )}
       </main>

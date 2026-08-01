@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 // The "Next up" home card — fills the idle Skill Details panel when nothing is
 // selected. A native React port of the bundle's home card: instead of a MutationObserver
@@ -62,12 +63,12 @@ export function MapHomeCard({ onSelect }: Props) {
           progress and tells you what to learn next.
         </p>
         <div className="tsm-home-actions">
-          <a className="tsm-home-btn primary" href="/signin">
+          <Link className="tsm-home-btn primary" href="/signin">
             Sign in
-          </a>
-          <a className="tsm-home-link" href="/skills">
+          </Link>
+          <Link className="tsm-home-link" href="/skills">
             Browse the guide <span aria-hidden="true">→</span>
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -114,13 +115,13 @@ export function MapHomeCard({ onSelect }: Props) {
                   </span>
                   <span className="tsm-home-next-reason">{s.reason}</span>
                 </button>
-                <a
+                <Link
                   className="tsm-home-next-guide"
                   href={`/skill/${s.slug}`}
                   aria-label={`Read the ${s.name} guide`}
                 >
                   Guide <span aria-hidden="true">→</span>
-                </a>
+                </Link>
               </div>
             ))}
           </div>
@@ -132,12 +133,12 @@ export function MapHomeCard({ onSelect }: Props) {
       )}
 
       <div className="tsm-home-actions">
-        <a className="tsm-home-btn primary" href="/me">
+        <Link className="tsm-home-btn primary" href="/me">
           Profile
-        </a>
-        <a className="tsm-home-btn" href="/me/card">
+        </Link>
+        <Link className="tsm-home-btn" href="/me/card">
           Card
-        </a>
+        </Link>
       </div>
     </div>
   );

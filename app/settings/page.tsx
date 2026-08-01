@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
@@ -51,9 +52,9 @@ export default async function SettingsPage() {
         </section>
 
         <div className="tm-cta-row">
-          <a className="tm-cta" href="/me">
+          <Link className="tm-cta" href="/me">
             View your profile <span className="tm-ar" aria-hidden="true">→</span>
-          </a>
+          </Link>
         </div>
 
         <section className="tm-sec">

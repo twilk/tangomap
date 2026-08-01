@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
@@ -85,16 +86,16 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
           recs={recommend(mastered, 3).map((r) => ({ name: r.name, label: r.label, level: r.level, reason: r.reason }))}
         />
         <div className="tm-cta-row" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', borderTop: 0, paddingTop: 0 }}>
-          <a className="tm-cta" href={`/compare?a=${encodeURIComponent(data.handle)}`}>
+          <Link className="tm-cta" href={`/compare?a=${encodeURIComponent(data.handle)}`}>
             Compare with {isOwner ? 'another dancer' : 'me'} <span className="tm-ar" aria-hidden="true">→</span>
-          </a>
-          <a className="tm-cta ghost" href={`/u/${encodeURIComponent(data.handle)}`}>
+          </Link>
+          <Link className="tm-cta ghost" href={`/u/${encodeURIComponent(data.handle)}`}>
             ← Full profile
-          </a>
+          </Link>
           <ArPresentButton serial={data.serial} name={name} />
-          <a className="tm-cta ghost" href="/ar/scan">
+          <Link className="tm-cta ghost" href="/ar/scan">
             Scan a card
-          </a>
+          </Link>
         </div>
       </main>
     </div>

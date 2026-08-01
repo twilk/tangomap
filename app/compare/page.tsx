@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/auth';
 import { db } from '@/db';
@@ -188,7 +189,7 @@ export default async function Compare({
                   : `/compare?a=${encodeURIComponent(d.handle)}`;
                 return (
                   <div className="tm-dancer" key={d.handle}>
-                    <a className="tm-dancer-main" href={`/u/${d.handle}`}>
+                    <Link className="tm-dancer-main" href={`/u/${d.handle}`}>
                       <span className="tm-dancer-ava" aria-hidden="true">{initial}</span>
                       <span className="tm-dancer-info">
                         <span className="tm-dancer-name">{d.displayName ?? d.handle}</span>
@@ -196,17 +197,17 @@ export default async function Compare({
                           @{d.handle} · {cnt}/62{d.style ? ` · ${d.style}` : ''}
                         </span>
                       </span>
-                    </a>
+                    </Link>
                     {isSelf ? (
                       <span className="tm-cself" aria-label="This is you">You</span>
                     ) : (
-                      <a className="tm-cbtn" href={href} aria-label={`Compare with ${d.displayName ?? d.handle}`}>
+                      <Link className="tm-cbtn" href={href} aria-label={`Compare with ${d.displayName ?? d.handle}`}>
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <path d="M4 8h13m0 0-4-4m4 4-4 4" />
                           <path d="M20 16H7m0 0 4 4m-4-4 4-4" />
                         </svg>
                         Compare
-                      </a>
+                      </Link>
                     )}
                   </div>
                 );

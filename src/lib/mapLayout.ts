@@ -9,10 +9,11 @@ import type { MapNode } from '@/src/data/mapNodes';
 //
 // Two deliberate departures from the bundle, both required to make the layout a
 // pure function of (nodes, width, measurer, density):
-//   1. The desktop (non-touch) constant branch is used. The bundle also has a
-//      touch branch (state.vw < 768) that only changes pill height / gaps / font;
-//      it is a viewport decision, not part of the core flow layout, so it is out
-//      of scope for this decision-free foundation.
+//   1. The touch branch is an explicit `touch` OPTION rather than a viewport read.
+//      The bundle switched on `state.vw < 768` internally; here the caller decides
+//      (TangoMap watches `(pointer: coarse)`) and passes it in, so the layout stays
+//      a pure function of its arguments. Default false === the desktop constants,
+//      byte-identical to before the option existed.
 //   2. The band stack starts below a fixed HEADER_H (the static title + progress
 //      bar, template L1104 + L1114). The bundle's "NEXT UP" chip strip that can
 //      follow is driven by per-user mastery state, which a pure layout cannot know;
@@ -33,18 +34,27 @@ export type LayoutOpts = {
   width: number;
   measureText: (text: string) => number;
   density?: 'compact' | 'comfortable';
+  /** Coarse-pointer (finger) sizing. The pills ARE the app's primary control, so on
+   *  touch they grow to the 44px minimum tap target and get a little more room to
+   *  breathe. Opt-in: omitted/false reproduces the mouse layout exactly. */
+  touch?: boolean;
 };
 
-/** The desktop layout constants for a density, mirrored from template L1095–1100. */
-function constants(width: number, dense: boolean) {
+/** Minimum comfortable tap target (px) — the same floor the CSS controls use. */
+const TOUCH_TARGET = 44;
+
+/** The layout constants for a density, mirrored from template L1095–1100, plus the
+ *  bundle's touch branch (restored: it only scales pill height and gaps). */
+function constants(width: number, dense: boolean, touch: boolean) {
   return {
     // L1095: page margin, clamped and scaled with width.
     m: Math.max(12, Math.min(dense ? 22 : 44, width * (dense ? 0.018 : 0.03))),
-    // L1096: pill height (non-touch branch).
-    pillH: dense ? 28 : 34,
-    // L1097: inter-pill gaps (non-touch branch).
-    gapX: dense ? 6 : 8,
-    gapY: dense ? 6 : 9,
+    // L1096: pill height — the touch branch lifts it to a real tap target.
+    pillH: touch ? TOUCH_TARGET : dense ? 28 : 34,
+    // L1097: inter-pill gaps (touch gets a wider vertical gutter so neighbouring
+    // rows are not mis-tapped).
+    gapX: touch ? 8 : dense ? 6 : 8,
+    gapY: touch ? 10 : dense ? 6 : 9,
     // L1099: horizontal padding added to each pill's measured text width.
     pad: dense ? 22 : 30,
     // L1100: level-header height and the gap after each level band.
@@ -95,12 +105,13 @@ export function edgePath(from: NodeBox, to: NodeBox): { d: string; sameLevel: bo
  *
  * @param nodes   the map nodes (placed in array order within each level)
  * @param levels  level headings; the array index is the level number
- * @param opts    width, injected `measureText`, and density (default 'compact')
+ * @param opts    width, injected `measureText`, density (default 'compact') and
+ *                `touch` (default false — coarse-pointer tap-target sizing)
  */
 export function computeMapLayout(nodes: MapNode[], levels: string[], opts: LayoutOpts): MapLayout {
-  const { width: W, measureText, density = 'compact' } = opts;
+  const { width: W, measureText, density = 'compact', touch = false } = opts;
   const dense = density === 'compact';
-  const { m, pillH, gapX, gapY, pad, headH, secGap, headerH } = constants(W, dense);
+  const { m, pillH, gapX, gapY, pad, headH, secGap, headerH } = constants(W, dense, touch);
 
   const boxes: NodeBox[] = [];
   const byId = new Map<string, NodeBox>();
