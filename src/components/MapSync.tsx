@@ -200,7 +200,21 @@ export function startMapSync(): () => void {
       /* no MutationObserver */
     }
     onStorage = (e: StorageEvent) => {
-      if (e.key === KEY_M || e.key === KEY_T) scheduleCheck();
+      if (e.key !== KEY_M && e.key !== KEY_T) return;
+      // A `storage` event means ANOTHER TAB owns this change, and it is already
+      // accounted for: either its user edited (that tab pushes via
+      // MASTERED_CHANGE_EVENT) or it adopted the server's row (so it is already ON
+      // the server). Both writers of these keys — this component and TangoMap — only
+      // ever mount on `/`, so there is no writer without a pusher.
+      //
+      // This must NOT schedule a push. runCheck() stamps a FRESH Date.now(), which
+      // would turn a passive copy of the server's row into the newest write under
+      // last-write-wins: if another device wrote between our GET and this push, its
+      // newer progress would be silently overwritten by the older snapshot we just
+      // adopted. Instead just re-sync bookkeeping so this tab doesn't later mistake
+      // the other tab's change for a local edit and push it.
+      lastM = keyOf(localMastered());
+      lastT = themeMode();
     };
     window.addEventListener('storage', onStorage);
     // Same-tab mark/unmark: the map dispatches this so an unmark (which produces no

@@ -21,6 +21,10 @@ const IGNORES = [
   'playwright-report/**',
   'test-results/**',
   'public/vendor/**', // vendored js-aruco (AR marker detection) — not ours to restyle
+  // Written by `next build`, git-ignored, and stamped "do not edit". CI happens to
+  // lint before it builds, so this file isn't there yet — but run `build` first
+  // locally and its triple-slash reference fails the gate on generated code.
+  'next-env.d.ts',
 ];
 
 export default tseslint.config(

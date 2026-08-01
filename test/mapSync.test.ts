@@ -253,4 +253,26 @@ describe('MapSync progress sync (last-write-wins)', () => {
     expect(m2.mock.calls.length).toBe(0); // nothing fetched while hidden
     expect(JSON.parse(localStorage.getItem('tsm-mastered')!)).toEqual(['a']);
   });
+
+  // Regression: a `storage` event is ANOTHER tab's change, already owned by that tab
+  // (it pushes its own edits) or already on the server (it adopted them). Re-pushing
+  // it here would stamp a fresh Date.now() on a passive copy, making an older snapshot
+  // the newest write under last-write-wins — silently clobbering a genuinely newer
+  // device. Found by an independent Codex review of #49.
+  test('(n) a cross-tab storage event never triggers a PUT', async () => {
+    localStorage.setItem('tsm-mastered', JSON.stringify(['a']));
+    localStorage.setItem('tsm-updated', ms('2026-07-22T00:00:00.000Z'));
+    mockApi({ mastered: ['a'], theme: 'light', sel: null, updatedAt: '2026-07-22T00:00:00.000Z' });
+    run();
+    await flush();
+
+    // Another tab adopts the server's row and writes it to the shared localStorage.
+    const m2 = mockApi({ mastered: ['a'], theme: 'light', sel: null, updatedAt: '2026-07-22T00:00:00.000Z' });
+    localStorage.setItem('tsm-mastered', JSON.stringify(['a', 'b']));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'tsm-mastered' }));
+    vi.advanceTimersByTime(1000); // past the 500ms debounce runCheck sits behind
+    await flush();
+
+    expect(puts(m2)).toHaveLength(0);
+  });
 });

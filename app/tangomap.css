@@ -249,6 +249,16 @@
   .tsm-cat-row { min-height: 44px; }
   /* Both axes: min-height alone left a 24px-wide, 44px-tall sliver, not a target. */
   .tsm-cat-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; box-sizing: border-box; }
+
+  /* The rest of the map chrome, measured under 44px on production: the search
+     field (42px), the explorer mode tabs (28px), the mastery toggle, and the
+     home-card button/link (29px / 20px). The node pills are handled separately —
+     mapLayout sizes those geometrically so the graph stays legible. */
+  .tsm-search-input { min-height: 44px; box-sizing: border-box; }
+  .tsm-ex-mode { min-height: 44px; display: inline-flex; align-items: center; box-sizing: border-box; }
+  .tsm-master { min-height: 44px; box-sizing: border-box; }
+  .tsm-home-btn { min-height: 44px; display: inline-flex; align-items: center; box-sizing: border-box; }
+  .tsm-home-link { display: inline-flex; align-items: center; min-height: 44px; }
 }
 
 /* ============================================================

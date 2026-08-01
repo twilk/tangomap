@@ -48,12 +48,50 @@ body { margin: 0; }
 .tm-themebtn:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
 .tm-themebtn .tm-sun,.tm-themebtn .tm-moon,.tm-themebtn .tm-swatch{align-items:center; justify-content:center; line-height:0}
 .tm-themebtn .tm-sun{display:none}
-/* Touch targets: on a touch pointer (or a small screen) the header nav pills and
-   the theme toggle grow to the 44px minimum tap size. Desktop mouse keeps the
-   compact size — no visual change there. */
+/* Touch targets: on a touch pointer (or a small screen) every CONTROL reaches the
+   44px minimum tap size. Desktop mouse keeps the compact size — no visual change.
+
+   Measured on production at 375px before this block existed: .tm-vbtn 85x31,
+   .tm-cbtn 98x35, .tm-preset 90x29, .tm-preset-actions button 53x26, .tm-reset
+   168x35, .tm-save 75x39, .tm-cta 343x35, .tm-dancer-main 265x40, .tm-lrow 343x40,
+   .tm-tr 343x30 — and .tm-link, which had min-height:44px but was only 34px WIDE,
+   a sliver rather than a target (the same both-axes mistake already fixed for
+   .tsm-cat-link).
+
+   NOT here, deliberately: links that sit inline INSIDE a sentence — .tm-skcat-link
+   ("Turns · Level 4"), .tm-publink ("Live at <link> · turn the…"), .tm-link-inline.
+   WCAG 2.5.8 exempts inline links precisely because padding them to 44px would
+   wreck the line box around them. Their surrounding text stays the target. */
 @media (max-width: 767px), (pointer: coarse) {
-  .tm-link{display:inline-flex; align-items:center; min-height:44px}
+  /* Both axes — min-height alone leaves a tall, narrow sliver. */
+  .tm-link{display:inline-flex; align-items:center; justify-content:center; min-height:44px; min-width:44px; box-sizing:border-box}
   .tm-themebtn{width:44px; height:44px}
+
+  /* Buttons and button-shaped links. */
+  .tm-vbtn,
+  .tm-cbtn,
+  .tm-cta,
+  .tm-preset,
+  .tm-reset,
+  .tm-save,
+  .tm-link-btn,
+  .tm-btn-ghost-danger,
+  .tm-community-cta,
+  .tm-preset-actions button{min-height:44px; display:inline-flex; align-items:center; box-sizing:border-box}
+  /* The gallery CTA is a text-styled button on its own line: give it height
+     without turning it into a padded block. */
+  .tm-community-cta{align-items:center}
+
+  /* Form controls. */
+  .tm-select,
+  .tm-preset-name-input{min-height:44px; box-sizing:border-box}
+  .tm-seg .opt{min-height:44px; display:flex; align-items:center; justify-content:center; box-sizing:border-box}
+
+  /* Whole-row targets: the row is what a thumb aims at, not the text inside it. */
+  .tm-lrow,
+  .tm-tr,
+  .tm-dancer-main,
+  .tm-preset-row{min-height:44px; box-sizing:border-box}
 }
 .tm-themebtn .tm-moon{display:inline-flex}
 :root[data-theme="dark"] .tm-themebtn .tm-sun{display:inline-flex}
