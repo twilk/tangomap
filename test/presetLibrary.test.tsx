@@ -303,4 +303,72 @@ describe('PresetLibrary', () => {
 
     expect(container.textContent).toMatch(/set a handle/i);
   });
+
+  test('an already-shared preset offers "Stop sharing", not a dead "Share"', async () => {
+    installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/presets') return { body: [preset('p1', 'Carmesí', A, true)] };
+      return {};
+    });
+
+    await render({ initialActive: A, isPublic: true, handle: 'zbig' });
+
+    const row = rows()[0];
+    // The status badge still reads "Shared"…
+    expect(row.textContent).toMatch(/shared/i);
+    // …but the action is now "Stop sharing" — there is no plain "Share" button.
+    expect(() => buttonIn(row, 'Stop sharing')).not.toThrow();
+    const share = Array.from(row.querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Share');
+    expect(share).toBeUndefined();
+  });
+
+  test('clicking "Stop sharing" PATCHes {isShared:false}, drops the badge, and flips back to "Share"', async () => {
+    const fetchMock = installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/presets') return { body: [preset('p1', 'Carmesí', A, true)] };
+      if (method === 'PATCH' && url === '/api/presets/p1') return { body: { ok: true } };
+      return {};
+    });
+
+    await render({ initialActive: A, isPublic: true, handle: 'zbig' });
+    expect(rows()[0].textContent).toMatch(/shared/i);
+
+    await act(async () => {
+      buttonIn(rows()[0], 'Stop sharing').click();
+      await flush();
+    });
+
+    const patch = fetchMock.mock.calls.find(
+      ([url, init]) => url === '/api/presets/p1' && (init as RequestInit)?.method === 'PATCH',
+    );
+    expect(patch).toBeTruthy();
+    expect(bodyOf(patch![1] as RequestInit)).toMatchObject({ isShared: false });
+    // Badge cleared (check the badge element, not textContent — "Share"+"Delete"
+    // concatenate to "ShareDelete", which spuriously contains "shared") and the
+    // affordance is back to "Share".
+    const badges = Array.from(rows()[0].querySelectorAll('.badge')).map((b) => b.textContent?.trim().toLowerCase());
+    expect(badges).not.toContain('shared');
+    expect(() => buttonIn(rows()[0], 'Share')).not.toThrow();
+  });
+
+  test('"Stop sharing" needs no handle — it PATCHes even when handle is null', async () => {
+    const fetchMock = installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/presets') return { body: [preset('p1', 'Carmesí', A, true)] };
+      if (method === 'PATCH' && url === '/api/presets/p1') return { body: { ok: true } };
+      return {};
+    });
+
+    // No handle, yet a preset is already shared (e.g. handle was cleared later) — you
+    // must still be able to STOP sharing without being told to "set a handle".
+    await render({ initialActive: A, isPublic: false, handle: null });
+
+    await act(async () => {
+      buttonIn(rows()[0], 'Stop sharing').click();
+      await flush();
+    });
+
+    const patched = fetchMock.mock.calls.some(
+      ([url, init]) => url === '/api/presets/p1' && (init as RequestInit)?.method === 'PATCH',
+    );
+    expect(patched).toBe(true);
+    expect(container.textContent).not.toMatch(/set a handle/i);
+  });
 });
