@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { startMapSync, MASTERED_CHANGE_EVENT } from '@/src/components/MapSync';
+import { startMapSync, MASTERED_CHANGE_EVENT, MASTERED_ADOPTED_EVENT } from '@/src/components/MapSync';
 
 // The React port of the bundle's old progress-sync script. startMapSync() reads
 // globalThis fetch / localStorage / document / window exactly as the IIFE did, so we
@@ -169,5 +169,88 @@ describe('MapSync progress sync (last-write-wins)', () => {
     await flush();
     expect(puts(m).length).toBeGreaterThan(0);
     expect(putBody(m).theme).toBe('dark'); // readMode() → 'dark', pushed as progress.theme
+  });
+
+  // --- Live adoption: no page reload, ever -----------------------------------
+  // Adopting another device's state used to call location.reload(). It now writes
+  // localStorage and ANNOUNCES the change so the map re-renders in place.
+
+  test('(i) adopting newer server progress announces it instead of reloading', async () => {
+    const seen: string[] = [];
+    const onAdopted = () => seen.push('adopted');
+    window.addEventListener(MASTERED_ADOPTED_EVENT, onAdopted);
+    localStorage.setItem('tsm-mastered', JSON.stringify(['a']));
+    localStorage.setItem('tsm-updated', ms('2026-07-01T00:00:00.000Z')); // local OLDER
+    mockApi({ mastered: ['a', 'b'], theme: 'light', sel: null, updatedAt: '2026-07-22T00:00:00.000Z' });
+    run();
+    await flush();
+    window.removeEventListener(MASTERED_ADOPTED_EVENT, onAdopted);
+
+    expect(JSON.parse(localStorage.getItem('tsm-mastered')!)).toEqual(['a', 'b']); // adopted
+    expect(seen).toEqual(['adopted']); // and announced exactly once
+  });
+
+  test('(j) adopting a newer server THEME reflects it on <html data-theme> live', async () => {
+    localStorage.setItem('tsm-mastered', JSON.stringify(['a']));
+    localStorage.setItem('tsm-theme', 'light');
+    localStorage.setItem('tsm-updated', ms('2026-07-01T00:00:00.000Z')); // local OLDER
+    mockApi({ mastered: ['a'], theme: 'dark', sel: null, updatedAt: '2026-07-22T00:00:00.000Z' });
+    run();
+    await flush();
+
+    expect(localStorage.getItem('tsm-theme')).toBe('dark');
+    // The reload used to be what repainted the page; the mode must now be applied.
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  test('(k) adopting an UNCHANGED server state announces nothing (no needless re-render)', async () => {
+    const seen: string[] = [];
+    const onAdopted = () => seen.push('adopted');
+    window.addEventListener(MASTERED_ADOPTED_EVENT, onAdopted);
+    localStorage.setItem('tsm-mastered', JSON.stringify(['a']));
+    localStorage.setItem('tsm-theme', 'light');
+    localStorage.setItem('tsm-updated', ms('2026-07-01T00:00:00.000Z')); // older clock…
+    mockApi({ mastered: ['a'], theme: 'light', sel: null, updatedAt: '2026-07-22T00:00:00.000Z' }); // …same data
+    run();
+    await flush();
+    window.removeEventListener(MASTERED_ADOPTED_EVENT, onAdopted);
+
+    expect(seen).toEqual([]);
+  });
+
+  // --- Cross-device liveness: re-pull when the tab comes back ----------------
+
+  test('(l) returning to the tab re-pulls and adopts what another device changed', async () => {
+    localStorage.setItem('tsm-mastered', JSON.stringify(['a']));
+    localStorage.setItem('tsm-updated', ms('2026-07-22T00:00:00.000Z')); // in sync at mount
+    const m = mockApi({ mastered: ['a'], theme: 'light', sel: null, updatedAt: '2026-07-22T00:00:00.000Z' });
+    run();
+    await flush();
+    const getsAtMount = m.mock.calls.filter((c) => !(c[1] as RequestInit | undefined)?.method).length;
+
+    // Meanwhile another device marks 'b'. The user switches back to this tab.
+    mockApi({ mastered: ['a', 'b'], theme: 'light', sel: null, updatedAt: '2026-07-23T00:00:00.000Z' });
+    document.dispatchEvent(new Event('visibilitychange'));
+    await flush();
+
+    expect(getsAtMount).toBeGreaterThan(0);
+    expect(JSON.parse(localStorage.getItem('tsm-mastered')!)).toEqual(['a', 'b']);
+  });
+
+  test('(m) a tab going HIDDEN does not trigger a pull', async () => {
+    localStorage.setItem('tsm-mastered', JSON.stringify(['a']));
+    localStorage.setItem('tsm-updated', ms('2026-07-22T00:00:00.000Z'));
+    mockApi({ mastered: ['a'], theme: 'light', sel: null, updatedAt: '2026-07-22T00:00:00.000Z' });
+    run();
+    await flush();
+
+    const m2 = mockApi({ mastered: ['a', 'b'], theme: 'light', sel: null, updatedAt: '2026-07-23T00:00:00.000Z' });
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+    await flush();
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+
+    expect(m2.mock.calls.length).toBe(0); // nothing fetched while hidden
+    expect(JSON.parse(localStorage.getItem('tsm-mastered')!)).toEqual(['a']);
   });
 });

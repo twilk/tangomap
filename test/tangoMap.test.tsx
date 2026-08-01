@@ -2,6 +2,7 @@ import { act } from 'react';
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import { TangoMap } from '@/src/components/TangoMap';
+import { MASTERED_ADOPTED_EVENT } from '@/src/components/MapSync';
 import { MAP_NODES } from '@/src/data/mapNodes';
 import { NODE_BY_ID, dependentsOf, pathSteps } from '@/src/lib/mapGraph';
 
@@ -280,6 +281,60 @@ describe('TangoMap', () => {
     expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(true);
     expect(container.querySelector('button.tsm-node[data-id="walking"]')!.classList.contains('done')).toBe(true);
     expect(container.querySelector('button.tsm-node[data-id="posture"]')!.classList.contains('done')).toBe(false);
+  });
+
+  test('another tab marking a skill re-renders this map live (storage event, no reload)', async () => {
+    await render();
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(false);
+
+    // Another tab writes the shared key; the browser fires `storage` in THIS tab.
+    // (jsdom does not fire it for same-window writes, so we dispatch it explicitly —
+    // exactly the event a real second tab would produce.)
+    await act(async () => {
+      localStorage.setItem('tsm-mastered', JSON.stringify(['cross', 'walking']));
+      window.dispatchEvent(
+        new StorageEvent('storage', { key: 'tsm-mastered', newValue: JSON.stringify(['cross', 'walking']) }),
+      );
+    });
+
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(true);
+    expect(container.querySelector('button.tsm-node[data-id="walking"]')!.classList.contains('done')).toBe(true);
+  });
+
+  test('an unmark in another tab clears the pill here too', async () => {
+    localStorage.setItem('tsm-mastered', JSON.stringify(['cross']));
+    await render();
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(true);
+
+    await act(async () => {
+      localStorage.setItem('tsm-mastered', '[]');
+      window.dispatchEvent(new StorageEvent('storage', { key: 'tsm-mastered', newValue: '[]' }));
+    });
+
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(false);
+  });
+
+  test('an unrelated storage key does not disturb the map', async () => {
+    localStorage.setItem('tsm-mastered', JSON.stringify(['cross']));
+    await render();
+    await act(async () => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'tsm-view', newValue: 'explorer' }));
+    });
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(true);
+  });
+
+  test('progress adopted from another DEVICE re-renders the map in place (no reload)', async () => {
+    await render();
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(false);
+
+    // MapSync reconciled with the server, found it newer, wrote localStorage and
+    // announced it. The map must re-read — this is what used to require location.reload().
+    await act(async () => {
+      localStorage.setItem('tsm-mastered', JSON.stringify(['cross']));
+      window.dispatchEvent(new Event(MASTERED_ADOPTED_EVENT));
+    });
+
+    expect(container.querySelector('button.tsm-node[data-id="cross"]')!.classList.contains('done')).toBe(true);
   });
 
   test('selection persists: a pre-seeded tsm-sel is restored on mount', async () => {

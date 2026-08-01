@@ -9,7 +9,7 @@ import { MapSearch } from '@/src/components/MapSearch';
 import { MapExplorer } from '@/src/components/MapExplorer';
 import { MapCategoryNav } from '@/src/components/MapCategoryNav';
 import { MapOnboarding } from '@/src/components/MapOnboarding';
-import { MASTERED_CHANGE_EVENT } from '@/src/components/MapSync';
+import { MASTERED_CHANGE_EVENT, MASTERED_ADOPTED_EVENT } from '@/src/components/MapSync';
 
 // The whole-map view, ported from the decoded bundle's `buildMap` (template.html
 // ~L1090–1220) onto the app's --tm-* design tokens. This is the render half; the pure
@@ -162,6 +162,27 @@ export function TangoMap() {
     } catch {
       /* ignore */
     }
+  }, []);
+
+  // Stay live when the mastered set changes OUTSIDE this component — so the map never
+  // shows a stale count and nothing ever needs a manual refresh. Two sources:
+  //   • `storage` — another TAB of this browser wrote the shared key (the browser only
+  //     fires this in the *other* tabs, so it can never echo our own write).
+  //   • MASTERED_ADOPTED_EVENT — MapSync pulled newer state from another DEVICE and
+  //     adopted it. (This replaced a location.reload().)
+  // Both just re-read the single source of truth, so they are idempotent and order-free.
+  useEffect(() => {
+    const resync = () => setMastered(readMastered());
+    const onStorage = (e: StorageEvent) => {
+      // A null key means the whole store was cleared — that concerns us too.
+      if (e.key === null || e.key === MASTERED_KEY) resync();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener(MASTERED_ADOPTED_EVENT, resync);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(MASTERED_ADOPTED_EVENT, resync);
+    };
   }, []);
 
   // Smooth-scroll a pending node into view once the layout can place it. Cleared
