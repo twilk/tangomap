@@ -19,9 +19,20 @@
  *     BackLink, which pairs a real href with preventDefault + router.back().
  */
 
+/** Same-origin paths that are NOT app routes, so next/link is the wrong tool: API
+ *  handlers, and anything with a file extension (/favicon.ico, /cv.pdf, an exported
+ *  .csv). Flagging these would make the gate block correct code. */
+function isNonRoutePath(value) {
+  if (value.startsWith('/api/')) return true;
+  const path = value.split(/[?#]/)[0];
+  return /\.[a-z0-9]{2,5}$/i.test(path);
+}
+
 /** An href value that should have been a <Link>: app-internal, single leading slash. */
 function isInternalPath(value) {
-  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//');
+  if (typeof value !== 'string') return false;
+  if (!value.startsWith('/') || value.startsWith('//')) return false;
+  return !isNonRoutePath(value);
 }
 
 /** Read a literal href out of `href="/x"` or {`/x/${y}`}; null when not statically known. */
@@ -56,19 +67,30 @@ export const noInternalAHref = {
 
         let href = null;
         let hrefAttr = null;
-        for (const attr of node.attributes) {
-          // A spread ({...props}) could carry anything — don't guess, stay quiet.
-          if (attr.type === 'JSXSpreadAttribute') return;
+        let hrefIndex = -1;
+        let lastSpreadIndex = -1;
+        for (let i = 0; i < node.attributes.length; i++) {
+          const attr = node.attributes[i];
+          // A spread ({...props}) could carry href/target/download — but only the ones
+          // AFTER an explicit href can override it. Record the position instead of
+          // bailing outright, or `<a {...props} href="/skills">` escapes the rule even
+          // though the later explicit href definitively wins.
+          if (attr.type === 'JSXSpreadAttribute') { lastSpreadIndex = i; continue; }
           if (attr.type !== 'JSXAttribute' || attr.name.type !== 'JSXIdentifier') continue;
           const n = attr.name.name;
           if (n === 'target' || n === 'download') return; // deliberately leaving the SPA
           if (n === 'href') {
             hrefAttr = attr;
+            hrefIndex = i;
             href = staticHref(attr);
           }
         }
 
-        if (hrefAttr && isInternalPath(href)) {
+        // No explicit href, or a spread that could still overwrite it / add target:
+        // can't know statically, so stay quiet rather than cry wolf.
+        if (!hrefAttr || lastSpreadIndex > hrefIndex) return;
+
+        if (isInternalPath(href)) {
           context.report({ node: hrefAttr, messageId: 'useLink', data: { href } });
         }
       },
