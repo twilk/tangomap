@@ -88,6 +88,38 @@ describe('CommunityThemes', () => {
     expect(b[1].style.getPropertyValue('--tm-ground')).toBe(deriveTokens(B).ground);
   });
 
+  test('a Tango Map starter is labelled "by Tango Map" (no @), a real dancer keeps "by @handle"', async () => {
+    installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/community-themes') {
+        return { body: [ct('starter:midnight', 'Midnight', B, 'tangomap'), ct('p1', 'Carmesí', A, 'ana')] };
+      }
+      return {};
+    });
+
+    await render();
+
+    const b = buttons();
+    // The official curator shows the brand name, never an @handle.
+    expect(b[0].querySelector('.by')?.textContent).toBe('by Tango Map');
+    expect(b[0].querySelector('.by')?.textContent).not.toMatch(/@/);
+    // A real dancer's shared theme keeps the @handle.
+    expect(b[1].querySelector('.by')?.textContent).toBe('by @ana');
+  });
+
+  test('renders a clear heading, a one-line intro, and the "Share your first theme" CTA', async () => {
+    installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/community-themes') return { body: [ct('starter:midnight', 'Midnight', B, 'tangomap')] };
+      return {};
+    });
+
+    await render();
+
+    expect(container.querySelector('.tm-community-h')?.textContent).toMatch(/community/i);
+    expect(container.querySelector('.tm-community-intro')?.textContent?.length).toBeGreaterThan(0);
+    const cta = Array.from(container.querySelectorAll('button')).find((x) => /share your first theme/i.test(x.textContent ?? ''));
+    expect(cta).toBeTruthy();
+  });
+
   test('clicking a button applies the theme (data-theme=custom + tsm-custom-css written)', async () => {
     installFetch((method, url) => {
       if (method === 'GET' && url === '/api/community-themes') return { body: [ct('p1', 'Carmesí', A)] };
