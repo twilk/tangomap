@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
 import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
 import { traceSmooth } from '@/src/lib/radarPath';
@@ -298,9 +299,9 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
                         collapsed the panel is height:0 + aria-hidden, but an <a>
                         stays keyboard-focusable (focus trap); pull it out of the
                         tab order until its category is the open one. */}
-                    <a className="tm-skill-name" href={`/skill/${s.slug}`} title={s.name} tabIndex={open === i ? undefined : -1}>
+                    <Link className="tm-skill-name" href={`/skill/${s.slug}`} title={s.name} tabIndex={open === i ? undefined : -1}>
                       {s.name}
-                    </a>
+                    </Link>
                     {s.on && <span className="tm-check" aria-label="mastered">✓</span>}
                   </li>
                 ))}

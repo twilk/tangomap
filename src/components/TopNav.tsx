@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import { ThemeToggle } from './ThemeToggle';
 import { BackLink } from './BackLink';
 import { NavAuth } from './NavAuth';
@@ -25,8 +26,8 @@ export function TopNav({ back, children }: { back?: string; children?: ReactNode
       <span className="tm-brand"><span className="d" aria-hidden="true" />Tango Map</span>
       <span className="tm-nav">
         {back && <BackLink fallback={back} />}
-        <a className="tm-link" href="/">Map</a>
-        <a className="tm-link" href="/skills">Learn</a>
+        <Link className="tm-link" href="/">Map</Link>
+        <Link className="tm-link" href="/skills">Learn</Link>
         <NavAuth />
         {children}
         <ThemeToggle />

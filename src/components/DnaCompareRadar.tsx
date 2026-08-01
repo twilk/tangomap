@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { motion, useReducedMotion } from 'motion/react';
 import { iconSvg, type CategoryDetail } from '@/src/lib/dna';
 import { traceSmooth } from '@/src/lib/radarPath';
@@ -353,9 +354,9 @@ export function DnaCompareRadar({
                         {/* Name links to the skill guide. Collapsed rows are
                             height:0 + aria-hidden, so drop the <a> out of the tab
                             order until its category is open (no hidden focus trap). */}
-                        <a className="tm-cskill-name" href={`/skill/${s.slug}`} title={s.name} tabIndex={open === i ? undefined : -1}>
+                        <Link className="tm-cskill-name" href={`/skill/${s.slug}`} title={s.name} tabIndex={open === i ? undefined : -1}>
                           {s.name}
-                        </a>
+                        </Link>
                         <span className={`tm-dot b${bOn ? ' on' : ''}`} aria-hidden="true" />
                       </div>
                     );

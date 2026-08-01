@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import '@/src/styles/knowledge.css';
 import { SKILLS, type Skill } from '@/src/data/skills';
@@ -46,14 +47,14 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
     const cc = getSkillContent(s.slug);
     return (
       <li key={s.slug}>
-        <a className="tm-skcard" href={`/skill/${s.slug}`}>
+        <Link className="tm-skcard" href={`/skill/${s.slug}`}>
           <span className="tm-skcard-lvl" aria-label={`Level ${s.level}`}>L{s.level}</span>
           <span className="tm-skcard-body">
             <span className="tm-skcard-name">{s.name}</span>
             {cc?.tagline && <span className="tm-skcard-tag">{cc.tagline}</span>}
           </span>
           <span className="tm-skcard-ar" aria-hidden="true">→</span>
-        </a>
+        </Link>
       </li>
     );
   };
@@ -81,7 +82,7 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
         {isCurrent ? (
           <div className="tm-skcard current" aria-current="page">{inner}</div>
         ) : (
-          <a className="tm-skcard" href={`/skill/${s.slug}`}>{inner}</a>
+          <Link className="tm-skcard" href={`/skill/${s.slug}`}>{inner}</Link>
         )}
       </li>
     );
@@ -96,7 +97,7 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
           <span className="tm-skico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: iconSvg(cat?.icon ?? '', 26) }} />
           <div>
             <p className="tm-skcat">
-              <a className="tm-skcat-link" href={`/skills#${catAnchor(skill.tag)}`}>{cat?.label ?? skill.tag}</a> · Level {skill.level}
+              <Link className="tm-skcat-link" href={`/skills#${catAnchor(skill.tag)}`}>{cat?.label ?? skill.tag}</Link> · Level {skill.level}
             </p>
             <h1 className="tm-h1">{skill.name}</h1>
             {c?.tagline && <p className="tm-sksub">{c.tagline}</p>}
@@ -188,41 +189,41 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
         )}
 
         <div className="tm-skcta">
-          <a className="tm-cta ghost" href="/skills">
+          <Link className="tm-cta ghost" href="/skills">
             <span className="tm-ar" aria-hidden="true">←</span> All skills
-          </a>
+          </Link>
           {/* Reading about a skill should lead somewhere personal. /me redirects
               a signed-out visitor to sign-in, so the label promises the DNA
               rather than assuming they already have one. */}
-          <a className="tm-cta ghost" href="/me">
+          <Link className="tm-cta ghost" href="/me">
             See it in your Tango DNA <span className="tm-ar" aria-hidden="true">→</span>
-          </a>
-          <a className="tm-cta" href="/">
+          </Link>
+          <Link className="tm-cta" href="/">
             Open the map <span className="tm-ar" aria-hidden="true">→</span>
-          </a>
+          </Link>
         </div>
 
         {(prev || next) && (
           <nav className="tm-skpager" aria-label="Browse skills">
             {prev ? (
-              <a className="tm-skpager-a" rel="prev" href={`/skill/${prev.slug}`}>
+              <Link className="tm-skpager-a" rel="prev" href={`/skill/${prev.slug}`}>
                 <span className="tm-ar" aria-hidden="true">←</span>
                 <span className="tm-skpager-t">
                   <span className="tm-skpager-k">Previous</span>
                   <span className="tm-skpager-n">{prev.name}</span>
                 </span>
-              </a>
+              </Link>
             ) : (
               <span aria-hidden="true" />
             )}
             {next ? (
-              <a className="tm-skpager-a next" rel="next" href={`/skill/${next.slug}`}>
+              <Link className="tm-skpager-a next" rel="next" href={`/skill/${next.slug}`}>
                 <span className="tm-skpager-t">
                   <span className="tm-skpager-k">Next</span>
                   <span className="tm-skpager-n">{next.name}</span>
                 </span>
                 <span className="tm-ar" aria-hidden="true">→</span>
-              </a>
+              </Link>
             ) : (
               <span aria-hidden="true" />
             )}

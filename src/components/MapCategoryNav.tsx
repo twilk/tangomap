@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { CATEGORIES, iconSvg, catAnchor } from '@/src/lib/dna';
 
 // The "Browse by category" navigator — a native React port of the bundle's category rail.
@@ -51,13 +52,13 @@ export function MapCategoryNav({ counts, pinned, onHover, onPin }: Props) {
                 <span className="tsm-cat-label">{c.label}</span>
                 <span className="tsm-cat-count">{counts[c.tag] ?? 0}</span>
               </button>
-              <a
+              <Link
                 className="tsm-cat-link"
                 href={`/skills#${catAnchor(c.tag)}`}
                 aria-label={`Open ${c.label} in the guide`}
               >
                 <span aria-hidden="true">→</span>
-              </a>
+              </Link>
             </li>
           );
         })}

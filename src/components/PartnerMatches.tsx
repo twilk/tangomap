@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { danceScore, learnScore } from '@/src/lib/matching';
 import type { PublicProfile } from '@/src/lib/types';
 
@@ -58,10 +59,10 @@ export function PartnerMatches({ mastered, meHandle, dancers }: { mastered: stri
             <span className="tm-match-score" title="Dance match" aria-label={`${Math.round(s.score * 100)}% dance match`}>
               {Math.round(s.score * 100)}%
             </span>
-            <a className="tm-cbtn" href={compareHref(d.handle)} aria-label={`Compare with ${nameOf(d)}`}>
+            <Link className="tm-cbtn" href={compareHref(d.handle)} aria-label={`Compare with ${nameOf(d)}`}>
               <CompareIcon />
               Compare
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
@@ -82,10 +83,10 @@ export function PartnerMatches({ mastered, meHandle, dancers }: { mastered: stri
                     {l.topSkills.length ? ` — ${l.topSkills.join(', ')}${l.canTeach > l.topSkills.length ? '…' : ''}` : ''}
                   </span>
                 </span>
-                <a className="tm-cbtn" href={compareHref(d.handle)} aria-label={`Compare with ${nameOf(d)}`}>
+                <Link className="tm-cbtn" href={compareHref(d.handle)} aria-label={`Compare with ${nameOf(d)}`}>
                   <CompareIcon />
                   Compare
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

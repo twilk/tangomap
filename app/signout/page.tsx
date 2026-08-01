@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { signOut } from '@/auth';
 import { TopNav } from '@/src/components/TopNav';
 
@@ -24,7 +25,7 @@ export default function SignOutPage() {
             </button>
           </form>
           <p style={{ marginTop: '18px' }}>
-            <a className="tm-link" href="/">Never mind — back to the map</a>
+            <Link className="tm-link" href="/">Never mind — back to the map</Link>
           </p>
         </div>
       </main>
