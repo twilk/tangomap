@@ -22,6 +22,12 @@ async function load() {
   return import('@/src/lib/publicProfile');
 }
 
+// The curated starters are prepended to every gallery read — imported here so the
+// tests assert on the real data, not a copy.
+import { STARTER_COMMUNITY_THEMES } from '@/src/lib/communityStarters';
+const STARTER_IDS = STARTER_COMMUNITY_THEMES.map((t) => t.id);
+const N_STARTERS = STARTER_COMMUNITY_THEMES.length;
+
 /** A chainable db.select(...) stub that resolves to `rows` when `.limit()` is called,
  *  mirroring select().from().innerJoin().where().orderBy().limit(). */
 function selectResolving(rows: unknown[]) {
@@ -130,19 +136,33 @@ describe('getPublicProfile', () => {
 });
 
 describe('getCommunityThemes', () => {
-  test('shapes valid rows and drops a malformed-seed one (re-validated through parseTheme)', async () => {
+  test('the 3 curated starters are always present and come FIRST, then the live shared themes', async () => {
     dbSelect.mockReturnValue(
       selectResolving([
-        { id: 'p1', name: 'Carmesí', seeds: THEME, isShared: true, isPublic: true, authorHandle: 'ana', authorDisplayName: 'Ana' },
-        { id: 'p2', name: 'Rotten', seeds: BAD_THEME, isShared: true, isPublic: true, authorHandle: 'bob', authorDisplayName: null },
+        { id: 'p1', name: 'Carmesí', seeds: THEME, isShared: true, authorHandle: 'ana', authorDisplayName: 'Ana' },
       ]),
     );
     const { getCommunityThemes } = await load();
     const list = await getCommunityThemes();
 
+    expect(list).toHaveLength(N_STARTERS + 1);
+    expect(list.slice(0, N_STARTERS).map((t) => t.id)).toEqual(STARTER_IDS);
+    expect(list[N_STARTERS].id).toBe('p1');
+  });
+
+  test('shapes valid rows and drops a malformed-seed one (re-validated through parseTheme)', async () => {
+    dbSelect.mockReturnValue(
+      selectResolving([
+        { id: 'p1', name: 'Carmesí', seeds: THEME, isShared: true, authorHandle: 'ana', authorDisplayName: 'Ana' },
+        { id: 'p2', name: 'Rotten', seeds: BAD_THEME, isShared: true, authorHandle: 'bob', authorDisplayName: null },
+      ]),
+    );
+    const { getCommunityThemes } = await load();
+    const live = (await getCommunityThemes()).slice(N_STARTERS);
+
     // The rotten row is dropped; the good one is shaped as CommunityTheme.
-    expect(list).toHaveLength(1);
-    expect(list[0]).toEqual({
+    expect(live).toHaveLength(1);
+    expect(live[0]).toEqual({
       id: 'p1',
       name: 'Carmesí',
       seeds: THEME,
@@ -150,42 +170,52 @@ describe('getCommunityThemes', () => {
       authorDisplayName: 'Ana',
     });
     // The privacy flags are NOT leaked into the DTO.
-    expect(list[0]).not.toHaveProperty('isShared');
-    expect(list[0]).not.toHaveProperty('isPublic');
+    expect(live[0]).not.toHaveProperty('isShared');
+    expect(live[0]).not.toHaveProperty('isPublic');
     expect(dbSelect).toHaveBeenCalledTimes(1);
   });
 
-  test('JS gate (defense-in-depth): from a MIXED set only shared+public+handle rows survive', async () => {
+  test('a shared theme from a NON-PUBLIC author WITH a handle IS listed (gate no longer requires isPublic)', async () => {
     dbSelect.mockReturnValue(
       selectResolving([
-        // the one that should survive
-        { id: 'ok', name: 'Keeper', seeds: THEME, isShared: true, isPublic: true, authorHandle: 'ana', authorDisplayName: 'Ana' },
-        // shared but author PRIVATE — a regression dropping eq(profile.isPublic,true) must still not leak this
         { id: 'priv', name: 'Private author', seeds: THEME, isShared: true, isPublic: false, authorHandle: 'bob', authorDisplayName: 'Bob' },
-        // NON-shared but public — a regression dropping eq(themePreset.isShared,true) must still not leak this
+      ]),
+    );
+    const { getCommunityThemes } = await load();
+    const live = (await getCommunityThemes()).slice(N_STARTERS);
+    expect(live.map((t) => t.id)).toEqual(['priv']);
+  });
+
+  test('JS gate (defense-in-depth): from a MIXED set only shared+handle rows survive (no isPublic requirement)', async () => {
+    dbSelect.mockReturnValue(
+      selectResolving([
+        // shared + handle — survives, regardless of isPublic
+        { id: 'ok', name: 'Keeper', seeds: THEME, isShared: true, isPublic: false, authorHandle: 'ana', authorDisplayName: 'Ana' },
+        // NON-shared — a regression dropping eq(themePreset.isShared,true) must still not leak this
         { id: 'unshared', name: 'Not shared', seeds: THEME, isShared: false, isPublic: true, authorHandle: 'cid', authorDisplayName: 'Cid' },
-        // null handle
+        // null handle — a regression dropping isNotNull(profile.handle) must still not leak this
         { id: 'nohandle', name: 'No handle', seeds: THEME, isShared: true, isPublic: true, authorHandle: null, authorDisplayName: null },
       ]),
     );
     const { getCommunityThemes } = await load();
-    const list = await getCommunityThemes();
+    const live = (await getCommunityThemes()).slice(N_STARTERS);
 
-    expect(list.map((t) => t.id)).toEqual(['ok']);
+    expect(live.map((t) => t.id)).toEqual(['ok']);
   });
 
   test('drops a row whose author handle is null (defensive) and honours the limit arg', async () => {
     dbSelect.mockReturnValue(
-      selectResolving([{ id: 'p1', name: 'X', seeds: THEME, isShared: true, isPublic: true, authorHandle: null, authorDisplayName: null }]),
+      selectResolving([{ id: 'p1', name: 'X', seeds: THEME, isShared: true, authorHandle: null, authorDisplayName: null }]),
     );
     const { getCommunityThemes } = await load();
-    expect(await getCommunityThemes(10)).toEqual([]);
+    // Only the starters remain after the null-handle live row is dropped.
+    expect((await getCommunityThemes(10)).map((t) => t.id)).toEqual(STARTER_IDS);
   });
 
-  test('an empty gallery returns []', async () => {
+  test('an empty gallery still returns the starters (never empty on day one)', async () => {
     dbSelect.mockReturnValue(selectResolving([]));
     const { getCommunityThemes } = await load();
-    expect(await getCommunityThemes()).toEqual([]);
+    expect((await getCommunityThemes()).map((t) => t.id)).toEqual(STARTER_IDS);
   });
 });
 
@@ -229,10 +259,22 @@ describe('getCompareTheme', () => {
 });
 
 describe('getSharedTheme', () => {
-  test('private profile → null (no preset lookup)', async () => {
-    profileFindFirst.mockResolvedValue({ userId: 'u1', handle: 'priv', isPublic: false, displayName: null });
+  test('NON-PUBLIC author with a handle + a shared preset → returns it (no longer isPublic-gated)', async () => {
+    profileFindFirst.mockResolvedValue({ userId: 'u1', handle: 'priv', isPublic: false, displayName: 'Priv' });
+    themePresetFindFirst.mockResolvedValue({ id: 'p1', name: 'Carmesí', seeds: THEME, isShared: true });
     const { getSharedTheme } = await load();
-    expect(await getSharedTheme('priv')).toBeNull();
+    expect(await getSharedTheme('priv')).toEqual({
+      name: 'Carmesí',
+      seeds: THEME,
+      authorHandle: 'priv',
+      authorDisplayName: 'Priv',
+    });
+  });
+
+  test('handle-less author → null (no preset lookup)', async () => {
+    profileFindFirst.mockResolvedValue({ userId: 'u1', handle: null, isPublic: true, displayName: null });
+    const { getSharedTheme } = await load();
+    expect(await getSharedTheme('nohandle')).toBeNull();
     expect(themePresetFindFirst).not.toHaveBeenCalled();
   });
 

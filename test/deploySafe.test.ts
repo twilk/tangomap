@@ -1,5 +1,11 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { isMissingTable } from '@/src/lib/dbSafe';
+import { STARTER_COMMUNITY_THEMES } from '@/src/lib/communityStarters';
+
+// The curated starters are prepended to every getCommunityThemes read, so even a
+// missing theme_preset table degrades to a starters-only gallery, never a 500.
+const STARTER_IDS = STARTER_COMMUNITY_THEMES.map((t) => t.id);
+const N_STARTERS = STARTER_COMMUNITY_THEMES.length;
 
 // Deploy-safety: `theme_preset` is declared in the schema but only created by
 // migration 0004. Until that runs in a given database, every query that touches
@@ -98,10 +104,11 @@ describe('isMissingTable', () => {
 
 // --- READ paths degrade to empty/null when theme_preset is missing ---
 describe('read paths degrade gracefully on missing table', () => {
-  test('getCommunityThemes() → [] (not a throw)', async () => {
+  test('getCommunityThemes() → starters only (not a throw) when the table is missing', async () => {
     mockSelect.mockReturnValue(selectChain(() => Promise.reject(MISSING)));
     const { getCommunityThemes } = await loadPublic();
-    await expect(getCommunityThemes()).resolves.toEqual([]);
+    // No live rows survive a missing table, but the starters always ship.
+    await expect(getCommunityThemes().then((l) => l.map((t) => t.id))).resolves.toEqual(STARTER_IDS);
   });
 
   test('getSharedTheme() → null, with a public profile row present so it reaches the preset query', async () => {
@@ -194,13 +201,14 @@ describe('guard is transparent when the table exists', () => {
     expect(await res.json()).toHaveLength(1);
   });
 
-  test('getCommunityThemes shapes rows normally', async () => {
+  test('getCommunityThemes shapes rows normally (starters first, then the live row)', async () => {
     mockSelect.mockReturnValue(selectChain(() => Promise.resolve([
       { id: 'p1', name: 'Carmesí', seeds: valid, isShared: true, isPublic: true, authorHandle: 'ana', authorDisplayName: 'Ana' },
     ])));
     const { getCommunityThemes } = await loadPublic();
     const list = await getCommunityThemes();
-    expect(list).toHaveLength(1);
-    expect(list[0]).toMatchObject({ id: 'p1', name: 'Carmesí', authorHandle: 'ana' });
+    expect(list).toHaveLength(N_STARTERS + 1);
+    expect(list.slice(0, N_STARTERS).map((t) => t.id)).toEqual(STARTER_IDS);
+    expect(list[N_STARTERS]).toMatchObject({ id: 'p1', name: 'Carmesí', authorHandle: 'ana' });
   });
 });

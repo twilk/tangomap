@@ -5,6 +5,7 @@ import { and, desc, eq, isNotNull, lte } from 'drizzle-orm';
 import { normalizeHandle } from '@/src/lib/handle';
 import { parseTheme, type Theme } from '@/src/lib/theme';
 import { isMissingTable } from '@/src/lib/dbSafe';
+import { STARTER_COMMUNITY_THEMES } from '@/src/lib/communityStarters';
 import type { CommunityTheme, PublicProfile } from '@/src/lib/types';
 
 /**
@@ -156,22 +157,32 @@ export async function listPublicProfiles(limit = 60): Promise<PublicProfile[]> {
 }
 
 /**
- * The community gallery read model: every shared preset whose author is public and
- * has a handle, newest first. Gated three ways at the DB (preset.isShared AND
- * profile.isPublic AND a non-null handle) and re-validated per row through parseTheme
- * — a stored seed that no longer clears the legibility floor is dropped, never
- * returned. Only the allow-listed public fields leave in the DTO; no userId, no dates.
+ * The community gallery read model: the curated starters first, then every shared
+ * preset whose author has a handle, newest first. Sharing is decoupled from isPublic —
+ * a dancer can contribute a theme without publishing their DNA page — so the gate is
+ * two ways at the DB (preset.isShared AND a non-null handle) and re-validated per row
+ * through parseTheme; a stored seed that no longer clears the legibility floor is
+ * dropped, never returned. Only the allow-listed public fields leave in the DTO; no
+ * userId, no dates. The STARTER_COMMUNITY_THEMES are prepended so the gallery is never
+ * empty on day one.
  *
- * The privacy flags (isShared, isPublic) are also SELECTed and re-checked in JS below
- * — defense in depth. The SQL WHERE is the primary gate, but it's invisible to a
- * mocked-`db.select` unit test; the JS gate makes the invariant testable and survives a
- * regression that weakens the query. The flags never appear in the returned shape.
+ * The isShared flag is also SELECTed and re-checked in JS below — defense in depth. The
+ * SQL WHERE is the primary gate, but it's invisible to a mocked-`db.select` unit test;
+ * the JS gate makes the invariant testable and survives a regression that weakens the
+ * query. The flag never appears in the returned shape.
  */
 export async function getCommunityThemes(limit = 60): Promise<CommunityTheme[]> {
   // Deploy-safe: theme_preset ships before migration 0004 runs. While the table is
-  // absent Postgres raises 42P01 — degrade to an empty gallery rather than 500.
+  // absent Postgres raises 42P01 — degrade to a starters-only gallery rather than 500.
   // Every OTHER error is a real fault and re-throws.
-  let rows;
+  let rows: Array<{
+    id: string;
+    name: string;
+    seeds: unknown;
+    isShared: boolean;
+    authorHandle: string | null;
+    authorDisplayName: string | null;
+  }> = [];
   try {
     rows = await db
       .select({
@@ -179,35 +190,40 @@ export async function getCommunityThemes(limit = 60): Promise<CommunityTheme[]> 
         name: themePreset.name,
         seeds: themePreset.seeds,
         isShared: themePreset.isShared,
-        isPublic: profile.isPublic,
         authorHandle: profile.handle,
         authorDisplayName: profile.displayName,
       })
       .from(themePreset)
       .innerJoin(profile, eq(profile.userId, themePreset.userId))
-      .where(and(eq(themePreset.isShared, true), eq(profile.isPublic, true), isNotNull(profile.handle)))
+      .where(and(eq(themePreset.isShared, true), isNotNull(profile.handle)))
       .orderBy(desc(themePreset.updatedAt))
       .limit(limit);
   } catch (err) {
-    if (isMissingTable(err)) return [];
-    throw err;
+    if (!isMissingTable(err)) throw err;
+    // fall through with the empty `rows` — the starters still ship below.
   }
 
-  return rows.flatMap((r) => {
+  const live = rows.flatMap((r) => {
     // Second line of defense: enforce the gate in JS too, before parsing/shaping.
-    if (!r.isShared || !r.isPublic || !r.authorHandle) return [];
+    if (!r.isShared || !r.authorHandle) return [];
     const seeds = parseTheme(r.seeds);
     return seeds
       ? [{ id: r.id, name: r.name, seeds, authorHandle: r.authorHandle, authorDisplayName: r.authorDisplayName }]
       : [];
   });
+
+  // Starters first, so the gallery leads with something tasteful even before any dancer shares.
+  return [...STARTER_COMMUNITY_THEMES, ...live];
 }
 
 /**
- * The one theme a single public dancer shares, for the "apply their theme" affordance
- * on /u/[handle]. Coupled to isPublic: a private profile (or one without a handle, or
- * with no shared preset, or whose shared seeds no longer validate) returns null. Seeds
- * pass parseTheme on read — the same trust boundary the gallery uses.
+ * The one theme a single dancer shares, for the "apply their theme" affordance on
+ * /u/[handle]. Decoupled from isPublic (matching the gallery): any handle'd author's
+ * shared preset resolves — a profile without a handle, with no shared preset, or whose
+ * shared seeds no longer validate returns null. Seeds pass parseTheme on read — the same
+ * trust boundary the gallery uses. (The /u/[handle] page is itself isPublic-gated via
+ * getPublicProfile, so this only ever runs for a reachable page; the decoupling matters
+ * for the gallery, which surfaces handle'd-but-private authors.)
  */
 export async function getSharedTheme(handle: string): Promise<{
   name: string;
@@ -217,7 +233,7 @@ export async function getSharedTheme(handle: string): Promise<{
 } | null> {
   const h = normalizeHandle(handle);
   const prof = await profileRowByHandle(h);
-  if (!prof || !prof.isPublic || !prof.handle) return null;
+  if (!prof || !prof.handle) return null;
 
   // Deploy-safe: theme_preset ships before migration 0004. While the table is absent
   // Postgres raises 42P01 — this is the query that would otherwise 500 the

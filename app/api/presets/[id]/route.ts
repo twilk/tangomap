@@ -44,7 +44,10 @@ export async function PATCH(req: Request, { params }: Ctx) {
 
     if (body.isShared === true) {
       const prof = await db.query.profile.findFirst({ where: eq(profile.userId, userId) });
-      if (!prof?.isPublic || !prof.handle) return Response.json({ error: 'needs_public' }, { status: 409 });
+      // Sharing is gated on a HANDLE ONLY — not isPublic. A dancer can share a theme to
+      // the community gallery without publishing their (isPublic) DNA page; the handle is
+      // all the gallery needs to attribute it.
+      if (!prof?.handle) return Response.json({ error: 'needs_handle' }, { status: 409 });
       // TODO: wrap in db.transaction — the 0-or-1 clear-then-set spans two statements
       // (sibling-clear here + the main update below). Accepted for a single-user app.
       // 0-or-1 shared per user: clear the others first.

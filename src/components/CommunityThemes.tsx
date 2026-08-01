@@ -22,6 +22,29 @@ function saveErrorText(error: unknown): string {
   return "Couldn't save — try again";
 }
 
+/** Attribution line for a gallery card. The official curator (`tangomap`) is a brand,
+ *  not a dancer, so it shows the brand name "Tango Map" with no `@`; every real dancer
+ *  shows their `@handle`. */
+function authorLabel(t: CommunityTheme): string {
+  if (t.authorHandle === 'tangomap') return 'by Tango Map';
+  return `by @${t.authorHandle}`;
+}
+
+/** Onboarding nudge: focus the preset-save input in the sibling PresetLibrary so a
+ *  first-time contributor lands on the "name this theme / Save" control. Best-effort and
+ *  DOM-only (the two panels are siblings under ThemeEditor); a no-op if the library
+ *  isn't mounted. */
+function focusShareControl(): void {
+  const input = document.querySelector<HTMLInputElement>('.tm-preset-save .tm-preset-name-input');
+  if (!input) return;
+  try {
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch {
+    /* jsdom / environments without scrollIntoView — focusing alone still helps */
+  }
+  input.focus();
+}
+
 export default function CommunityThemes(): React.JSX.Element | null {
   const [themes, setThemes] = useState<CommunityTheme[]>([]);
   // Only ever one row is "active" at a time in the panel's transient UI.
@@ -81,7 +104,13 @@ export default function CommunityThemes(): React.JSX.Element | null {
 
   return (
     <section className="tm-community">
-      <h3 className="tm-community-h">Community themes</h3>
+      <div className="tm-community-head">
+        <h3 className="tm-community-h">Community themes</h3>
+        <p className="tm-community-intro">Apply a theme someone shared — or add your own to the gallery.</p>
+        <button type="button" className="tm-community-cta" onClick={focusShareControl}>
+          Share your first theme <span aria-hidden="true">→</span>
+        </button>
+      </div>
       <div className="tm-community-grid">
         {themes.map((t) => (
           <div key={t.id} className="tm-community-item">
@@ -92,7 +121,7 @@ export default function CommunityThemes(): React.JSX.Element | null {
               onClick={() => onApply(t)}
             >
               <span className="name">{t.name}</span>
-              <span className="by">by @{t.authorHandle}</span>
+              <span className="by">{authorLabel(t)}</span>
             </button>
 
             {failedId === t.id && (

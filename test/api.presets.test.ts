@@ -173,18 +173,28 @@ describe('presets [id] API', () => {
     expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ name: 'Neon Nights' }));
   });
 
-  test('PATCH isShared:true on a PRIVATE profile returns 409 needs_public (share gate fires before any write)', async () => {
+  test('PATCH isShared:true with NO handle returns 409 needs_handle (share gate fires before any write)', async () => {
     mockAuth.mockResolvedValue({ user: { id: 'u1' } });
     mockPresetFindFirst.mockResolvedValue(ownedRow);
     mockProfileFindFirst.mockResolvedValue({ isPublic: false, handle: null });
     const res = await (await loadId()).PATCH(patch({ isShared: true }), ctx());
     expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({ error: 'needs_public' });
+    expect(await res.json()).toEqual({ error: 'needs_handle' });
     expect(mockUpdate).not.toHaveBeenCalled();  // no sibling-clear, no main write
     expect(mockInsert).not.toHaveBeenCalled();
   });
 
-  test('PATCH isShared:true public+handle clears siblings then sets this one (0-or-1 per user)', async () => {
+  test('PATCH isShared:true with a handle but PRIVATE profile SUCCEEDS (gate is handle-only, not isPublic)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'u1' } });
+    mockPresetFindFirst.mockResolvedValue(ownedRow);
+    mockProfileFindFirst.mockResolvedValue({ isPublic: false, handle: 'ana' });
+    const res = await (await loadId()).PATCH(patch({ isShared: true }), ctx());
+    expect(res.status).toBe(200);
+    // Sharing no longer requires a public profile — a handle is enough.
+    expect(mockSet.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ isShared: true }));
+  });
+
+  test('PATCH isShared:true with a handle clears siblings then sets this one (0-or-1 per user)', async () => {
     mockAuth.mockResolvedValue({ user: { id: 'u1' } });
     mockPresetFindFirst.mockResolvedValue(ownedRow);
     mockProfileFindFirst.mockResolvedValue({ isPublic: true, handle: 'ana' });
