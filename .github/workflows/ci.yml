@@ -15,6 +15,10 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Regression gate. Chiefly `local/no-internal-a-href`: an internal <a href> is a
+      # full page reload, which is how 50 of them accumulated before #49. Runs with
+      # --max-warnings=0, so a warning fails the build too. Cheap, so it goes first.
+      - run: npm run lint
       # Guards drift between design/tokens.ts and the generated CSS/JS/DESIGN.md.
       - run: npm run design:check
       - run: npm test

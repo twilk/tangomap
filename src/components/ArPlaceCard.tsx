@@ -5,6 +5,9 @@ import type { DetailedHTMLProps, HTMLAttributes } from 'react';
 // <model-viewer> is a custom element registered by importing the module at
 // runtime; declare the (subset of) props we use so TSX type-checks.
 declare module 'react' {
+  // Augmenting React's JSX namespace is the only way to type a custom element;
+  // "prefer ES2015 modules" does not apply to a declaration merge.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       'model-viewer': DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {

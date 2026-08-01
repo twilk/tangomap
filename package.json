@@ -9,6 +9,8 @@
     "build": "npm run design:check && next build",
     "start": "next start",
     "test": "vitest run",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "design": "node --experimental-strip-types scripts/design.mjs",
     "design:check": "node --experimental-strip-types scripts/design.mjs --check",
     "e2e": "playwright test",
@@ -38,8 +40,11 @@
     "axe-core": "^4.12.1",
     "dotenv": "^17.4.2",
     "drizzle-kit": "0.30.1",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.21",
     "jsdom": "25.0.1",
     "typescript": "5.7.2",
+    "typescript-eslint": "^8.65.0",
     "vitest": "2.1.8"
   }
 }
