@@ -19,13 +19,14 @@ import { pushCustomTheme } from '@/src/lib/themeSync';
 type Props = {
   /** The current active theme seeds — the source for "Save current as preset". */
   initialActive: Theme | null;
-  /** Whether the dancer's profile is public — gates the Share affordance. */
+  /** Retained for the ThemeEditor call contract; NO LONGER gates sharing — sharing is
+   *  decoupled from isPublic and needs only a handle (see `canShare` below). */
   isPublic: boolean;
-  /** The dancer's handle — sharing needs a public profile WITH a handle. */
+  /** The dancer's handle — sharing a theme to the community gallery needs only this. */
   handle: string | null;
 };
 
-const SHARE_HINT = 'Make your profile public (with a handle) to share this theme';
+const SHARE_HINT = 'Set a handle in Settings to share';
 
 /** Whether two seed sets are the same theme (canonical `#rrggbb`, so string-equal). */
 function sameSeeds(a: Theme | null, b: Theme | null): boolean {
@@ -43,7 +44,7 @@ function saveReasonText(reason: 'cap' | 'duplicate' | 'name'): string {
   return '2–24 characters';
 }
 
-export default function PresetLibrary({ initialActive, isPublic, handle }: Props): React.JSX.Element {
+export default function PresetLibrary({ initialActive, handle }: Props): React.JSX.Element {
   const [list, setList] = useState<ThemePreset[]>([]);
   // The active theme drives the "Active" badge. Seeded from initialActive and kept
   // in sync with it (below), so a theme change from the EDITOR (Apply/Reset moves the
@@ -85,7 +86,9 @@ export default function PresetLibrary({ initialActive, isPublic, handle }: Props
     setActiveSeeds(initialActive);
   }, [initialActive]);
 
-  const canShare = isPublic && !!handle;
+  // Sharing is gated on a handle only — a dancer can share to the gallery without
+  // publishing their (isPublic) DNA page. The API enforces the same rule (409 needs_handle).
+  const canShare = !!handle;
 
   // Save gate: null active → nothing to save; otherwise run the pure cap/name check.
   let saveHint: string | null = null;

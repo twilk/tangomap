@@ -238,7 +238,7 @@ describe('PresetLibrary', () => {
     expect(deleted).toBe(false);
   });
 
-  test('Share on a private profile shows the make-public message and does NOT fetch a PATCH', async () => {
+  test('Share with NO handle shows the "set a handle" message and does NOT fetch a PATCH', async () => {
     const fetchMock = installFetch((method, url) => {
       if (method === 'GET' && url === '/api/presets') {
         return { body: [preset('p1', 'Carmesí', A)] };
@@ -246,6 +246,7 @@ describe('PresetLibrary', () => {
       return {};
     });
 
+    // Private profile is now irrelevant to sharing — only the missing handle gates it.
     await render({ initialActive: A, isPublic: false, handle: null });
 
     await act(async () => {
@@ -253,10 +254,53 @@ describe('PresetLibrary', () => {
       await flush();
     });
 
-    expect(container.textContent).toMatch(/make your profile public/i);
+    expect(container.textContent).toMatch(/set a handle/i);
+    expect(container.textContent).not.toMatch(/make your profile public/i);
     const anyPatch = fetchMock.mock.calls.some(
       ([, init]) => (init as RequestInit)?.method === 'PATCH',
     );
     expect(anyPatch).toBe(false);
+  });
+
+  test('Share WITH a handle (even on a private profile) PATCHes {isShared:true}', async () => {
+    const fetchMock = installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/presets') return { body: [preset('p1', 'Carmesí', A)] };
+      if (method === 'PATCH' && url === '/api/presets/p1') return { body: { ok: true } };
+      return {};
+    });
+
+    // isPublic:false, but a handle is present → sharing is allowed.
+    await render({ initialActive: A, isPublic: false, handle: 'ana' });
+
+    await act(async () => {
+      buttonIn(rows()[0], 'Share').click();
+      await flush();
+    });
+
+    const patch = fetchMock.mock.calls.find(
+      ([url, init]) => url === '/api/presets/p1' && (init as RequestInit)?.method === 'PATCH',
+    );
+    expect(patch).toBeTruthy();
+    expect(bodyOf(patch![1] as RequestInit)).toMatchObject({ isShared: true });
+    // The row is now badged Shared.
+    expect(rows()[0].textContent).toMatch(/shared/i);
+  });
+
+  test('a needs_handle 409 from the API surfaces the "set a handle" message', async () => {
+    installFetch((method, url) => {
+      if (method === 'GET' && url === '/api/presets') return { body: [preset('p1', 'Carmesí', A)] };
+      if (method === 'PATCH' && url === '/api/presets/p1') return { ok: false, status: 409, body: { error: 'needs_handle' } };
+      return {};
+    });
+
+    // Client thinks it has a handle, but the server disagrees (race / stale prop).
+    await render({ initialActive: A, isPublic: true, handle: 'ana' });
+
+    await act(async () => {
+      buttonIn(rows()[0], 'Share').click();
+      await flush();
+    });
+
+    expect(container.textContent).toMatch(/set a handle/i);
   });
 });
