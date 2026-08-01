@@ -52,6 +52,13 @@ a.tm-back {
   line-height: 1;
   letter-spacing: 0;
 }
+/* Touch: the 44px min-width lives HERE, not with the other tap-target rules in
+   tango.css, because `a.tm-back` (0,1,1) outranks a plain `.tm-link` (0,1,0) — the
+   generic rule set min-height but this one kept min-width at 34px, leaving the back
+   control a 34px-wide sliver on a phone. Measured on production before the fix. */
+@media (max-width: 767px), (pointer: coarse) {
+  a.tm-back { min-width: 44px; }
+}
 a.tm-back:hover {
   border-color: var(--tm-ember);
   color: var(--tm-ink);
