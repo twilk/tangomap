@@ -50,8 +50,10 @@ export default async function Page({ params }: { params: Promise<{ handle: strin
   const name = data.displayName ?? data.handle;
   const initial = (name.trim()[0] ?? '·').toUpperCase();
 
-  // A public dancer may share one theme (coupled to isPublic); when present, offer to
-  // apply it. Seeds are already re-validated in getSharedTheme, and again on click.
+  // Sharing a theme needs only a handle (decoupled from isPublic), but this /u page
+  // only renders for a public profile (getPublicProfile 404s otherwise, above), so
+  // the apply-theme affordance shows on public dancers who have shared one. Seeds are
+  // re-validated in getSharedTheme, and again on click.
   const shared = await getSharedTheme(data.handle);
 
   return (
