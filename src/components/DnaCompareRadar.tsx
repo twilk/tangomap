@@ -78,7 +78,6 @@ export function DnaCompareRadar({
     const hiI = hiRef.current;
     const gv = (n: string) => getComputedStyle(cv).getPropertyValue(n).trim() || '#888';
     const line = gv('--tm-line');
-    const faint = gv('--tm-faint');
     // Each blob draws in its dancer's own reconciled accent when themed, else the
     // page's --tm-ember/--tm-verd (frozen default for a themeless half).
     const ember = aBlob ?? gv('--tm-ember');
@@ -197,7 +196,9 @@ export function DnaCompareRadar({
         }
       }
     }
-  }, [a.cats, b.cats, cats.length, aBlob, bBlob]);
+    // `cats` is an alias for `a.cats`; both are listed because the hooks rule tracks
+    // the alias and its root separately. Same value, so the duplicate costs nothing.
+  }, [a.cats, cats, b.cats, aBlob, bBlob]);
 
   useEffect(() => {
     redrawRef.current = draw;

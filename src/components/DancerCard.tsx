@@ -304,6 +304,10 @@ export function DancerCard(props: DancerCardProps) {
     } catch {}
     tiltMaxRef.current = MAX_TILT_AR; // stronger tilt while fullscreen
     arCloseRef.current?.focus();
+    // Capture the wrapper NOW: a ref read inside cleanup can point somewhere else (or
+    // nowhere) by the time cleanup runs, which would silently skip the tilt reset and
+    // leave the card stuck at 18°.
+    const wrapAtOpen = wrapRef.current;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     // Trap Tab within the overlay chrome (close + optional "Enable motion").
@@ -331,7 +335,7 @@ export function DancerCard(props: DancerCardProps) {
       document.body.style.overflow = prevOverflow;
       tiltMaxRef.current = MAX_TILT;
       // Drop the amplified tilt so the card returns flat, not stuck at 18°.
-      const el = wrapRef.current;
+      const el = wrapAtOpen;
       if (el) {
         el.style.setProperty('--rx', '0deg');
         el.style.setProperty('--ry', '0deg');
@@ -707,6 +711,9 @@ export function DancerCard(props: DancerCardProps) {
           </button>
           <p className="tm-badge-name">{props.name}</p>
           <p className="tm-badge-meta">@{props.handle} · {props.count}/62</p>
+          {/* A QR generated in the browser into a data: URI — there is no URL for
+              next/image to optimise, and it must not hit the network. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           {qr ? <img src={qr} alt={`QR code linking to ${props.name}'s Tango Map profile`} /> : <p className="tm-badge-meta">…</p>}
           <p className="tm-badge-hint">Scan to see my Tango DNA — tap anywhere to close</p>
         </div>

@@ -48,7 +48,6 @@ export function DnaRadar({ categories }: { categories: CategoryDetail[] }) {
     const hiI = hiRef.current;
     const gv = (n: string) => getComputedStyle(cv).getPropertyValue(n).trim() || '#888';
     const line = gv('--tm-line');
-    const faint = gv('--tm-faint');
     const ember = gv('--tm-ember');
     const carm = gv('--tm-carmine');
     const muted = gv('--tm-muted');
