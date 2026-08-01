@@ -247,16 +247,21 @@
 @media (pointer: coarse) {
   .tsm-view-btn { height: 44px; }
   .tsm-cat-row { min-height: 44px; }
-  .tsm-cat-link { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; }
+  /* Both axes: min-height alone left a 24px-wide, 44px-tall sliver, not a target. */
+  .tsm-cat-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; box-sizing: border-box; }
 }
 
 /* ============================================================
    EXPLORER — dependency-graph canvas (desktop-only sibling of
    the whole-map scroll canvas; both live under .tsm-body)
    ============================================================ */
+/* overflow-y must be auto, not hidden: the explorer spaces neighbours at a MINIMUM
+   distance, so a well-connected node (walking and giro-left each unlock 10) can lay
+   out taller than a short/landscape canvas. With `hidden` those outermost nodes were
+   silently clipped and unreachable — no scrollbar, no hint they existed. */
 .tsm-ex {
   position: relative; flex: 1 1 auto; min-width: 0; min-height: 0;
-  overflow: hidden; font-family: var(--sans);
+  overflow-x: hidden; overflow-y: auto; font-family: var(--sans);
 }
 
 /* layered / radial sub-mode control, pinned top-right of the canvas */

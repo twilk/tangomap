@@ -63,6 +63,8 @@ export default function ThemeEditor({ isPublic = false, handle = null }: ThemeEd
   // "Use my theme on my card" — optimistic local state (off), hydrated from the
   // server on mount. Persisted on its own, never bundled with the theme write.
   const [cardUsesTheme, setCardUsesTheme] = useState(false);
+  // Set when a card-toggle write fails, so the reverted switch explains itself.
+  const [cardError, setCardError] = useState<string | null>(null);
 
   useEffect(() => {
     const t = currentCustomTheme();
@@ -151,7 +153,9 @@ export default function ThemeEditor({ isPublic = false, handle = null }: ThemeEd
   }
 
   function onToggleCard(next: boolean): void {
-    setCardUsesTheme(next); // optimistic
+    const prev = cardUsesTheme;
+    setCardUsesTheme(next); // optimistic — the switch must feel instant
+    setCardError(null);
     // ONLY this flag — never customTheme — so a card toggle can't clobber a
     // just-applied, synced theme (the disjoint-writer trap ThemeEditor + sync own).
     try {
@@ -159,9 +163,24 @@ export default function ThemeEditor({ isPublic = false, handle = null }: ThemeEd
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ cardUsesCustomTheme: next }),
-      }).catch(() => {});
+      })
+        .then((r) => {
+          // Reconcile: this toggle's only visible effect is on the CARD, a different
+          // page. Left unchecked, a failed write reads as "On" here and the user finds
+          // out much later that their card never changed. (Status, not `ok` — the same
+          // convention the hydrate effect above uses.)
+          if (r.status !== 200) {
+            setCardUsesTheme(prev);
+            setCardError("Couldn't save that — check your connection and try again.");
+          }
+        })
+        .catch(() => {
+          setCardUsesTheme(prev);
+          setCardError("Couldn't save that — check your connection and try again.");
+        });
     } catch {
-      /* no fetch available — the optimistic state still reflects the choice */
+      setCardUsesTheme(prev);
+      setCardError("Couldn't save that — check your connection and try again.");
     }
   }
 
@@ -281,6 +300,7 @@ export default function ThemeEditor({ isPublic = false, handle = null }: ThemeEd
           <span className="b">Your dancer card and its share image render in your custom colours. Off keeps the classic dark card.</span>
         </span>
       </label>
+      {cardError && <p className="tm-preset-hint" role="alert">{cardError}</p>}
 
       {hasCustom && (
         <div className="tm-reset-row">

@@ -28,6 +28,9 @@ const PILL_FONT_WEIGHT = 600;
 // `mapDensity ?? 'compact'`). The left page margin `m` is recomputed here from the
 // same formula the layout uses, so the level-band labels sit flush with the pills.
 const DENSITY = 'compact' as const;
+
+/** Pointer type that needs 44px tap targets (finger, stylus) rather than a cursor. */
+const COARSE_POINTER = '(pointer: coarse)';
 const pageMargin = (w: number) => Math.max(12, Math.min(22, w * 0.018));
 
 // Fallback width for environments with no layout (jsdom in tests): clientWidth is
@@ -120,6 +123,15 @@ export function TangoMap() {
     const el = scrollRef.current;
     if (!el) return;
     const width = el.clientWidth || el.getBoundingClientRect().width || FALLBACK_WIDTH;
+    // Finger or mouse? The pills are the map's primary control, so on a coarse
+    // pointer they lay out at the 44px tap-target size. Guarded: no matchMedia
+    // (jsdom/older browsers) simply means the mouse layout, as before.
+    let touch = false;
+    try {
+      touch = typeof matchMedia === 'function' && matchMedia(COARSE_POINTER).matches;
+    } catch {
+      /* no matchMedia — keep the mouse layout */
+    }
 
     let ctx = ctxRef.current;
     if (!ctx) {
@@ -136,7 +148,7 @@ export function TangoMap() {
       return ctx.measureText(text).width;
     };
 
-    setLayout(computeMapLayout(MAP_NODES, LEVELS, { width, measureText, density: DENSITY }));
+    setLayout(computeMapLayout(MAP_NODES, LEVELS, { width, measureText, density: DENSITY, touch }));
   }, []);
 
   useEffect(() => {
@@ -146,6 +158,23 @@ export function TangoMap() {
     const ro = new ResizeObserver(() => recompute());
     ro.observe(el);
     return () => ro.disconnect();
+  }, [recompute]);
+
+  // Re-lay-out if the pointer type itself changes (2-in-1 detaching its keyboard,
+  // a tablet picking up a mouse) so tap targets follow the input device. Guarded:
+  // no matchMedia, or the legacy no-addEventListener form, is simply a no-op.
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return;
+    let mq: MediaQueryList;
+    try {
+      mq = matchMedia(COARSE_POINTER);
+    } catch {
+      return;
+    }
+    if (typeof mq.addEventListener !== 'function') return;
+    const onChange = () => recompute();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
   }, [recompute]);
 
   // Restore persisted state on mount: the mastered set, and the last selection

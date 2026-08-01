@@ -149,6 +149,32 @@ describe('ThemeEditor', () => {
     expect(body).not.toHaveProperty('customThemeUpdatedAt');
   });
 
+  test('a FAILED card-toggle write reverts the switch and says so (never a silent lie)', async () => {
+    // The mount GET succeeds; the toggle's PUT is rejected (e.g. expired session).
+    const fetchMock = vi.fn((_url: string, opts?: RequestInit) =>
+      Promise.resolve(
+        opts?.method === 'PUT'
+          ? { status: 401, json: async () => ({ error: 'unauthorized' }) }
+          : { status: 200, json: async () => ({ cardUsesCustomTheme: false }) },
+      ),
+    );
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    await render();
+    const toggle = q<HTMLInputElement>('[aria-label="cardUsesCustomTheme"]');
+    expect(toggle.checked).toBe(false);
+
+    await act(async () => {
+      toggle.click();
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // This toggle's only visible effect is on the CARD (another page), so an
+    // unreconciled optimistic "On" would go unnoticed until the card looked wrong.
+    expect(q<HTMLInputElement>('[aria-label="cardUsesCustomTheme"]').checked).toBe(false);
+    expect(container.textContent).toMatch(/couldn't save/i);
+  });
+
   test('prefills the seeds from an already-stored custom theme', async () => {
     localStorage.setItem(
       'tsm-custom',
