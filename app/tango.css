@@ -82,9 +82,13 @@ body { margin: 0; }
      without turning it into a padded block. */
   .tm-community-cta{align-items:center}
 
-  /* Form controls. */
+  /* Form controls. The /compare handle fields and their submit measured 40px and
+     42px on production — the label IS the visual control, so it carries the height
+     and the bare <input>/<button> inside inherit it via the row's align-items. */
   .tm-select,
-  .tm-preset-name-input{min-height:44px; box-sizing:border-box}
+  .tm-preset-name-input,
+  .tm-inp,
+  .tm-cform button{min-height:44px; box-sizing:border-box}
   .tm-seg .opt{min-height:44px; display:flex; align-items:center; justify-content:center; box-sizing:border-box}
 
   /* Whole-row targets: the row is what a thumb aims at, not the text inside it. */
