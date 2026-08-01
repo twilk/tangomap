@@ -241,6 +241,14 @@
 }
 .tsm-view-btn.on { background: var(--tm-ember); color: var(--tm-ground); }
 .tsm-view-btn:focus-visible { outline: 2px solid var(--tm-ember); outline-offset: 2px; }
+/* Touch targets: the Map/Explorer toggle and the category rows (both shown from
+   768px up, where a touch tablet still needs 44px) reach the 44px minimum on a
+   touch pointer. Mouse pointers keep the compact size. */
+@media (pointer: coarse) {
+  .tsm-view-btn { height: 44px; }
+  .tsm-cat-row { min-height: 44px; }
+  .tsm-cat-link { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; }
+}
 
 /* ============================================================
    EXPLORER — dependency-graph canvas (desktop-only sibling of

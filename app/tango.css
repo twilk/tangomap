@@ -48,6 +48,13 @@ body { margin: 0; }
 .tm-themebtn:focus-visible{outline:2px solid var(--tm-ember); outline-offset:2px}
 .tm-themebtn .tm-sun,.tm-themebtn .tm-moon,.tm-themebtn .tm-swatch{align-items:center; justify-content:center; line-height:0}
 .tm-themebtn .tm-sun{display:none}
+/* Touch targets: on a touch pointer (or a small screen) the header nav pills and
+   the theme toggle grow to the 44px minimum tap size. Desktop mouse keeps the
+   compact size — no visual change there. */
+@media (max-width: 767px), (pointer: coarse) {
+  .tm-link{display:inline-flex; align-items:center; min-height:44px}
+  .tm-themebtn{width:44px; height:44px}
+}
 .tm-themebtn .tm-moon{display:inline-flex}
 :root[data-theme="dark"] .tm-themebtn .tm-sun{display:inline-flex}
 :root[data-theme="dark"] .tm-themebtn .tm-moon{display:none}
