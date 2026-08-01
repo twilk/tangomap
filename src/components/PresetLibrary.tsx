@@ -3,7 +3,7 @@
 // The preset library: a client panel below the seed pickers in Settings → Theme.
 // Lists a dancer's saved theme presets (≤5), each row painted in its OWN colours
 // (self-preview via presetStyleVars → inline --tm-* vars), and offers Save / Apply /
-// Rename / Share / Delete. The ACTIVE theme still lives in profile.customTheme; the
+// Rename / Share⇄Stop-sharing / Delete. The ACTIVE theme still lives in profile.customTheme; the
 // server API (app/api/presets/*) is authoritative, this component is a thin,
 // resilient shell over it — every fetch is guarded so an API error never breaks the
 // editor. Applying a preset ALSO runs applyCustomTheme locally so the live app
@@ -169,10 +169,15 @@ export default function PresetLibrary({ initialActive, handle }: Props): React.J
     }
   }
 
-  async function onShare(p: ThemePreset): Promise<void> {
+  // Share and stop-sharing are one control: the button flips between them by state.
+  // Sharing needs a handle (the API 409s otherwise); STOPPING never does, so an
+  // already-shared preset can always be pulled from the gallery.
+  async function onToggleShare(p: ThemePreset): Promise<void> {
     setConfirmDeleteId(null);
-    // Pre-explain the requirement before the API would 409.
-    if (!canShare) {
+    const next = !p.isShared;
+    // Pre-explain the handle requirement before the API would 409 — but only when
+    // turning sharing ON. Turning it off is always allowed.
+    if (next && !canShare) {
       setShareHintId(p.id);
       return;
     }
@@ -180,16 +185,21 @@ export default function PresetLibrary({ initialActive, handle }: Props): React.J
       const res = await fetch(`/api/presets/${p.id}`, {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ isShared: true }),
+        body: JSON.stringify({ isShared: next }),
       });
       if (res.status === 409) {
         setShareHintId(p.id);
         return;
       }
       if (!res.ok) return;
-      // 0-or-1 shared per user: this one is now the shared one.
       setShareHintId(null);
-      setList((cur) => cur.map((x) => ({ ...x, isShared: x.id === p.id })));
+      setList((cur) =>
+        next
+          // 0-or-1 shared per user: this one becomes the ONLY shared one.
+          ? cur.map((x) => ({ ...x, isShared: x.id === p.id }))
+          // Stop sharing: just clear this row.
+          : cur.map((x) => (x.id === p.id ? { ...x, isShared: false } : x)),
+      );
     } catch {
       /* best-effort */
     }
@@ -279,7 +289,14 @@ export default function PresetLibrary({ initialActive, handle }: Props): React.J
                     <>
                       <button type="button" onClick={() => void onApply(p)}>Apply</button>
                       <button type="button" onClick={() => startRename(p)}>Rename</button>
-                      <button type="button" onClick={() => void onShare(p)}>Share</button>
+                      <button
+                        type="button"
+                        className={p.isShared ? 'on' : undefined}
+                        aria-label={p.isShared ? `Stop sharing ${p.name}` : `Share ${p.name}`}
+                        onClick={() => void onToggleShare(p)}
+                      >
+                        {p.isShared ? 'Stop sharing' : 'Share'}
+                      </button>
                       <button type="button" onClick={() => void onDelete(p)}>
                         {confirmDeleteId === p.id ? 'Confirm' : 'Delete'}
                       </button>
