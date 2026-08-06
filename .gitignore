@@ -22,3 +22,4 @@ playwright-report/
 proofpack/
 # saved browser session for capturing the signed-in screens — a live cookie
 auth.json
+.gstack/
