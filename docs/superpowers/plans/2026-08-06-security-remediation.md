@@ -4,6 +4,33 @@
 
 **Goal:** Clear all 7 production-dependency vulnerabilities (2 critical, 5 high) reported by `npm audit --omit=dev`, and tidy the repo state, without a Next.js major upgrade.
 
+---
+
+## STATUS — updated 2026-08-06
+
+| Task | State | Shipped as | Advisories after |
+|---|---|---|---|
+| 1. Repo hygiene | ✅ **DONE** | #54 + out-of-band actions | 7 |
+| 2. postcss + sharp overrides | ✅ **DONE** | #55 | **7 → 4** |
+| 3. drizzle-orm 0.45.2 | ✅ **DONE** | #56 | **4 → 3** |
+| 4. Auth stack | ⏸️ **NOT STARTED — stopped here by request** | — | target 0 |
+| 5. CI audit gate | ⏸️ blocked on Task 4 (would fail CI until then) | — | — |
+
+**Result so far: 7 advisories → 3.** The 3 remaining are all the auth stack (`next-auth`, `@auth/core`, `@auth/drizzle-adapter`) and are Task 4's scope.
+
+**Verified in production after Task 3** (`dfe16f6`): `/u/wilk` renders real DB data (59/62 mastered), `/api/community-themes` returns 4, `/api/progress` returns 401 (not 500).
+
+**Two corrections to this plan, learned by executing it:**
+
+1. **Task 3 Step 2 expected `tsc` to error** on the object-form table configs. It did not — Drizzle 0.45.2 still *accepts* the deprecated form. The migration to array form was applied anyway, as the step's fallback instructed, ahead of its removal in the next major.
+2. **Task 1 Step 4's pruning command was wrong.** `git branch -r --merged origin/main` returns **nothing** in this repo, because every PR is **squash-merged** — branch commits never become ancestors of `main`. The correct criterion is the set of head branches of merged PRs:
+   ```bash
+   gh pr list --state merged --limit 100 --json headRefName --jq '.[].headRefName' | sort -u > merged.txt
+   git ls-remote --heads origin | sed 's|.*refs/heads/||' | sort -u > remote.txt
+   comm -12 merged.txt remote.txt | grep -vx "feat/theme-sharing-fixes"
+   ```
+   That deleted 39 stale remote branches, 0 failures. `feat/theme-sharing-fixes` is excluded because a second session has it checked out in the `Map-theme` worktree.
+
 **Architecture:** Four independent phases ordered by risk, each its own PR. Phase 1 is hygiene (no code). Phase 2 pins transitive packages via npm `overrides` — this is what avoids the `next@16` breaking change `npm audit fix --force` wants. Phase 3 moves the DB layer. Phase 4 moves the auth stack, which is the only phase that can lock users out, so it ships last and alone.
 
 **Tech Stack:** Next.js 15.5.21 (App Router), React 19, TypeScript 5.7, Drizzle ORM 0.38.2 + Postgres (Supabase), Auth.js v5 (`next-auth@5.0.0-beta.25`) + Google.
