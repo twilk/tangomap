@@ -24,7 +24,7 @@ export const accounts = pgTable('account', {
   scope: text('scope'),
   id_token: text('id_token'),
   session_state: text('session_state'),
-}, (a) => ({ pk: primaryKey({ columns: [a.provider, a.providerAccountId] }) }));
+}, (a) => [primaryKey({ columns: [a.provider, a.providerAccountId] })]);
 
 export const sessions = pgTable('session', {
   sessionToken: text('sessionToken').primaryKey(),
@@ -36,7 +36,7 @@ export const verificationTokens = pgTable('verificationToken', {
   identifier: text('identifier').notNull(),
   token: text('token').notNull(),
   expires: timestamp('expires', { mode: 'date' }).notNull(),
-}, (v) => ({ pk: primaryKey({ columns: [v.identifier, v.token] }) }));
+}, (v) => [primaryKey({ columns: [v.identifier, v.token] })]);
 
 // --- App tables ---
 export const progress = pgTable('progress', {
@@ -53,7 +53,7 @@ export const progressHistory = pgTable('progress_history', {
   userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
   day: text('day').notNull(), // YYYY-MM-DD (UTC)
   mastered: jsonb('mastered').$type<string[]>().notNull().default([]),
-}, (h) => ({ pk: primaryKey({ columns: [h.userId, h.day] }) }));
+}, (h) => [primaryKey({ columns: [h.userId, h.day] })]);
 
 export const profile = pgTable('profile', {
   userId: text('userId').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
@@ -90,4 +90,4 @@ export const themePreset = pgTable('theme_preset', {
   isShared: boolean('isShared').notNull().default(false),
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
-}, (t) => ({ byUser: index('theme_preset_userId_idx').on(t.userId) }));
+}, (t) => [index('theme_preset_userId_idx').on(t.userId)]);
