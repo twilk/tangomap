@@ -13,12 +13,27 @@
 | 1. Repo hygiene | ✅ **DONE** | #54 + out-of-band actions | 7 |
 | 2. postcss + sharp overrides | ✅ **DONE** | #55 | **7 → 4** |
 | 3. drizzle-orm 0.45.2 | ✅ **DONE** | #56 | **4 → 3** |
-| 4. Auth stack | ⏸️ **NOT STARTED — stopped here by request** | — | target 0 |
-| 5. CI audit gate | ⏸️ blocked on Task 4 (would fail CI until then) | — | — |
+| 4. Auth stack | ✅ **DONE** | #57 | **3 → 0** |
+| 5. CI audit gate | ✅ **DONE** | #57 | — |
 
-**Result so far: 7 advisories → 3.** The 3 remaining are all the auth stack (`next-auth`, `@auth/core`, `@auth/drizzle-adapter`) and are Task 4's scope.
+**COMPLETE: 7 advisories → 0.** `npm audit --omit=dev` reports a clean production tree, and CI now enforces it (`npm audit --omit=dev --audit-level=high`, confirmed running on `main`).
 
 **Verified in production after Task 3** (`dfe16f6`): `/u/wilk` renders real DB data (59/62 mastered), `/api/community-themes` returns 4, `/api/progress` returns 401 (not 500).
+
+**Verified in production after Task 4** (`4c1c423`): `/api/auth/providers` 200 returning `google` with the correct callback URL, `/api/auth/csrf` 200, `/api/auth/session` 200 → `null` signed-out, `/api/progress` 401, `/u/wilk` still 59/62 from the DB, no JS errors. **The owner completed a real Google sign-in on production and confirmed it works** — the one step an agent cannot perform.
+
+### Task 4's verification could NOT be done on a preview — record this before trying again
+
+The plan's Step 5/6 assumed a preview deployment could exercise sign-in. It cannot, for two independent reasons, neither of them a code bug:
+
+1. **Vercel env scoping is inconsistent.** `AUTH_GOOGLE_SECRET` is set for Preview+Production, but **`AUTH_GOOGLE_ID` and `AUTH_URL` are Production-only**. A preview therefore sends an empty `client_id` and Google replies `401 invalid_client: The OAuth client was not found`. This predates the upgrade by ~15 days and would break any version identically — it burned one verification attempt.
+2. **Google requires an exact registered redirect URI**, and preview URLs are per-branch, so even with the env var present a fresh preview URL is rejected.
+
+To make preview auth testable in future: add `AUTH_GOOGLE_ID` to the Preview scope **and** register a stable preview alias in Google Cloud as an authorized redirect URI. Otherwise auth changes must be verified on production with a rollback prepared (last known-good before #57: `c59591b`, Vercel deployment `5778719676`).
+
+### Task 4 also needed a check the plan did not specify
+
+`drizzle-kit generate` compares our schema only to our own migrations, so it cannot see an **adapter** that expects different columns. Adapter 1.11.3 does reference a WebAuthn `authenticator` table this schema lacks; it is safe only because `lib/pg.js` touches it exclusively inside `createAuthenticator` / `getAuthenticator` / `listAuthenticatorsByUserId` / `updateAuthenticatorCounter`, line 52 merely constructs the table object in memory, and this app configures Google alone with zero passkey references. **Re-run that reasoning if a provider is ever added.**
 
 **Two corrections to this plan, learned by executing it:**
 
