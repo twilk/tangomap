@@ -19,6 +19,10 @@ jobs:
       # full page reload, which is how 50 of them accumulated before #49. Runs with
       # --max-warnings=0, so a warning fails the build too. Cheap, so it goes first.
       - run: npm run lint
+      # Fails on a new HIGH/CRITICAL advisory in PRODUCTION dependencies. The tree is
+      # at zero as of this commit, so any hit is genuinely new. --omit=dev on purpose:
+      # a devDependency advisory never reaches users and must not block a release.
+      - run: npm audit --omit=dev --audit-level=high
       # Guards drift between design/tokens.ts and the generated CSS/JS/DESIGN.md.
       - run: npm run design:check
       - run: npm test
