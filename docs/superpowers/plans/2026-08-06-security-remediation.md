@@ -29,7 +29,25 @@ The plan's Step 5/6 assumed a preview deployment could exercise sign-in. It cann
 1. **Vercel env scoping is inconsistent.** `AUTH_GOOGLE_SECRET` is set for Preview+Production, but **`AUTH_GOOGLE_ID` and `AUTH_URL` are Production-only**. A preview therefore sends an empty `client_id` and Google replies `401 invalid_client: The OAuth client was not found`. This predates the upgrade by ~15 days and would break any version identically — it burned one verification attempt.
 2. **Google requires an exact registered redirect URI**, and preview URLs are per-branch, so even with the env var present a fresh preview URL is rejected.
 
-To make preview auth testable in future: add `AUTH_GOOGLE_ID` to the Preview scope **and** register a stable preview alias in Google Cloud as an authorized redirect URI. Otherwise auth changes must be verified on production with a rollback prepared (last known-good before #57: `c59591b`, Vercel deployment `5778719676`).
+**DECIDED 2026-08-06 — do not propose preview auth testing again.** Making previews testable would need `AUTH_GOOGLE_ID` added to the Preview scope *and* a stable preview alias registered in Google Cloud. The owner's call is no: **auth changes are verified on production.** Two facts make that workable — every env var here is marked *Sensitive* in Vercel, so values are write-only and cannot be copied between scopes by any tool; and auth changes are rare enough that the ceremony would not pay for itself.
+
+### Production verification protocol for auth changes
+
+This replaces preview testing. It is what #57 actually used, and it worked.
+
+1. **Capture the rollback point BEFORE merging** — the current `main` SHA and the live Vercel deployment id:
+   ```bash
+   git rev-parse --short origin/main
+   gh api "repos/twilk/tangomap/deployments?environment=Production&per_page=1" --jq '.[0]|"deployment_id=\(.id) sha=\(.sha[:7])"'
+   ```
+   For #57 that was `c59591b` / deployment `5778719676`.
+2. Merge, wait for the Production deployment to report `success`.
+3. **Machine checks first** (these catch a broken adapter without anyone logging in):
+   `/api/auth/providers` → 200 listing `google` with the right callback URL · `/api/auth/csrf` → 200 · `/api/auth/session` → 200 returning `null` when signed out · `/api/progress` → 401 not 500 · a public profile page still rendering its counts from the DB.
+4. Owner completes one real Google sign-in. An agent cannot do this step.
+5. If anything fails: Vercel dashboard → Deployments → **Instant Rollback** to the captured deployment (fastest), or `git revert` the merge and push.
+
+Exposure window is a few minutes, and steps 1 and 3 are what keep it that way.
 
 ### Task 4 also needed a check the plan did not specify
 
