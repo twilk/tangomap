@@ -14,6 +14,7 @@ import { DnaGenome } from '@/src/components/DnaGenome';
 import { DnaBars } from '@/src/components/DnaBars';
 import { ViewSwitcher } from '@/src/components/ViewSwitcher';
 import { CopyButton } from '@/src/components/CopyButton';
+import { SITE } from '@/src/lib/site';
 import { TopNav } from '@/src/components/TopNav';
 import type { PublicProfile } from '@/src/lib/types';
 
@@ -22,7 +23,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = { title: 'Compare — Tango Map' };
 
-const SITE = 'https://partykamap.vercel.app';
+
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? '') : (v ?? ''));
 const nameOf = (p: PublicProfile) => p.displayName ?? p.handle;
 

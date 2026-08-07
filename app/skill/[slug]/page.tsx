@@ -5,6 +5,7 @@ import '@/src/styles/knowledge.css';
 import { SKILLS, type Skill } from '@/src/data/skills';
 import { CATEGORIES, iconSvg, catAnchor } from '@/src/lib/dna';
 import { getSkillContent } from '@/src/lib/knowledge';
+import { courseJsonLd } from '@/src/lib/jsonld';
 import { adjacent, prerequisites, unlocks, longestPrereqPath, pathSteps } from '@/src/lib/skillGraph';
 import { TopNav } from '@/src/components/TopNav';
 import { SkillVideo } from '@/src/components/SkillVideo';
@@ -230,6 +231,18 @@ export default async function SkillPage({ params }: { params: Promise<{ slug: st
           </nav>
         )}
       </main>
+
+      {/* Structured data. Every one of these 62 pages is statically generated and was,
+          until now, indistinguishable from prose to a crawler. `Course` is the honest
+          schema.org type here — a named unit of instruction with prerequisites — and
+          `coursePrerequisites` is the one field that carries what actually makes this
+          corpus a graph rather than 62 loose articles. Emitted as a script tag rather
+          than via Metadata because Next has no metadata field for arbitrary JSON-LD. */}
+      <script
+        type="application/ld+json"
+        // Content is built from our own static data, never user input.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd(skill, c?.summary ?? null, buildsOn)) }}
+      />
     </div>
   );
 }
