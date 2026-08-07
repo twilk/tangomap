@@ -91,3 +91,30 @@ export const themePreset = pgTable('theme_preset', {
   createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
 }, (t) => [index('theme_preset_userId_idx').on(t.userId)]);
+
+// First-party telemetry. The ONLY instrumentation in this app: no PostHog, no
+// Plausible, no gtag, no @vercel/analytics — nothing leaves our infrastructure.
+// Deliberately absent columns: IP address, user agent, email, any free-text field.
+//
+// `progress.mastered` is a jsonb array with ONE updatedAt for the whole set, and
+// progress_history is a day-granularity snapshot. Per-skill mastery timing did not
+// exist and could not be reconstructed; `skill_mastered` rows with a slug and a ts
+// are what make "where did they stall" a SQL query later instead of a migration later.
+export const events = pgTable('event', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  ts: timestamp('ts', { mode: 'date' }).notNull().defaultNow(),
+  // Nullable: signed-out events (link_open) have no user yet.
+  userId: text('userId').references(() => users.id, { onDelete: 'cascade' }),
+  // First-party random id in an httpOnly cookie, so a signed-out link_open can be
+  // joined to the signin that follows. Not a fingerprint, not shared across sites.
+  anonId: text('anonId'),
+  name: text('name').notNull(),
+  // Skill slug for skill_mastered / skill_unmastered / skill_page_view. Else null.
+  slug: text('slug'),
+  // Small, allowlisted, non-PII. e.g. { src: 'organic' }.
+  props: jsonb('props').$type<Record<string, string | number | boolean>>(),
+}, (e) => [
+  index('event_name_ts_idx').on(e.name, e.ts),
+  index('event_user_ts_idx').on(e.userId, e.ts),
+  index('event_anon_ts_idx').on(e.anonId, e.ts),
+]);
