@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { db } from '@/db';
 import { progress, progressHistory } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { masteryDiff, recordEvent } from '@/src/lib/events';
 import { sanitizeMastered } from '@/src/lib/progress';
 import type { Progress, ProgressInput } from '@/src/lib/types';
 
@@ -64,5 +65,15 @@ export async function PUT(req: Request) {
   } catch (e) {
     console.error('progress_history snapshot failed', e);
   }
+  // Per-skill mastery events. `existing` is already loaded above for the clock check,
+  // so the diff costs nothing. This is the source of the input metric that defines
+  // "complete", and the only per-skill timing that exists anywhere — progress.mastered
+  // carries one updatedAt for the whole set, so a stall point cannot be reconstructed
+  // from it after the fact. Best-effort, exactly like the snapshot above.
+  const diff = masteryDiff(sanitizeMastered(existing?.mastered ?? []), mastered);
+  await Promise.all([
+    ...diff.mastered.map((slug) => recordEvent({ name: 'skill_mastered', userId: session.user!.id, slug })),
+    ...diff.unmastered.map((slug) => recordEvent({ name: 'skill_unmastered', userId: session.user!.id, slug })),
+  ]);
   return Response.json({ mastered, theme, sel, updatedAt: writeAt.toISOString() } satisfies Progress);
 }

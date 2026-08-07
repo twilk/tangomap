@@ -98,10 +98,19 @@ describe('PUT /api/progress', () => {
     expect(body.mastered).not.toContain('not-a-skill');
     expect(body.theme).toBe('dark');
     expect(body.sel).toBe(null);
-    // upsert chain was invoked twice: progress row + daily history snapshot
-    expect(mockInsert).toHaveBeenCalledTimes(2);
-    expect(mockValues).toHaveBeenCalledTimes(2);
+    // Three inserts now: progress row, daily history snapshot, and exactly ONE event.
+    // The existing row holds ['mirada-cabeceo','posture'] and the sanitised write is
+    // ['mirada-cabeceo'], so the diff is a single UNMASTER of 'posture'. Note what does
+    // NOT appear: 'mirada-cabeceo' is unchanged and emits nothing, and 'not-a-skill' was
+    // sanitised away before the diff — sync churn must never inflate the input metric.
+    expect(mockInsert).toHaveBeenCalledTimes(3);
+    expect(mockValues).toHaveBeenCalledTimes(3);
+    // Only the first two are upserts; the event insert is a plain append.
     expect(mockOnConflict).toHaveBeenCalledTimes(2);
+    const evt = mockValues.mock.calls[2][0];
+    expect(evt.name).toBe('skill_unmastered');
+    expect(evt.slug).toBe('posture');
+    expect(evt.userId).toBe('u1');
     // persisted values are sanitized too (both the row and the snapshot)
     expect(mockValues.mock.calls[0][0].mastered).toEqual(['mirada-cabeceo']);
     expect(mockValues.mock.calls[1][0].mastered).toEqual(['mirada-cabeceo']);
