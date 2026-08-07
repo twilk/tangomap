@@ -23,6 +23,9 @@ jobs:
       # at zero as of this commit, so any hit is genuinely new. --omit=dev on purpose:
       # a devDependency advisory never reaches users and must not block a release.
       - run: npm audit --omit=dev --audit-level=high
+      # Type errors in test/ are invisible to `next build` (it does not typecheck
+      # test files) and to vitest (it does not typecheck at all). #64 merged one.
+      - run: npm run typecheck
       # Guards drift between design/tokens.ts and the generated CSS/JS/DESIGN.md.
       - run: npm run design:check
       - run: npm test

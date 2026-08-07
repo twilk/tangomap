@@ -10,6 +10,7 @@
     "start": "next start",
     "test": "vitest run",
     "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
     "lint:fix": "eslint . --fix",
     "design": "node --experimental-strip-types scripts/design.mjs",
     "design:check": "node --experimental-strip-types scripts/design.mjs --check",

@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { db } from '@/db';
 import { profile } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { recordEvent } from '@/src/lib/events';
 import { isValidHandle, normalizeHandle } from '@/src/lib/handle';
 import { parseTheme } from '@/src/lib/theme';
 import type { ProfileDTO, ProfileInput, Style } from '@/src/lib/types';
@@ -68,6 +69,10 @@ export async function PUT(req: Request) {
       handle = h;
     }
   }
+  // The funnel step Zuckerberg's argument turns on: an invitee only becomes
+  // comparable once they claim a handle. Only the null -> set TRANSITION counts;
+  // renaming an existing handle is not a new claim and must not inflate the step.
+  const handleJustClaimed = !existing?.handle && handle !== null;
 
   const isPublic = body.isPublic !== undefined ? body.isPublic === true : (existing?.isPublic ?? false);
   const displayName =
@@ -125,6 +130,9 @@ export async function PUT(req: Request) {
     }
     throw e;
   }
+
+  // Only after the write actually succeeded — a claim that hit a 409 is not a claim.
+  if (handleJustClaimed) await recordEvent({ name: 'handle_claimed', userId });
 
   return Response.json({
     handle,

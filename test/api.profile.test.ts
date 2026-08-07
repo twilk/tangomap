@@ -83,7 +83,10 @@ describe('profile API', () => {
       themeShared: false,
       customThemeUpdatedAt: null,
     });
-    expect(mockInsert).toHaveBeenCalledTimes(1);
+    // Two inserts: the profile upsert, then a handle_claimed event. There was no
+    // existing profile, so this is a genuine first claim — the only case that counts.
+    expect(mockInsert).toHaveBeenCalledTimes(2);
+    // Only the profile write is an upsert; the event is a plain append.
     expect(mockOnConflict).toHaveBeenCalledTimes(1);
   });
 

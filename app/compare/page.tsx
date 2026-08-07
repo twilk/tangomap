@@ -14,6 +14,7 @@ import { DnaGenome } from '@/src/components/DnaGenome';
 import { DnaBars } from '@/src/components/DnaBars';
 import { ViewSwitcher } from '@/src/components/ViewSwitcher';
 import { CopyButton } from '@/src/components/CopyButton';
+import { recordEvent } from '@/src/lib/events';
 import { SITE } from '@/src/lib/site';
 import { TopNav } from '@/src/components/TopNav';
 import type { PublicProfile } from '@/src/lib/types';
@@ -62,6 +63,15 @@ export default async function Compare({
   ];
 
   const dancers = await listPublicProfiles(60);
+
+  // Funnel telemetry, server-side so it cannot be forged or blocked by a client.
+  // `link_open` marks an arrival carrying ?a= — the top of the invite funnel, and
+  // legitimately signed-out. `compare_filled` marks the funnel's success state:
+  // two profiles actually resolved. Best-effort; recordEvent never throws.
+  await Promise.all([
+    ...(sp.a ? [recordEvent({ name: 'link_open', props: { a_present: true } })] : []),
+    ...(pa && pb ? [recordEvent({ name: 'compare_filled' })] : []),
+  ]);
 
   let verdict: React.ReactNode = null;
   if (pa && pb) {
@@ -165,7 +175,7 @@ export default async function Compare({
               />
               <div className="tm-invite">
                 <span>Add a second handle above, or send a friend an invite — they just add their handle:</span>
-                <CopyButton className="tm-cta ghost" text={`${SITE}/compare?a=${encodeURIComponent(p.handle)}&b=`} label="Copy invite link" />
+                <CopyButton className="tm-cta ghost" text={`${SITE}/compare?a=${encodeURIComponent(p.handle)}&b=`} label="Copy invite link" trackAs="invite_copied" />
               </div>
             </section>
           );
