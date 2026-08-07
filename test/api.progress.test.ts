@@ -107,7 +107,8 @@ describe('PUT /api/progress', () => {
     expect(mockValues).toHaveBeenCalledTimes(3);
     // Only the first two are upserts; the event insert is a plain append.
     expect(mockOnConflict).toHaveBeenCalledTimes(2);
-    const evt = mockValues.mock.calls[2][0];
+    // The insert mock is typed for progress rows; an event row is a different shape.
+    const evt = mockValues.mock.calls[2][0] as unknown as { name: string; slug: string; userId: string };
     expect(evt.name).toBe('skill_unmastered');
     expect(evt.slug).toBe('posture');
     expect(evt.userId).toBe('u1');
